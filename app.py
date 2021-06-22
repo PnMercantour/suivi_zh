@@ -2,54 +2,42 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.express as px
+import dash_leaflet as dl
+import dash_leaflet.express as dlx
 from dash.dependencies import Input, Output
-
+import pandas as pd
+import json
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+# Lecture des csv
+points = pd.read_csv("data/sites2.csv", ';')
+zh = pd.read_csv("data/zh.csv", ';')
+# Ces lignes ne sont utiles que pour inverser les entrées des tableaux des csv. Sinon le par se retrouve en Ethiopie
+coor = [{'lat' : json.loads(points['centroid'][i])['coordinates'][1], 'lon' : json.loads(points['centroid'][i])['coordinates'][0]} for i in range(len(points))]
+poly = [json.loads(zh['geojson'][i])['coordinates'][0][0] for i in range(len(zh))]
+for item in poly:
+    for array in item:
+        array.reverse()
 
-df = px.data.gapminder()
+# Création de la dataframe, un tableau passé en paramètre de dl.Map
+# Le fond de carte
+df = [dl.WMSTileLayer(url="http://ows.mundialis.de/services/service?",
+                    layers="TOPO-OSM-WMS", format="image/png")]
+# Ajout des points
+for i in range(len(coor)):
+    df.append(dl.GeoJSON(data=dlx.dicts_to_geojson([coor[i]])))
+# Ajout des polygones
+for i in range(len(poly)):
+    df.append(dl.Polygon(positions=poly[i]))
 
-app.layout = html.Div([html.Div([html.Div([dcc.Graph(id='map', clickData={'points': [{'hovertext': 'Japan'}]}),
-            dcc.Slider(id="year_selector",
-            min=df['year'].min(), max=df['year'].max(), value=df['year'].max(), step=None,
-            marks={str(year): str(year) for year in df['year'].unique()})], style={'width': '49%'}),
-            html.Div([dcc.Graph(id='pie_chart')])], style={'display': 'flex', 'align-items': 'stretch'}),
-            html.Div([
-                html.Div([dcc.Dropdown(id="dropdown1", options=[{'label': i, 'value': i} for i in ['lifeExp', 'pop', 'gdpPercap']], value='pop', style={'width':'60%'}), 
-            dcc.Graph(id='graph1')], style={'width':'49%'}), 
-            html.Div([dcc.Dropdown(id="dropdown2", options=[{'label': i, 'value': i} for i in ['lifeExp', 'pop', 'gdpPercap']], value='lifeExp', style={'width':'60%'}), 
-            dcc.Graph(id='graph2')], style={'width':'49%'})
-            ], style={'display': 'flex', 'align-items': 'stretch'})
-            ])
-
-@app.callback(Output(component_id='map', component_property='figure'), 
-            Input('year_selector','value')
-)
-def render_map(year) :
-    dff = df[df['year']==year]
-    fig = px.choropleth(dff, locations="iso_alpha", color="pop", hover_name="country", projection='natural earth')   
-    return fig
-
-@app.callback(Output('pie_chart', 'figure'), Input('year_selector','value'))
-def pie_chart(year):
-    dff = df[df['year']==year]
-    dff = dff[dff['continent']=='Europe']
-    fig = px.pie(dff, values='pop', names="country", title='Population européenne par pays')
-    return fig
-
-@app.callback(Output('graph1', 'figure'), [Input('map', 'clickData'), Input('dropdown1', 'value')])
-def display_graph1(clickValue, type='pop'):
-    dff = df[df['country']==clickValue['points'][0]['hovertext']]
-    fig = px.line(x=dff['year'], y=dff[str(type)])
-    fig.update_traces(mode='lines+markers')
-    return fig
-
-@app.callback(Output('graph2', 'figure'), [Input('map', 'clickData'), Input('dropdown2', 'value')])
-def display_graph2(clickValue, type='lifeExp'):
-    dff = df[df['country']==clickValue['points'][0]['hovertext']]
-    fig = px.line(x=dff['year'], y=dff[str(type)])
-    return fig
+# Le layout
+app.layout = html.Div([
+    dl.Map(children=df, 
+        center=[45, 7], zoom=9,
+        style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"}),
+])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
