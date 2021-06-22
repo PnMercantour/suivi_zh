@@ -13,14 +13,16 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 # Lecture des csv
 points = pd.read_csv("data/sites2.csv", ';')
 zh = pd.read_csv("data/zh.csv", ';')
-# Ces lignes ne sont utiles que pour inverser les entrées des tableaux des csv. Sinon le par se retrouve en Ethiopie
+#création d'un dictionaire pour les couleurs des polygones
+color = {'bon': 'green', 'moyen': 'yellow', 'mauvais': 'red'}
+# Ces lignes ne sont utiles que pour inverser les entrées des tableaux des csv. Sinon le parc se retrouve en Ethiopie
 coor = [{'lat' : json.loads(points['centroid'][i])['coordinates'][1], 'lon' : json.loads(points['centroid'][i])['coordinates'][0]} for i in range(len(points))]
 poly = [json.loads(zh['geojson'][i])['coordinates'][0][0] for i in range(len(zh))]
 for item in poly:
     for array in item:
         array.reverse()
 
-# Création de la dataframe, un tableau passé en paramètre de dl.Map
+# Création de la dataframe, un tableau passé en paramètre de dl.Map dans le layout
 # Le fond de carte
 df = [dl.WMSTileLayer(url="http://ows.mundialis.de/services/service?",
                     layers="TOPO-OSM-WMS", format="image/png")]
@@ -29,12 +31,12 @@ for i in range(len(coor)):
     df.append(dl.GeoJSON(data=dlx.dicts_to_geojson([coor[i]])))
 # Ajout des polygones
 for i in range(len(poly)):
-    df.append(dl.Polygon(positions=poly[i]))
+    df.append(dl.Polygon(positions=poly[i], color=color[zh['etat'][i]]))
 
 # Le layout
 app.layout = html.Div([
-    dl.Map(children=df, 
-        center=[45, 7], zoom=9,
+    dl.Map(children = df,
+        center=[44.3, 7], zoom=9,
         style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"}),
 ])
 
