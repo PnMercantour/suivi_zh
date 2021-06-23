@@ -1,0 +1,31 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.70314953475636,
+                    44.1897035946932
+                ]
+            },
+            "properties": {
+                "site": "Alpage de Couesto"
+            }
+        },
+        {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.48324119633014,
+                    44.1203005937268
+                ]
+            },
+            "properties": {
+                "site": "Cime de la Garde"
+            }
+        }
+    ]
+}

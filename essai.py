@@ -5,7 +5,6 @@ import plotly.express as px
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
 from dash.dependencies import Input, Output
-import pandas as pd
 import json
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -16,19 +15,11 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 # Le fond de carte
 baseLayer = dl.WMSTileLayer(url="http://ows.mundialis.de/services/service?",
                             layers="TOPO-OSM-WMS", format="image/png")
-# # Ajout des points
-# for i in range(len(coor)):
-#     df.append(dl.GeoJSON(data=dlx.dicts_to_geojson([coor[i]])))
-# # Ajout des polygones
-# for i in range(len(poly)):
-#     df.append(dl.Polygon(positions=poly[i], color=color[zh['etat'][i]]))
-f = open('data/features.json',)
-siteData = json.load(f)
-f.close()
-siteLayer = dl.GeoJSON(data=siteData, id="sites")
 
+siteLayer = dl.GeoJSON(url=app.get_asset_url('sites.json'), id="sites")
 # Le layout
 app.layout = html.Div([
+    html.Img(src=app.get_asset_url('morgon.png')),
     dl.Map(children=[baseLayer, siteLayer],
            center=[44.3, 7], zoom=9,
            style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"}),
