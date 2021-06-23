@@ -11,27 +11,23 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 # Lecture des csv
-points = pd.read_csv("data/sites2.csv", ';')
+points = pd.read_csv("data/sites.csv", ';')
 zh = pd.read_csv("data/zh.csv", ';')
 #création d'un dictionaire pour les couleurs des polygones
 color = {'bon': 'green', 'moyen': 'yellow', 'mauvais': 'red'}
 # Ces lignes ne sont utiles que pour inverser les entrées des tableaux des csv. Sinon le parc se retrouve en Ethiopie
 coor = [{'lat' : json.loads(points['centroid'][i])['coordinates'][1], 'lon' : json.loads(points['centroid'][i])['coordinates'][0]} for i in range(len(points))]
-poly = [json.loads(zh['geojson'][i])['coordinates'][0][0] for i in range(len(zh))]
-for item in poly:
-    for array in item:
-        array.reverse()
 
 # Création de la dataframe, un tableau passé en paramètre de dl.Map dans le layout
 # Le fond de carte
 df = [dl.WMSTileLayer(url="http://ows.mundialis.de/services/service?",
                     layers="TOPO-OSM-WMS", format="image/png")]
 # Ajout des points
-for i in range(len(coor)):
-    df.append(dl.GeoJSON(data=dlx.dicts_to_geojson([coor[i]])))
+for obj in coor:
+    df.append(dl.GeoJSON(data=dlx.dicts_to_geojson([obj])))
 # Ajout des polygones
-for i in range(len(poly)):
-    df.append(dl.Polygon(positions=poly[i], color=color[zh['etat'][i]]))
+for item in zh['geojson']:
+    df.append(dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(item)}]}))
 
 # Le layout
 app.layout = html.Div([
