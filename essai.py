@@ -10,19 +10,7 @@ import json
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-# Lecture des csv
-points = pd.read_csv("data/sites2.csv", ';')
-zh = pd.read_csv("data/zh.csv", ';')
-# création d'un dictionaire pour les couleurs des polygones
-color = {'bon': 'green', 'moyen': 'yellow', 'mauvais': 'red'}
-# Ces lignes ne sont utiles que pour inverser les entrées des tableaux des csv. Sinon le parc se retrouve en Ethiopie
-coor = [{'lat': json.loads(points['centroid'][i])['coordinates'][1], 'lon': json.loads(
-    points['centroid'][i])['coordinates'][0]} for i in range(len(points))]
-poly = [json.loads(zh['geojson'][i])['coordinates'][0][0]
-        for i in range(len(zh))]
-for item in poly:
-    for array in item:
-        array.reverse()
+
 
 # Création de la couche raster
 # Le fond de carte
