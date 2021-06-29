@@ -4,7 +4,8 @@ import dash_html_components as html
 import plotly.express as px
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
-from dash.dependencies import Input, Output, State, MATCH, ALL
+import dash_table
+from dash.dependencies import Input, Output
 import pandas as pd
 from dash_extensions.javascript import arrow_function
 import json
@@ -32,8 +33,12 @@ app.layout = html.Div([
         center=[44.3, 7], zoom=9,
         style={'width': '100%', 'height': '50vh', 'margin': "auto"}, id="map"),
     html.Div([dcc.Checklist(id="selection_zone_humide",options=[{"label": nom, "value": nom}for nom in zh['nom_site'].unique()])], style={'maxHeight':'50vh', 'width':'400px', 'overflowY': 'auto', 'paddingLeft': '1vh'}, id="liste")], style={'display': 'flex'}),
-    html.Div(id="site_selectionne"),
     dl.Map(style={'width': '30%', 'height': '50vh', 'margin': "auto"},zoom=15,id="mini_map"),
+    dash_table.DataTable(
+    id='table',
+    columns=[{"name": "id", "id": "id"},{"name": "nom site", "id": "nom_site"}, {"name": "état", "id": "etat"}],
+    data=zh.to_dict('records'),
+)
 ])
 
 @app.callback(Output('selection_zone_humide', 'value'), Input('selection_zone_humide', 'value'))
