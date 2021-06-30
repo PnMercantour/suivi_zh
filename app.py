@@ -34,10 +34,11 @@ app.layout = html.Div([
         style={'width': '100%', 'height': '50vh', 'margin': "auto"}, id="map"),
     html.Div([dcc.Checklist(id="selection_zone_humide",options=[{"label": nom, "value": nom}for nom in zh['nom_site'].unique()])], style={'maxHeight':'50vh', 'width':'400px', 'overflowY': 'auto', 'paddingLeft': '1vh'}, id="liste")], style={'display': 'flex'}),
     dl.Map(style={'width': '30%', 'height': '50vh', 'margin': "auto"},zoom=15,id="mini_map"),
+    html.Div(id="test"),
     dash_table.DataTable(
     id='table',
-    columns=[{"name": "id", "id": "id"},{"name": "nom site", "id": "nom_site"},{"name": "surface", "id": "surface"} ,{"name": "état", "id": "etat"}],
-    data=list(zh.to_dict('records')),
+    columns=[{"name": "nom site", "id": "nom_site"},{"name": "surface", "id": "surface"} ,{"name": "état", "id": "etat"}],
+    data=zh.to_dict('records'),
     sort_action='native',
     filter_action='native'
 )
@@ -62,20 +63,19 @@ def maj_checlist(v):
 #     else:
 #       return [baseLayer, sites], [44.3, 7]
 
-@app.callback([Output("mini_map", "children"), Output("mini_map", "center")], [Input("selection_zone_humide", 'value'), Input("zones_humides", "click_feature")])
-def zh_mini_map(nom_site, feature):
-  if feature is not None and nom_site==[]:
+@app.callback([Output("mini_map", "children"), Output("mini_map", "center"), Output("zones_humides", "click_feature")], [Input("table", "selected_cells"), Input("table", "data"), Input("zones_humides", "click_feature")])
+def zh_mini_map(selectionTab, dataTab, feature):
+  if feature is not None:
       toutes_zones = zh[zh['nom_site']==feature['properties']['site']]['geojson']
       centre = json.loads(points[points['nom_site']==feature['properties']['site']]['centroid'].all())['coordinates'][::-1]
-      return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre
-  elif nom_site:
-    if feature is not None: feature = None
-    nom_site = nom_site[0]
-    toutes_zones = zh[zh['nom_site']==nom_site]['geojson']
-    centre = json.loads(points[points['nom_site']==nom_site]['centroid'].all())['coordinates'][::-1]
-    return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre
+      return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None
+  if selectionTab is not None:
+    toutes_zones = dataTab[selectionTab[0]['row_id']-1]['geojson'].split('\n')
+    centre = json.loads(points[points['nom_site']==dataTab[selectionTab[0]['row_id']-1]['nom_site']]['centroid'].all())['coordinates'][::-1]
+    selectionTab = None
+    return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None
   else:
-    return [baseLayer, sites], [44.3, 7]
+    return [baseLayer, sites], [44.3, 7], None
 
 if __name__ == '__main__':
     app.run_server(debug=True)
