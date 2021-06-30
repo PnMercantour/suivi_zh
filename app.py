@@ -36,8 +36,10 @@ app.layout = html.Div([
     dl.Map(style={'width': '30%', 'height': '50vh', 'margin': "auto"},zoom=15,id="mini_map"),
     dash_table.DataTable(
     id='table',
-    columns=[{"name": "id", "id": "id"},{"name": "nom site", "id": "nom_site"}, {"name": "état", "id": "etat"}],
-    data=zh.to_dict('records'),
+    columns=[{"name": "id", "id": "id"},{"name": "nom site", "id": "nom_site"},{"name": "surface", "id": "surface"} ,{"name": "état", "id": "etat"}],
+    data=list(zh.to_dict('records')),
+    sort_action='native',
+    filter_action='native'
 )
 ])
 
