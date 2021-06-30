@@ -32,50 +32,43 @@ app.layout = html.Div([
     html.Div([dl.Map(children = [baseLayer, sites, zones_humides],
         center=[44.3, 7], zoom=9,
         style={'width': '100%', 'height': '50vh', 'margin': "auto"}, id="map"),
-    html.Div([dcc.Checklist(id="selection_zone_humide",options=[{"label": nom, "value": nom}for nom in zh['nom_site'].unique()])], style={'maxHeight':'50vh', 'width':'400px', 'overflowY': 'auto', 'paddingLeft': '1vh'}, id="liste")], style={'display': 'flex'}),
-    dl.Map(style={'width': '30%', 'height': '50vh', 'margin': "auto"},zoom=15,id="mini_map"),
-    html.Div(id="test"),
+    dl.Map(style={'width': '30%', 'height': '50vh', 'margin': "auto"},zoom=15,id="mini_map")], style={'display':'flex'}),
     dash_table.DataTable(
     id='table',
     columns=[{"name": "nom site", "id": "nom_site"},{"name": "surface", "id": "surface"} ,{"name": "état", "id": "etat"}],
     data=zh.to_dict('records'),
     sort_action='native',
-    filter_action='native'
+    filter_action='native',
+    style_data_conditional=[
+        {
+            'if': {'row_index': 'odd'},
+            'backgroundColor': 'rgb(248, 248, 248)'
+        }
+    ]
 )
 ])
-
-@app.callback(Output('selection_zone_humide', 'value'), Input('selection_zone_humide', 'value'))
-def maj_checlist(v):
-  if v:
-    if len(v) > 1:
-      return v[1:]
-    else:
-      return v
-  else:
-    return []
-
-# @app.callback([Output("mini_map", "children"), Output("mini_map", "center")], [Input("zones_humides", "click_feature")])
-# def site_click(feature):
-#     if feature is not None:
-#       toutes_zones = zh[zh['nom_site']==feature['properties']['site']]['geojson']
-#       centre = json.loads(points[points['nom_site']==feature['properties']['site']]['centroid'].all())['coordinates'][::-1]
-#       return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre
-#     else:
-#       return [baseLayer, sites], [44.3, 7]
-
+#, Output("table", "selected_cells")
 @app.callback([Output("mini_map", "children"), Output("mini_map", "center"), Output("zones_humides", "click_feature")], [Input("table", "selected_cells"), Input("table", "data"), Input("zones_humides", "click_feature")])
 def zh_mini_map(selectionTab, dataTab, feature):
+  # if feature is not None:
+  #   for item in zh['geojson'] :
+  #     if json.loads(item) == feature['geometry']: 
+  #       row = zh[zh['geojson']==item]['id']+1
+  #       print(row)
   if feature is not None:
       toutes_zones = zh[zh['nom_site']==feature['properties']['site']]['geojson']
       centre = json.loads(points[points['nom_site']==feature['properties']['site']]['centroid'].all())['coordinates'][::-1]
-      return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None
+      return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None #, [{'row': row, 'column': 0}]
   if selectionTab is not None:
-    toutes_zones = dataTab[selectionTab[0]['row_id']-1]['geojson'].split('\n')
+    toutes_zones = zh[zh['nom_site']==dataTab[selectionTab[0]['row_id']-1]['nom_site']]['geojson']
     centre = json.loads(points[points['nom_site']==dataTab[selectionTab[0]['row_id']-1]['nom_site']]['centroid'].all())['coordinates'][::-1]
-    selectionTab = None
-    return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None
+    return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None #, selectionTab
   else:
-    return [baseLayer, sites], [44.3, 7], None
+    return [baseLayer, sites], [44.3, 7], None #, [{'row': 1, 'column': 0}]
+
+# @app.callback(Output("table", "selected_cells"), [Input("table", "data"), Input("zones_humides", "click_feature")])
+# def test(data, click):
+#   return [{'row': 1, 'column': 0}]
 
 if __name__ == '__main__':
     app.run_server(debug=True)
