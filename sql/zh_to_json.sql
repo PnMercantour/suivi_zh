@@ -8,9 +8,10 @@ WITH features AS (
     eau_zh.zh
 )
 SELECT
-  nom_site,
-  json_build_object('type', 'FeatureCollection', 'features', json_agg(feature)) geojson
+  site.id,
+  json_build_object('type', 'FeatureCollection', 'features', json_agg(feature))::text geojson
 FROM
-  features
+  eau_zh.site
+  JOIN features USING (nom_site)
 GROUP BY
   nom_site;

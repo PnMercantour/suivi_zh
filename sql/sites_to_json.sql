@@ -1,40 +1,15 @@
-WITH p AS (
+WITH features AS (
   SELECT
-    nom_site,
-    row_to_json(r) properties
-  FROM (
-    SELECT
-      nom_site,
-      1000 surface
-    FROM
-      eau_zh.site) r
-),
-g AS (
-  SELECT
-    nom_site,
-    st_asgeojson (st_transform (st_centroid (st_union (geom)), 4326))::json geometry
+    json_build_object('type', 'Feature', 'properties', json_build_object('id', site.id,
+      'nom_site', site.nom_site), 'geometry', st_asgeojson (st_transform (st_centroid (st_union
+      (geom)), 4326))::json) feature
   FROM
-    eau_zh.zh
+    eau_zh.site
+    JOIN eau_zh.zh USING (nom_site)
   GROUP BY
-    nom_site
-),
-f AS (
-  SELECT
-    'Feature' "type",
-    properties,
-    geometry
-  FROM
-    p
-    JOIN g USING (nom_site)
-),
-fc AS (
-  SELECT
-    'FeatureCollection' "type",
-    array_to_json(array_agg(row_to_json(f))) features
-  FROM
-    f
+    site.nom_site
 )
 SELECT
-  row_to_json(fc) geojson
+  json_build_object('type', 'FeatureCollection', 'features', json_agg(feature))::text geojson
 FROM
-  fc
+  features;
