@@ -45,30 +45,29 @@ app.layout = html.Div([
             'backgroundColor': 'rgb(248, 248, 248)'
         }
     ]
-)
+), html.Div(id='test')
 ])
-#, Output("table", "selected_cells")
-@app.callback([Output("mini_map", "children"), Output("mini_map", "center"), Output("zones_humides", "click_feature")], [Input("table", "selected_cells"), Input("table", "data"), Input("zones_humides", "click_feature")])
+#, Output("table", "active_cell"), Output("table", "filter_query")
+@app.callback([Output("mini_map", "children"), Output("mini_map", "center"), Output("zones_humides", "click_feature"), Output("table", "active_cell")], [Input("table", "selected_cells"), Input("table", "data"), Input("zones_humides", "click_feature")])
 def zh_mini_map(selectionTab, dataTab, feature):
-  # if feature is not None:
-  #   for item in zh['geojson'] :
-  #     if json.loads(item) == feature['geometry']: 
-  #       row = zh[zh['geojson']==item]['id']+1
-  #       print(row)
+  if feature is not None:
+    for item in zh['geojson'] :
+      if json.loads(item) == feature['geometry']: 
+        row = zh[zh['geojson']==item]['id']+1
   if feature is not None:
       toutes_zones = zh[zh['nom_site']==feature['properties']['site']]['geojson']
       centre = json.loads(points[points['nom_site']==feature['properties']['site']]['centroid'].all())['coordinates'][::-1]
-      return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None #, [{'row': row, 'column': 0}]
+      return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None , {'row': int(row), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
   if selectionTab is not None:
     toutes_zones = zh[zh['nom_site']==dataTab[selectionTab[0]['row_id']-1]['nom_site']]['geojson']
     centre = json.loads(points[points['nom_site']==dataTab[selectionTab[0]['row_id']-1]['nom_site']]['centroid'].all())['coordinates'][::-1]
-    return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None #, selectionTab
+    return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None , None #, None
   else:
-    return [baseLayer, sites], [44.3, 7], None #, [{'row': 1, 'column': 0}]
+    return [baseLayer, sites], [44.3, 7], None , None #, None
 
-# @app.callback(Output("table", "selected_cells"), [Input("table", "data"), Input("zones_humides", "click_feature")])
-# def test(data, click):
-#   return [{'row': 1, 'column': 0}]
+# @app.callback(Output("table", "filter_query"), Input("test", "children"))
+# def test(filter):
+#   return "{nom_site} contains Plate"
 
 if __name__ == '__main__':
     app.run_server(debug=True)
