@@ -3,28 +3,646 @@
     "features": [
         {
             "type": "Feature",
+            "properties": {
+                "nom_site": "Ténibre",
+                "surface": 1000
+            },
             "geometry": {
                 "type": "Point",
                 "coordinates": [
-                    6.70314953475636,
-                    44.1897035946932
+                    6.95395617298577,
+                    44.2838970220091
                 ]
-            },
-            "properties": {
-                "site": "Alpage de Couesto"
             }
         },
         {
             "type": "Feature",
+            "properties": {
+                "nom_site": "Escuzier, Sagnas, Colombart",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.81203478105537,
+                    44.3083044292848
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Marécages des Ricauds",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.72851639492671,
+                    44.3131568594807
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Sallevieille",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.94003506558983,
+                    44.1634385941573
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Col d'Allos",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.59228274532606,
+                    44.2972449127273
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Estrop",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.79971513642576,
+                    44.2198429921525
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Lac Allos",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.70279730165433,
+                    44.2385576679555
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Col de la Cayolle",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.73898082417579,
+                    44.2610107811944
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Vallon du Lauzanier",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.8827797628171,
+                    44.4101461328312
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Vallon des Graus",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.38931045125072,
+                    44.0326782130927
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Les Launes",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.95810562130973,
+                    44.0922938562142
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Vallon de Mollières et Graveirette",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.23020054062673,
+                    44.1514466768907
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Salso-Moreno",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.90298570913305,
+                    44.3410607411995
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Orrenaye",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.92280428472709,
+                    44.4319681425927
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Lac des Grenouilles",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.48392726724597,
+                    44.0985319194103
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Muletiers",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.69272728808219,
+                    44.1965382949516
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Lac de la Fous",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.4015580135479,
+                    44.1015813477361
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Vallon du Ciot",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.52095771983931,
+                    44.0451116747279
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Restefond",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.79909748526901,
+                    44.3277226616593
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Col du Sabion",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.47582703538325,
+                    44.1272907669963
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Vallon de l'Alpe",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.83637112946276,
+                    44.315880416411
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Lançonnet",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.65479865374536,
+                    44.1417844692891
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Merveilles",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.45495030530851,
+                    44.0579294824855
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Sagnes, Trécolpas",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.33303100518343,
+                    44.1280731639119
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Vallon de Fontanalbe : stations à Drosera rotundifolia",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.47958610237313,
+                    44.0910509024452
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Vallon de la Braissette",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.78443928125838,
+                    44.3085590757993
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Lac Vert de Fontanalbe et lacs Gias Pasteur",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.46882147796043,
+                    44.0862336033542
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Plateau de la Céva",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.49661042330091,
+                    44.0206368221943
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Parassac",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.86101874346817,
+                    44.3976966520222
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Millefonts",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.18715573942031,
+                    44.1093260409144
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Lacs de Lignin",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.70312603396607,
+                    44.1038986842792
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Les Pelats",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.83447221603543,
+                    44.3353024696952
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Sanguinière",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.77490766537168,
+                    44.2840764777885
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Gialorgues",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.8200134934534,
+                    44.2343644298893
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Isola 2000",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.16700678064493,
+                    44.1813443649071
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Lacs et plan de Prals",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.37395386109468,
+                    44.0798204190294
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Encombrette",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.70702821191083,
+                    44.213254106972
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Station à Typha minima, Confluence Bachelard/Ubaye",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.62081999618798,
+                    44.3848169713263
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "La Sagne",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.96636692200401,
+                    44.087762804122
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Col des Trente Souches",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.81000965970723,
+                    44.1861042285193
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Vallon de la Braisse",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.81519040004492,
+                    44.2904716942812
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Alpage de Couesto",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.70314953013607,
+                    44.189703569528
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Cime de la Garde",
+                "surface": 1000
+            },
             "geometry": {
                 "type": "Point",
                 "coordinates": [
                     7.48324119633014,
                     44.1203005937268
                 ]
-            },
+            }
+        },
+        {
+            "type": "Feature",
             "properties": {
-                "site": "Cime de la Garde"
+                "nom_site": "Suintements sous la baisse de St Véran",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.42251557628014,
+                    44.0193673723302
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Rouchouse",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    6.89215200184228,
+                    44.460577783112
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "nom_site": "Madone de Fenestre",
+                "surface": 1000
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    7.35698675999115,
+                    44.0943184491727
+                ]
             }
         }
     ]
