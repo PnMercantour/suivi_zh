@@ -9,7 +9,7 @@ WITH features AS (
 )
 SELECT
   nom_site,
-  json_build_object('type', 'FeatureCollection', 'features', array_to_json(array_agg(feature))) geojson
+  json_build_object('type', 'FeatureCollection', 'features', json_agg(feature)) geojson
 FROM
   features
 GROUP BY
