@@ -45,7 +45,7 @@ app.layout = html.Div([
             'backgroundColor': 'rgb(248, 248, 248)'
         }
     ]
-), html.Div(id='test')
+)
 ])
 #, Output("table", "active_cell"), Output("table", "filter_query")
 @app.callback([Output("mini_map", "children"), Output("mini_map", "center"), Output("zones_humides", "click_feature"), Output("table", "active_cell")], [Input("table", "selected_cells"), Input("table", "data"), Input("zones_humides", "click_feature")])
@@ -65,9 +65,9 @@ def zh_mini_map(selectionTab, dataTab, feature):
   else:
     return [baseLayer, sites], [44.3, 7], None , None #, None
 
-# @app.callback(Output("table", "filter_query"), Input("test", "children"))
+# @app.callback(Output("mini_map", "zoom"), Input("test", "children"))
 # def test(filter):
-#   return "{nom_site} contains Plate"
+#   return 13
 
 if __name__ == '__main__':
     app.run_server(debug=True)
