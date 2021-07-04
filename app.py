@@ -21,7 +21,7 @@ color = {'bon': 'green', 'moyen': 'yellow', 'mauvais': 'red'}
 # GeoJSON pour les points
 sites = dl.GeoJSON(url=app.get_asset_url('sites.json'), id="sites")
 # GeoJSON pour les zones humides
-zones_humides = dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zh.loc[i]['geojson']), "properties":{"site": zh.loc[i]['nom_site']}}for i in range(len(zh))]}, hoverStyle=arrow_function(dict(weight=5, color='#666', dashArray='')), id="zones_humides")
+zones_humides = dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zh.loc[i]['geojson']), "properties":{"site": zh.loc[i]['nom_site']}}for i in range(len(zh))]}, id="zones_humides") #, hoverStyle=arrow_function(dict(weight=5, color='#666', dashArray=''))
 
 # Création de la dataframe, un tableau passé en paramètre de dl.Map dans le layout
 # Le fond de carte
@@ -65,17 +65,29 @@ app.layout = html.Div([
 #   else:
 #     return [baseLayer, sites], [44.3, 7], None , None #, None
 
-@app.callback([Output("mini_map", "children"), Output("mini_map", "center"), Output("test", "style")], [Input("table", "selected_cells"), Input("table", "data"), Input("sites", "click_feature")])
+@app.callback([Output("mini_map", "children"), Output("mini_map", "center")], [Input("table", "selected_cells"), Input("table", "data"), Input("sites", "click_feature")])
 def test(cell, data, feature):
     if dash.callback_context.triggered[0]['prop_id'] == 'sites.click_feature':
         toutes_zones = zh[zh['nom_site']==feature['properties']['nom_site']]['geojson']
         centre = json.loads(points[points['nom_site']==feature['properties']['nom_site']]['centroid'].all())['coordinates'][::-1]
-        return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre , {"display":"None"} #, {'row': int(1), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
+        return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre  #, {'row': int(1), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
     else:
-        toutes_zones = zh[zh['nom_site']==data[cell[0]['row']]['nom_site']]['geojson']
-        centre = json.loads(points[points['nom_site']==data[cell[0]['row']]['nom_site']]['centroid'].all())['coordinates'][::-1]
-        return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None #, None #, None
+        if cell is not None:
+            toutes_zones = zh[zh['nom_site']==data[cell[0]['row']]['nom_site']]['geojson']
+            centre = json.loads(points[points['nom_site']==data[cell[0]['row']]['nom_site']]['centroid'].all())['coordinates'][::-1]
+            return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre #, None #, None
 
+@app.callback(Output('table', 'data'), [Input("table", "selected_cells"), Input("table", "data"), Input("sites", "click_feature"), Input('table', 'filter_query')])
+def test(cell, data, feature, filter):
+    print(dash.callback_context.triggered[0]['prop_id'])
+    if dash.callback_context.triggered[0]['prop_id'] == 'sites.click_feature':
+        return zh[zh['nom_site']==feature['properties']['nom_site']].to_dict('records')
+    elif dash.callback_context.triggered[0]['prop_id'] == 'table.selected_cells':
+        return zh[zh['nom_site']==data[cell[0]['row']]['nom_site']].to_dict('records')
+    elif dash.callback_context.triggered[0]['prop_id'] == '.' or dash.callback_context.triggered[0]['prop_id'] == 'table.filter_query':
+        return points.to_dict('records')
+    return points.to_dict('records')
+    
 
 if __name__ == '__main__':
     app.run_server(debug=True)
