@@ -6,6 +6,7 @@ import dash_leaflet as dl
 import dash_leaflet.express as dlx
 import dash_table
 from dash.dependencies import Input, Output
+from dash.exceptions import PreventUpdate
 import pandas as pd
 from dash_extensions.javascript import arrow_function
 import json
@@ -29,10 +30,10 @@ baseLayer = dl.WMSTileLayer(url="http://ows.mundialis.de/services/service?",
                     layers="TOPO-OSM-WMS", format="image/png")
 # Le layout
 app.layout = html.Div([
-    html.Div([dl.Map(children = [baseLayer, sites, zones_humides],
+    html.Div([dl.Map(id="map", children = [baseLayer, sites, zones_humides],
         center=[44.3, 7], zoom=9,
-        style={'width': '100%', 'height': '50vh', 'margin': "auto"}, id="map"),
-    dl.Map(style={'width': '30%', 'height': '50vh', 'margin': "auto"},zoom=15,id="mini_map")], style={'display':'flex'}),
+        style={'width': '100%', 'height': '50vh', 'margin': "auto"}),
+    dl.Map(id="mini_map", style={'width': '30%', 'height': '50vh', 'margin': "auto"},zoom=15)], style={'display':'flex'}),
     html.Div([dash_table.DataTable(
     id='table',
     columns=[{"name": "nom site", "id": "nom_site"}],
@@ -47,46 +48,32 @@ app.layout = html.Div([
     ]
 )], id="test"), html.Div(id="test2")
 ])
-#, Output("table", "active_cell"), Output("table", "filter_query")
-# @app.callback([Output("mini_map", "children"), Output("mini_map", "center"), Output("sites", "click_feature"), Output("table", "active_cell")], [Input("table", "selected_cells"), Input("table", "data"), Input("sites", "click_feature")])
-# def zh_mini_map(selectionTab, dataTab, feature):
-#   if feature is not None:
-#     for item in zh['geojson'] :
-#       if json.loads(item) == feature['geometry']: 
-#         row = zh[zh['geojson']==item]['id']
-#   if feature is not None:
-#       toutes_zones = zh[zh['nom_site']==feature['properties']['nom_site']]['geojson']
-#       centre = json.loads(points[points['nom_site']==feature['properties']['nom_site']]['centroid'].all())['coordinates'][::-1]
-#       return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None , {'row': int(1), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
-#   if selectionTab is not None:
-#     toutes_zones = zh[zh['nom_site']==dataTab[selectionTab[0]['row']]['nom_site']]['geojson']
-#     centre = json.loads(points[points['nom_site']==dataTab[selectionTab[0]['row']]['nom_site']]['centroid'].all())['coordinates'][::-1]
-#     return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre, None , None #, None
-#   else:
-#     return [baseLayer, sites], [44.3, 7], None , None #, None
 
-@app.callback([Output("mini_map", "children"), Output("mini_map", "center")], [Input("table", "selected_cells"), Input("table", "data"), Input("sites", "click_feature")])
-def test(cell, data, feature):
+@app.callback([Output('mini_map', 'children'), Output('mini_map', 'center')], [Input('sites', 'click_feature'), Input('table', 'data'), Input('table', 'selected_cells')])
+def test(feature, data, cell):
+    if dash.callback_context.triggered[0]['prop_id'] == '.':
+        raise PreventUpdate
     if dash.callback_context.triggered[0]['prop_id'] == 'sites.click_feature':
-        toutes_zones = zh[zh['nom_site']==feature['properties']['nom_site']]['geojson']
-        centre = json.loads(points[points['nom_site']==feature['properties']['nom_site']]['centroid'].all())['coordinates'][::-1]
-        return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre  #, {'row': int(1), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
-    else:
-        if cell is not None:
-            toutes_zones = zh[zh['nom_site']==data[cell[0]['row']]['nom_site']]['geojson']
-            centre = json.loads(points[points['nom_site']==data[cell[0]['row']]['nom_site']]['centroid'].all())['coordinates'][::-1]
-            return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre #, None #, None
+        site = feature['properties']
+        idSite = str(site['id'])
+        centre = json.loads(points[points['nom_site']==site['nom_site']]['centroid'].all())['coordinates'][::-1]
+        return [baseLayer, dl.GeoJSON(url=app.get_asset_url('sites/'+idSite+'.json'))], centre  #, {'row': int(1), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
+    if dash.callback_context.triggered[0]['prop_id'] == 'table.selected_cells':
+        toutes_zones = zh[zh['nom_site']==data[cell[0]['row']]['nom_site']]['geojson']
+        centre = json.loads(points[points['nom_site']==data[cell[0]['row']]['nom_site']]['centroid'].all())['coordinates'][::-1]
+        return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre #, None #, None
 
-@app.callback(Output('table', 'data'), [Input("table", "selected_cells"), Input("table", "data"), Input("sites", "click_feature"), Input('table', 'filter_query')])
+@app.callback([Output('table', 'data'), Output('table', 'columns')], [Input("table", "selected_cells"), Input("table", "data"), Input("sites", "click_feature"), Input('table', 'filter_query')])
 def test(cell, data, feature, filter):
-    print(dash.callback_context.triggered[0]['prop_id'])
+    columns = [{'name':'nom_site', 'id':'nom_site'}, {'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat'}]
+    if dash.callback_context.triggered[0]['prop_id'] == '.':
+        raise PreventUpdate
     if dash.callback_context.triggered[0]['prop_id'] == 'sites.click_feature':
-        return zh[zh['nom_site']==feature['properties']['nom_site']].to_dict('records')
-    elif dash.callback_context.triggered[0]['prop_id'] == 'table.selected_cells':
-        return zh[zh['nom_site']==data[cell[0]['row']]['nom_site']].to_dict('records')
-    elif dash.callback_context.triggered[0]['prop_id'] == '.' or dash.callback_context.triggered[0]['prop_id'] == 'table.filter_query':
-        return points.to_dict('records')
-    return points.to_dict('records')
+        return zh[zh['nom_site']==feature['properties']['nom_site']].to_dict('records'), columns
+    if dash.callback_context.triggered[0]['prop_id'] == 'table.selected_cells':
+        return zh[zh['nom_site']==data[cell[0]['row']]['nom_site']].to_dict('records'), columns
+    if dash.callback_context.triggered[0]['prop_id'] == 'table.filter_query':
+        return points.to_dict('records'), [{"name": "nom site", "id": "nom_site"}]
     
 
 if __name__ == '__main__':
