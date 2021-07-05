@@ -18,11 +18,9 @@ points = pd.read_csv("data/sites.csv", ';')
 zh = pd.read_csv("data/zh.csv", ';')
 #création d'un dictionaire pour les couleurs des polygones
 color = {'bon': 'green', 'moyen': 'yellow', 'mauvais': 'red'}
-dd_options = [dict(value=p, label=p) for p in points["nom_site"]]
-dd_defaults = [o["value"] for o in dd_options]
-geojson_filtre = assign("function(feature, context){{return context.props.hideout.includes(feature.properties.nom_site);}}")
+
 # GeoJSON pour les points
-listes_sites = dl.GeoJSON(id="listes_sites", url=app.get_asset_url('sites.json'), options=dict(filter=geojson_filtre), hideout=dd_defaults)
+listes_sites = dl.GeoJSON(id="listes_sites", url=app.get_asset_url('sites.json'))
 # GeoJSON pour les zones humides
 zones_humides = dl.GeoJSON(id="zones_humides", data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zh.loc[i]['geojson']), "properties":{"site": zh.loc[i]['nom_site']}}for i in range(len(zh))]}) #, hoverStyle=arrow_function(dict(weight=5, color='#666', dashArray=''))
 
