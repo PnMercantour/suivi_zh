@@ -1,13 +1,13 @@
 window.dashExtensions = Object.assign({}, window.dashExtensions, {
     default: {
-        function0: function(feature, latlng) {
-            const flag = L.icon({
-                iconUrl: `https://flagcdn.com/64x48/${feature.properties.iso2}.png`,
-                iconSize: [64, 48]
-            });
-            return L.marker(latlng, {
-                icon: flag
-            });
+        function0: (feature, layer) => {
+            if (!feature.properties) {
+                return
+            }
+            if (feature.properties.nom_site) {
+                layer.bindTooltip(feature.properties.nom_site)
+            }
         }
+
     }
 });
