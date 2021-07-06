@@ -21,8 +21,6 @@ color = {'bon': 'green', 'moyen': 'yellow', 'mauvais': 'red'}
 
 # GeoJSON pour les points
 listes_sites = dl.GeoJSON(id="listes_sites", url=app.get_asset_url('sites.json'))
-# GeoJSON pour les zones humides
-zones_humides = dl.GeoJSON(id="zones_humides", data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zh.loc[i]['geojson']), "properties":{"site": zh.loc[i]['nom_site']}}for i in range(len(zh))]}) #, hoverStyle=arrow_function(dict(weight=5, color='#666', dashArray=''))
 
 # Création de la dataframe, un tableau passé en paramètre de dl.Map dans le layout
 # Le fond de carte
@@ -32,62 +30,63 @@ baseLayer = dl.TileLayer()
 #                    layers="TOPO-OSM-WMS", format="image/png")
 # Le layout
 app.layout = html.Div([
-    html.Div([dl.Map(id="parc", children = [baseLayer, listes_sites, zones_humides],
+    html.Div([
+    dash_table.DataTable(
+        id='tableau_des_sites',
+        columns=[{"name": "nom site", "id": "nom_site"}],
+        data=points.to_dict('records'),
+        sort_action='native',
+        filter_action='native',
+        style_data_conditional=[
+            {'if': {'row_index': 'odd'},
+            'backgroundColor': 'rgb(248, 248, 248)'
+            }
+    ]
+)],style={'float':'left', 'paddingRight': '5vh'}),
+    html.Div(dl.Map(id="parc", children = [baseLayer, listes_sites],
         center=[44.3, 7], zoom=9,
-        style={'width': '100%', 'height': '50vh', 'margin': "auto"}),
-    dash_table.DataTable(
-    id='tableau_des_sites',
-    columns=[{"name": "nom site", "id": "nom_site"}],
-    data=points.to_dict('records'),
-    sort_action='native',
-    filter_action='native',
-    style_data_conditional=[
-        {
-            'if': {'row_index': 'odd'},
+        style={'width': '100%', 'height': '50vh', 'margin': "auto"}),style={'display':'flex', 'paddingBottom':'5vh'}),
+    html.Div([
+        dl.Map(id="site_unique", style={'width': '70%', 'height': '50vh', 'margin': "auto"},zoom=15),
+        dash_table.DataTable(
+            id='tableau_des_zones',
+            columns=[{"name": "nom site", "id": "nom_site"}],
+            data=points.to_dict('records'),
+            sort_action='native',
+            filter_action='native',
+            style_data_conditional=[
+            {'if': {'row_index': 'odd'},
             'backgroundColor': 'rgb(248, 248, 248)'
-        }
-    ], page_size=10
-)], style={'display':'flex', 'maxHeight':'50vh'}),
-    html.Div([dl.Map(id="site_unique", style={'width': '30%', 'height': '50vh', 'margin': "auto"},zoom=15),
-    dash_table.DataTable(
-    id='tableau_des_zones',
-    columns=[{"name": "nom site", "id": "nom_site"}],
-    data=points.to_dict('records'),
-    sort_action='native',
-    filter_action='native',
-    style_data_conditional=[
-        {
-            'if': {'row_index': 'odd'},
-            'backgroundColor': 'rgb(248, 248, 248)'
-        }
-    ], page_size=10
-)], style={'display':'flex', 'maxHeight': '50vh', 'overflowY': 'auto'})
+            }
+        ], page_size=10
+)], style={'display':'flex', 'maxHeight': '50vh'})
 ])
-
 @app.callback([Output('site_unique', 'children'), Output('site_unique', 'center')], [Input('listes_sites', 'click_feature'), Input('tableau_des_sites', 'data'), Input('tableau_des_sites', 'selected_cells')])
 def maj_carte_site_unique(feature, data, cell):
-    if dash.callback_context.triggered[0]['prop_id'] == '.':
+    trigger = dash.callback_context.triggered[0]['prop_id']
+    if trigger == '.':
         raise PreventUpdate
-    if dash.callback_context.triggered[0]['prop_id'] == 'listes_sites.click_feature':
+    if trigger == 'listes_sites.click_feature':
         site = feature['properties']
         idSite = str(site['id'])
         centre = json.loads(points[points['nom_site']==site['nom_site']]['centroid'].all())['coordinates'][::-1]
         return [baseLayer, dl.GeoJSON(url=app.get_asset_url('sites/'+idSite+'.json'))], centre  #, {'row': int(1), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
-    if dash.callback_context.triggered[0]['prop_id'] == 'tableau_des_sites.selected_cells':
+    if trigger == 'tableau_des_sites.selected_cells':
         toutes_zones = zh[zh['nom_site']==data[cell[0]['row']]['nom_site']]['geojson']
         centre = json.loads(points[points['nom_site']==data[cell[0]['row']]['nom_site']]['centroid'].all())['coordinates'][::-1]
         return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre #, None #, None
 
 @app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns')], [Input("tableau_des_sites", "selected_cells"), Input("tableau_des_sites", "data"), Input("listes_sites", "click_feature"), Input('tableau_des_sites', 'filter_query')])
 def maj_tableau_des_sites(cell, data, feature, filter):
+    trigger = dash.callback_context.triggered[0]['prop_id']
     columns = [{'name':'nom_site', 'id':'nom_site'}, {'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat'}]
-    if dash.callback_context.triggered[0]['prop_id'] == '.':
+    if trigger == '.':
         raise PreventUpdate
-    if dash.callback_context.triggered[0]['prop_id'] == 'listes_sites.click_feature':
+    if trigger == 'listes_sites.click_feature':
         return zh[zh['nom_site']==feature['properties']['nom_site']].to_dict('records'), columns
-    if dash.callback_context.triggered[0]['prop_id'] == 'tableau_des_sites.selected_cells':
+    if trigger == 'tableau_des_sites.selected_cells':
         return zh[zh['nom_site']==data[cell[0]['row']]['nom_site']].to_dict('records'), columns
-    if dash.callback_context.triggered[0]['prop_id'] == 'tableau_des_sites.filter_query':
+    if trigger == 'tableau_des_sites.filter_query':
         return points.to_dict('records'), [{"name": "nom site", "id": "nom_site"}]
     
 
