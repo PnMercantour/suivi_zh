@@ -35,8 +35,7 @@ app.layout = html.Div([
     html.Div([dl.Map(id="parc", children = [baseLayer, listes_sites, zones_humides],
         center=[44.3, 7], zoom=9,
         style={'width': '100%', 'height': '50vh', 'margin': "auto"}),
-    dl.Map(id="site_unique", style={'width': '30%', 'height': '50vh', 'margin': "auto"},zoom=15)], style={'display':'flex'}),
-    html.Div([dash_table.DataTable(
+    dash_table.DataTable(
     id='tableau_des_sites',
     columns=[{"name": "nom site", "id": "nom_site"}],
     data=points.to_dict('records'),
@@ -47,8 +46,22 @@ app.layout = html.Div([
             'if': {'row_index': 'odd'},
             'backgroundColor': 'rgb(248, 248, 248)'
         }
-    ]
-)], id="test"), html.Div(id="test2")
+    ], page_size=10
+)], style={'display':'flex', 'maxHeight':'50vh'}),
+    html.Div([dl.Map(id="site_unique", style={'width': '30%', 'height': '50vh', 'margin': "auto"},zoom=15),
+    dash_table.DataTable(
+    id='tableau_des_zones',
+    columns=[{"name": "nom site", "id": "nom_site"}],
+    data=points.to_dict('records'),
+    sort_action='native',
+    filter_action='native',
+    style_data_conditional=[
+        {
+            'if': {'row_index': 'odd'},
+            'backgroundColor': 'rgb(248, 248, 248)'
+        }
+    ], page_size=10
+)], style={'display':'flex', 'maxHeight': '50vh', 'overflowY': 'auto'})
 ])
 
 @app.callback([Output('site_unique', 'children'), Output('site_unique', 'center')], [Input('listes_sites', 'click_feature'), Input('tableau_des_sites', 'data'), Input('tableau_des_sites', 'selected_cells')])
@@ -65,7 +78,7 @@ def maj_carte_site_unique(feature, data, cell):
         centre = json.loads(points[points['nom_site']==data[cell[0]['row']]['nom_site']]['centroid'].all())['coordinates'][::-1]
         return [baseLayer, dl.GeoJSON(data={"type": "FeatureCollection", "features": [{"type": "Feature", "geometry":json.loads(zone)}for zone in toutes_zones]})], centre #, None #, None
 
-@app.callback([Output('tableau_des_sites', 'data'), Output('tableau_des_sites', 'columns')], [Input("tableau_des_sites", "selected_cells"), Input("tableau_des_sites", "data"), Input("listes_sites", "click_feature"), Input('tableau_des_sites', 'filter_query')])
+@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns')], [Input("tableau_des_sites", "selected_cells"), Input("tableau_des_sites", "data"), Input("listes_sites", "click_feature"), Input('tableau_des_sites', 'filter_query')])
 def maj_tableau_des_sites(cell, data, feature, filter):
     columns = [{'name':'nom_site', 'id':'nom_site'}, {'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat'}]
     if dash.callback_context.triggered[0]['prop_id'] == '.':
