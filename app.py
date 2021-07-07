@@ -102,7 +102,6 @@ def maj_tableau_des_sites(cell, data, feature):
             #print(app.get_asset_url('sites/'+str(feature['properties']['id'])+'.json'))
             v = json.loads(site.read())
             site.close()     
-        print([{'name': [feature['properties']['nom_site'], column], 'id': column['id']} for column in columns])
         return [dict(zone['properties'])for zone in v['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns]
     if trigger == 'tableau_des_sites.selected_cells':
         #print(type(zh[zh['nom_site']==data[cell[0]['row']]['nom_site']]))
