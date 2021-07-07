@@ -15,7 +15,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 # Lecture des csv
 points = pd.read_csv("data/sites.csv", ';')
-
+zh = pd.read_csv("data/zh.csv", ';')
 #création d'un dictionaire pour les couleurs des polygones
 color = {'bon': 'green', 'moyen': 'yellow', 'mauvais': 'red'}
 
@@ -83,9 +83,9 @@ def maj_carte_site_unique(feature, data, cell):
     if trigger == 'listes_sites.click_feature':
         site = feature['properties']
         idSite = str(site['id'])
-        print([index['properties']['nom_site'] for index in sites_json['features']])
+        # print([index['properties']['nom_site'] for index in sites_json['features']])
         centre = json.loads(points[points['nom_site']==site['nom_site']]['centroid'].all())['coordinates'][::-1]
-        return app.get_asset_url(), centre  #, {'row': int(1), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
+        return app.get_asset_url('sites/'+idSite+'.json'), centre  #, {'row': int(1), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
     if trigger == 'tableau_des_sites.selected_cells':
         idSite = str(data[cell[0]['row']]['id'])
         centre = json.loads(points[points['nom_site']==data[cell[0]['row']]['nom_site']]['centroid'].all())['coordinates'][::-1]
@@ -94,12 +94,18 @@ def maj_carte_site_unique(feature, data, cell):
 @app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns')], [Input("tableau_des_sites", "selected_cells"), Input("tableau_des_sites", "data"), Input("listes_sites", "click_feature")])
 def maj_tableau_des_sites(cell, data, feature):
     trigger = dash.callback_context.triggered[0]['prop_id']
-    columns = [{'name':'nom_site', 'id':'nom_site'}, {'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat'}]
+    columns = [{'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat_zh'}]
     if trigger == '.':
         raise PreventUpdate
-    if trigger == 'listes_sites.click_feature':
-        return zh[zh['nom_site']==feature['properties']['nom_site']].to_dict('records'), columns
+    if trigger == 'listes_sites.click_feature': 
+        with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as site:
+            #print(app.get_asset_url('sites/'+str(feature['properties']['id'])+'.json'))
+            v = json.loads(site.read())
+            site.close()     
+        print([{'name': [feature['properties']['nom_site'], column], 'id': column['id']} for column in columns])
+        return [dict(zone['properties'])for zone in v['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns]
     if trigger == 'tableau_des_sites.selected_cells':
+        #print(type(zh[zh['nom_site']==data[cell[0]['row']]['nom_site']]))
         return zh[zh['nom_site']==data[cell[0]['row']]['nom_site']].to_dict('records'), columns
     if trigger == 'tableau_des_sites.filter_query':
         return points.to_dict('records'), [{"name": "nom site", "id": "nom_site"}]
