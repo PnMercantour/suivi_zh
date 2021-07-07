@@ -17,7 +17,23 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 points = pd.read_csv("data/sites.csv", ';')
 zh = pd.read_csv("data/zh.csv", ';')
 #création d'un dictionaire pour les couleurs des polygones
-color = {'bon': 'green', 'moyen': 'yellow', 'mauvais': 'red'}
+js_style = assign("""
+function(feature) {
+    let t = {bon: "#1E90FF", moyen: "#FF7F50", mauvais: "#FF4500"};
+    console.log(feature);
+    return {color: t[feature.properties.etat_zh]}
+}""")
+
+fonction_couleur_carte = """
+(feature, layer) => {
+    if(!feature.properties){
+        return
+    }
+    if(feature.properties.etat_zh){
+        layer.bindTooltip(feature.properties.etat_zh)
+    }
+}
+"""
 
 # Chargement de sites.json utilisation pour les données du tableaux des sites
 with open('assets/sites.json', 'r') as fichier:
@@ -61,7 +77,7 @@ app.layout = html.Div([
         center=[44.3, 7], zoom=9,
         style={'width': '100%', 'height': '50vh', 'margin': "auto"}),style={'display':'flex', 'paddingBottom':'5vh'}),
     html.Div([
-        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique')],style={'width': '70%', 'height': '50vh', 'margin': "auto"},zoom=15),
+        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(onEachFeature=assign(fonction_couleur_carte), style=js_style))],style={'width': '70%', 'height': '50vh', 'margin': "auto"},zoom=15),
         dash_table.DataTable(
             id='tableau_des_zones',
             columns=[{"name": "nom site", "id": "nom_site"}],
@@ -72,7 +88,7 @@ app.layout = html.Div([
             {'if': {'row_index': 'odd'},
             'backgroundColor': 'rgb(248, 248, 248)'
             }
-        ], page_size=10
+        ], page_size=10,  merge_duplicate_headers=True,
 )], style={'display':'flex', 'maxHeight': '50vh'})
 ])
 @app.callback([Output('zone_humide_unique', 'url'), Output('site_unique', 'center')], [Input('listes_sites', 'click_feature'), Input('tableau_des_sites', 'data'), Input('tableau_des_sites', 'selected_cells')])
@@ -99,13 +115,12 @@ def maj_tableau_des_sites(cell, data, feature):
         raise PreventUpdate
     if trigger == 'listes_sites.click_feature': 
         with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as site:
-            #print(app.get_asset_url('sites/'+str(feature['properties']['id'])+'.json'))
             v = json.loads(site.read())
-            site.close()     
+            site.close()   
         return [dict(zone['properties'])for zone in v['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns]
     if trigger == 'tableau_des_sites.selected_cells':
         #print(type(zh[zh['nom_site']==data[cell[0]['row']]['nom_site']]))
-        return zh[zh['nom_site']==data[cell[0]['row']]['nom_site']].to_dict('records'), columns
+        return zh[zh['nom_site']==data[cell[0]['row']]['nom_site']].to_dict('records'), [{'name': [data[cell[0]['row']]['nom_site'], column['name']], 'id': column['id']} for column in columns]
     if trigger == 'tableau_des_sites.filter_query':
         return points.to_dict('records'), [{"name": "nom site", "id": "nom_site"}]
     

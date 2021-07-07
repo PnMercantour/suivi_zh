@@ -16,12 +16,7 @@ function(feature) {
     return {color: t[feature.properties.etat_zh]}
 }""")
 
-hoverStyle = arrow_function(dict(weight=5, fillOpacity=1))
-app.layout = html.Div([
-    dl.Map(children=[dl.TileLayer(),
-                     dl.GeoJSON(id="site-4", hoverStyle=hoverStyle,
-                                url=app.get_asset_url('sites/4.json'),
-                                options=dict(onEachFeature=assign("""
+fonction = """
 (feature, layer) => {
     //console.log("feature =",feature);
     if(!feature.properties){
@@ -31,7 +26,14 @@ app.layout = html.Div([
         layer.bindTooltip(feature.properties.etat_zh)
     }
 }
-"""), style=js_style
+"""
+
+hoverStyle = arrow_function(dict(weight=5, fillOpacity=1))
+app.layout = html.Div([
+    dl.Map(children=[dl.TileLayer(),
+                     dl.GeoJSON(id="site-4", hoverStyle=hoverStyle,
+                                url=app.get_asset_url('sites/4.json'),
+                                options=dict(onEachFeature=assign(fonction), style=js_style
                                              ))],
            center=[44.3, 7], zoom=9,
            style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"}),
