@@ -14,8 +14,8 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 # Lecture des csv
-points = pd.read_csv("data/sites.csv", ';')
-zh = pd.read_csv("data/zh.csv", ';')
+#points = pd.read_csv("data/sites.csv", ';')
+#zh = pd.read_csv("data/zh.csv", ';')
 #création d'un dictionaire pour les couleurs des polygones
 js_style = assign("""
 function(feature) {
@@ -65,7 +65,7 @@ app.layout = html.Div([
         id='tableau_des_sites',
         columns=[{"name": "nom_site", "id": "nom_site"}],
         data=[{'nom_site':index['properties']}['nom_site'] for index in sites_json['features']],
-        #sort_action='native',
+        sort_action='native',
         filter_action='native',
         style_data_conditional=[
             {'if': {'row_index': 'odd'},
@@ -82,47 +82,61 @@ app.layout = html.Div([
             id='tableau_des_zones',
             columns=[{"name": "nom site", "id": "nom_site"}],
             data=[],
-            #sort_action='native',
+            sort_action='native',
             filter_action='native',
             style_data_conditional=[
             {'if': {'row_index': 'odd'},
             'backgroundColor': 'rgb(248, 248, 248)'
             }
         ], page_size=10,  merge_duplicate_headers=True,
-)], style={'display':'flex', 'maxHeight': '50vh'})
+)], style={'display':'flex', 'maxHeight': '50vh'}), html.Div(id='test')
 ])
-@app.callback([Output('zone_humide_unique', 'url'), Output('site_unique', 'center')], [Input('listes_sites', 'click_feature'), Input('tableau_des_sites', 'data'), Input('tableau_des_sites', 'selected_cells')])
-def maj_carte_site_unique(feature, data, cell):
+
+# @app.callback([Output('test', 'children'), Input('tableau_des_sites', 'data')])
+# def test(data):
+#     print(data)
+
+def trouve_le_centroid(id):
+    for elem in sites_json['features']:
+        if str(elem['properties']['id']) == id:
+            return elem['geometry']['coordinates'][::-1]
+
+@app.callback([Output('zone_humide_unique', 'url'), Output('site_unique', 'center')], [Input('listes_sites', 'click_feature'), Input('tableau_des_sites', 'selected_cells')])
+def maj_carte_site_unique(feature, cell):
     trigger = dash.callback_context.triggered[0]['prop_id']
     if trigger == '.':
         raise PreventUpdate
     if trigger == 'listes_sites.click_feature':
         site = feature['properties']
         idSite = str(site['id'])
-        # print([index['properties']['nom_site'] for index in sites_json['features']])
-        centre = json.loads(points[points['nom_site']==site['nom_site']]['centroid'].all())['coordinates'][::-1]
+        centre = trouve_le_centroid(idSite)
         return app.get_asset_url('sites/'+idSite+'.json'), centre  #, {'row': int(1), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
     if trigger == 'tableau_des_sites.selected_cells':
-        idSite = str(data[cell[0]['row']]['id'])
-        centre = json.loads(points[points['nom_site']==data[cell[0]['row']]['nom_site']]['centroid'].all())['coordinates'][::-1]
+        idSite = str(cell[0]['row_id'])
+        centre = trouve_le_centroid(idSite)
         return app.get_asset_url('sites/'+idSite+'.json'), centre #, None #, None
 
-@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns')], [Input("tableau_des_sites", "selected_cells"), Input("tableau_des_sites", "data"), Input("listes_sites", "click_feature")])
-def maj_tableau_des_sites(cell, data, feature):
+@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns')], [Input("tableau_des_sites", "selected_cells"), Input("listes_sites", "click_feature")])
+def maj_tableau_des_sites(cell, feature):
     trigger = dash.callback_context.triggered[0]['prop_id']
     columns = [{'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat_zh'}]
     if trigger == '.':
         raise PreventUpdate
     if trigger == 'listes_sites.click_feature': 
-        with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as site:
-            v = json.loads(site.read())
-            site.close()   
-        return [dict(zone['properties'])for zone in v['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns]
+        with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as fichier_json:
+            site = json.loads(fichier_json.read())
+            fichier_json.close()   
+        return [dict(zone['properties'])for zone in site['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns]
     if trigger == 'tableau_des_sites.selected_cells':
-        #print(type(zh[zh['nom_site']==data[cell[0]['row']]['nom_site']]))
-        return zh[zh['nom_site']==data[cell[0]['row']]['nom_site']].to_dict('records'), [{'name': [data[cell[0]['row']]['nom_site'], column['name']], 'id': column['id']} for column in columns]
+        with open('assets/sites/'+str(cell[0]['row_id'])+'.json', 'r') as fichier_json:
+            site = json.loads(fichier_json.read())
+            fichier_json.close()
+        for elem in sites_json['features']:
+            if elem['properties']['id'] == cell[0]['row_id']:
+                nom_site = elem['properties']['nom_site']
+        return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns]
     if trigger == 'tableau_des_sites.filter_query':
-        return points.to_dict('records'), [{"name": "nom site", "id": "nom_site"}]
+        return [{'nom_site':index['properties']}['nom_site'] for index in sites_json['features']], [{"name": "nom site", "id": "nom_site"}]
     
 
 if __name__ == '__main__':
