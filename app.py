@@ -92,10 +92,6 @@ app.layout = html.Div([
 )], style={'display':'flex', 'maxHeight': '50vh'}), html.Div(id='test')
 ])
 
-# @app.callback([Output('test', 'children'), Input('tableau_des_sites', 'data')])
-# def test(data):
-#     print(data)
-
 def trouve_le_centroid(id):
     for elem in sites_json['features']:
         if str(elem['properties']['id']) == id:
@@ -116,8 +112,8 @@ def maj_carte_site_unique(feature, cell):
         centre = trouve_le_centroid(idSite)
         return app.get_asset_url('sites/'+idSite+'.json'), centre #, None #, None
 
-@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns')], [Input("tableau_des_sites", "selected_cells"), Input("listes_sites", "click_feature")])
-def maj_tableau_des_sites(cell, feature):
+@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns'), Output('tableau_des_sites', 'selected_cells')], [Input("tableau_des_sites", "selected_cells"), Input("listes_sites", "click_feature"), Input('tableau_des_sites', 'derived_virtual_row_ids')])
+def maj_tableau_des_sites(cell, feature, sites_lignes):
     trigger = dash.callback_context.triggered[0]['prop_id']
     columns = [{'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat_zh'}]
     if trigger == '.':
@@ -126,7 +122,8 @@ def maj_tableau_des_sites(cell, feature):
         with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as fichier_json:
             site = json.loads(fichier_json.read())
             fichier_json.close()   
-        return [dict(zone['properties'])for zone in site['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns]
+        ligne = sites_lignes.index(feature['properties']['id'])
+        return [dict(zone['properties']) for zone in site['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns], [{'row': ligne, 'column':0}]
     if trigger == 'tableau_des_sites.selected_cells':
         with open('assets/sites/'+str(cell[0]['row_id'])+'.json', 'r') as fichier_json:
             site = json.loads(fichier_json.read())
@@ -134,11 +131,8 @@ def maj_tableau_des_sites(cell, feature):
         for elem in sites_json['features']:
             if elem['properties']['id'] == cell[0]['row_id']:
                 nom_site = elem['properties']['nom_site']
-        return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns]
-    if trigger == 'tableau_des_sites.filter_query':
-        return [{'nom_site':index['properties']}['nom_site'] for index in sites_json['features']], [{"name": "nom site", "id": "nom_site"}]
+        return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns], cell
     
-
 if __name__ == '__main__':
     app.run_server(debug=True)
 
