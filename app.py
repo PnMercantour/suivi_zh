@@ -112,7 +112,7 @@ def maj_carte_site_unique(feature, cell):
         centre = trouve_le_centroid(idSite)
         return app.get_asset_url('sites/'+idSite+'.json'), centre #, None #, None
 
-@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns'), Output('tableau_des_sites', 'selected_cells')], [Input("tableau_des_sites", "selected_cells"), Input("listes_sites", "click_feature"), Input('tableau_des_sites', 'derived_virtual_row_ids')])
+@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns'), Output('tableau_des_sites', 'selected_cells')], [Input("tableau_des_sites", "selected_cells"), Input("listes_sites", "click_feature"), Input('tableau_des_sites', 'derived_viewport_row_ids')])
 def maj_tableau_des_sites(cell, feature, sites_lignes):
     trigger = dash.callback_context.triggered[0]['prop_id']
     columns = [{'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat_zh'}]
@@ -132,7 +132,14 @@ def maj_tableau_des_sites(cell, feature, sites_lignes):
             if elem['properties']['id'] == cell[0]['row_id']:
                 nom_site = elem['properties']['nom_site']
         return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns], cell
-    
+
+@app.callback([Output('tableau_des_zones', 'active_cell')], [Input('zone_humide_unique','click_feature'), Input('tableau_des_zones', 'derived_viewport_row_ids')]) 
+def test(zone, tableau_zones_lignes):
+    #print(zone['properties']['id'])
+    row = tableau_zones_lignes.index(zone['properties']['id'])
+    print(row)
+    return [{'row': row, 'column': 0}]
+
 if __name__ == '__main__':
     app.run_server(debug=True)
 
