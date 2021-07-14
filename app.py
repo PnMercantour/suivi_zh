@@ -1,30 +1,24 @@
 import dash
-import dash_core_components as dcc
 import dash_html_components as html
-import plotly.express as px
 import dash_leaflet as dl
-import dash_leaflet.express as dlx
 import dash_table
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, ClientsideFunction
 from dash.exceptions import PreventUpdate
-import pandas as pd
 from dash_extensions.javascript import arrow_function, assign
 import json
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+#external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-# Lecture des csv
-#points = pd.read_csv("data/sites.csv", ';')
-#zh = pd.read_csv("data/zh.csv", ';')
+app = dash.Dash(__name__)
+
 #création d'un dictionaire pour les couleurs des polygones
 js_style = assign("""
 function(feature) {
-    let t = {bon: "#1E90FF", moyen: "#FF7F50", mauvais: "#FF4500"};
+    let t = {bon: "#1E90FF", moyen: "#FF7F50", mauvais: "#FF4500", sel: "FFFFFF"};
     console.log(feature);
     return {color: t[feature.properties.etat_zh]}
 }""")
 
-fonction_couleur_carte = """
+fonction_couleur_carte = assign("""
 (feature, layer) => {
     if(!feature.properties){
         return
@@ -33,7 +27,7 @@ fonction_couleur_carte = """
         layer.bindTooltip(feature.properties.etat_zh)
     }
 }
-"""
+""")
 
 # Chargement de sites.json utilisation pour les données du tableaux des sites
 with open('assets/sites.json', 'r') as fichier:
@@ -41,7 +35,7 @@ with open('assets/sites.json', 'r') as fichier:
     fichier.close()
 
 # GeoJSON pour les sites
-listes_sites = dl.GeoJSON(id="listes_sites", url=app.get_asset_url('sites.json'), options=dict(onEachFeature=assign("""
+carte_sites = dl.GeoJSON(id="carte_sites", url=app.get_asset_url('sites.json'), options=dict(onEachFeature=assign("""
 (feature, layer) => {
     if(!feature.properties){
         return
@@ -52,33 +46,7 @@ listes_sites = dl.GeoJSON(id="listes_sites", url=app.get_asset_url('sites.json')
 }
 """)))
 
-# Création de la dataframe, un tableau passé en paramètre de dl.Map dans le layout
-# Le fond de carte
-baseLayer = dl.TileLayer()
-
-# dl.WMSTileLayer(url="http://ows.mundialis.de/services/service?",
-#                    layers="TOPO-OSM-WMS", format="image/png")
-# Le layout
-app.layout = html.Div([
-    html.Div([
-    dash_table.DataTable(
-        id='tableau_des_sites',
-        columns=[{"name": "nom_site", "id": "nom_site"}],
-        data=[{'nom_site':index['properties']}['nom_site'] for index in sites_json['features']],
-        sort_action='native',
-        filter_action='native',
-        style_data_conditional=[
-            {'if': {'row_index': 'odd'},
-            'backgroundColor': 'rgb(248, 248, 248)'
-            }
-        ]
-)],style={'float':'left', 'paddingRight': '5vh'}),
-    html.Div(dl.Map(id="parc", children = [baseLayer, listes_sites],
-        center=[44.3, 7], zoom=9,
-        style={'width': '100%', 'height': '50vh', 'margin': "auto"}),style={'display':'flex', 'paddingBottom':'5vh'}),
-    html.Div([
-        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(onEachFeature=assign(fonction_couleur_carte), style=js_style))],style={'width': '70%', 'height': '50vh', 'margin': "auto"},zoom=15),
-        dash_table.DataTable(
+tableau_des_zones = dash_table.DataTable(
             id='tableau_des_zones',
             columns=[{"name": "nom site", "id": "nom_site"}],
             data=[],
@@ -89,36 +57,68 @@ app.layout = html.Div([
             'backgroundColor': 'rgb(248, 248, 248)'
             }
         ], page_size=10,  merge_duplicate_headers=True,
-)], style={'display':'flex', 'maxHeight': '50vh'}), html.Div(id='test')
+)
+
+tableau_des_sites = dash_table.DataTable(
+        id='tableau_des_sites',
+        columns=[{"name": "nom_site", "id": "nom_site"}],
+        data=[{'nom_site':index['properties']}['nom_site'] for index in sites_json['features']],
+        sort_action='native',
+        filter_action='native',
+        style_data_conditional=[
+            {'if': {'row_index': 'odd'},
+            'backgroundColor': 'rgb(248, 248, 248)'
+            }
+        ]
+)
+
+# Création de la dataframe, un tableau passé en paramètre de dl.Map dans le layout
+# Le fond de carte
+baseLayer = dl.TileLayer()
+
+# dl.WMSTileLayer(url="http://ows.mundialis.de/services/service?",
+#                    layers="TOPO-OSM-WMS", format="image/png")
+# Le layout
+app.layout = html.Div([
+    html.Div([
+        tableau_des_sites
+    ],style={'float':'left', 'paddingRight': '5vh'}),
+    html.Div(
+        dl.Map(id="parc", children = [baseLayer, carte_sites],
+        center=[44.3, 7], zoom=9,),style={'display':'flex', 'paddingBottom':'5vh'}),
+    html.Div([
+        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(onEachFeature=fonction_couleur_carte, style=js_style)), dl.Polygon(id="selection", positions=[], color="#000000")],zoom=15),
+        tableau_des_zones
+    ], style={'display':'flex', 'maxHeight': '50vh'}), html.Div(id='test')
 ])
 
 def trouve_le_centroid(id):
     for elem in sites_json['features']:
-        if str(elem['properties']['id']) == id:
+        if elem['properties']['id'] == id:
             return elem['geometry']['coordinates'][::-1]
 
-@app.callback([Output('zone_humide_unique', 'url'), Output('site_unique', 'center')], [Input('listes_sites', 'click_feature'), Input('tableau_des_sites', 'selected_cells')])
+def trouve_le_fichier_du_site(id):
+    return app.get_asset_url('sites/'+str(id)+'.json')
+
+@app.callback([Output('zone_humide_unique', 'url'), Output('site_unique', 'center')], [Input('carte_sites', 'click_feature'), Input('tableau_des_sites', 'selected_cells')])
 def maj_carte_site_unique(feature, cell):
     trigger = dash.callback_context.triggered[0]['prop_id']
     if trigger == '.':
         raise PreventUpdate
-    if trigger == 'listes_sites.click_feature':
-        site = feature['properties']
-        idSite = str(site['id'])
-        centre = trouve_le_centroid(idSite)
-        return app.get_asset_url('sites/'+idSite+'.json'), centre  #, {'row': int(1), 'column': 0} #, "{nom_site} contains"+feature['properties']['site']
+    if trigger == 'carte_sites.click_feature':
+        id = feature['properties']['id']
+        return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
     if trigger == 'tableau_des_sites.selected_cells':
-        idSite = str(cell[0]['row_id'])
-        centre = trouve_le_centroid(idSite)
-        return app.get_asset_url('sites/'+idSite+'.json'), centre #, None #, None
+        id = cell[0]['row_id']
+        return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
 
-@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns'), Output('tableau_des_sites', 'selected_cells')], [Input("tableau_des_sites", "selected_cells"), Input("listes_sites", "click_feature"), Input('tableau_des_sites', 'derived_viewport_row_ids')])
+@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns'), Output('tableau_des_sites', 'selected_cells')], [Input("tableau_des_sites", "selected_cells"), Input("carte_sites", "click_feature"), Input('tableau_des_sites', 'derived_viewport_row_ids')])
 def maj_tableau_des_sites(cell, feature, sites_lignes):
     trigger = dash.callback_context.triggered[0]['prop_id']
     columns = [{'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat_zh'}]
     if trigger == '.':
         raise PreventUpdate
-    if trigger == 'listes_sites.click_feature': 
+    if trigger == 'carte_sites.click_feature': 
         with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as fichier_json:
             site = json.loads(fichier_json.read())
             fichier_json.close()   
@@ -134,12 +134,34 @@ def maj_tableau_des_sites(cell, feature, sites_lignes):
         return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns], cell
 
 @app.callback([Output('tableau_des_zones', 'active_cell')], [Input('zone_humide_unique','click_feature'), Input('tableau_des_zones', 'derived_viewport_row_ids')]) 
-def test(zone, tableau_zones_lignes):
-    #print(zone['properties']['id'])
+def selection_cellule_tableau_des_zones(zone, tableau_zones_lignes):
+    trigger = dash.callback_context.triggered[0]['prop_id']
+    if trigger == '.':
+        raise PreventUpdate
     row = tableau_zones_lignes.index(zone['properties']['id'])
-    print(row)
     return [{'row': row, 'column': 0}]
+
+# @app.callback(Output("zone_humide_unique", "children"), [Input("zone_humide_unique", "click_feature"), Input("tableau_des_zones", "active_cell")])
+# def zh_selectionnee_change_couleur(input,cell):
+#     trigger = dash.callback_context.triggered[0]['prop_id']
+#     if trigger == '.':
+#         raise PreventUpdate
+#     elif trigger == 'zone_humide_unique.click_feature':
+#         points = [point[::-1] for point in input['geometry']['coordinates'][0][0]]
+#         return dl.Polygon(positions=points, color="#0000FF")
+#     else :
+#         print(cell)
+
+app.clientside_callback(
+    """
+    function(feature) {
+        let coor = feature.geometry.coordinates[0][0]
+        let returnTab = []
+        coor.forEach(element => returnTab.push(element.reverse()))
+        return returnTab
+    }
+    """,
+Output("selection", "positions"), Input("zone_humide_unique", "click_feature"))
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
