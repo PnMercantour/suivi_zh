@@ -84,8 +84,8 @@ app.layout = html.Div([
         tableau_des_sites
     ],style={'float':'left', 'paddingRight': '5vh'}),
     html.Div(
-        dl.Map(id="parc", children = [baseLayer, carte_sites],
-        center=[44.3, 7], zoom=9,),style={'display':'flex', 'paddingBottom':'5vh'}),
+        dl.Map(id="parc", children = [baseLayer, carte_sites, dl.Marker('assets/pointer.png', position=[44.3,7])],
+        center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
     html.Div([
         dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(onEachFeature=fonction_couleur_carte, style=js_style)), dl.Polygon(id="selection", positions=[], color="#000000")],zoom=15),
         tableau_des_zones
@@ -141,27 +141,21 @@ def selection_cellule_tableau_des_zones(zone, tableau_zones_lignes):
     row = tableau_zones_lignes.index(zone['properties']['id'])
     return [{'row': row, 'column': 0}]
 
-# @app.callback(Output("zone_humide_unique", "children"), [Input("zone_humide_unique", "click_feature"), Input("tableau_des_zones", "active_cell")])
-# def zh_selectionnee_change_couleur(input,cell):
-#     trigger = dash.callback_context.triggered[0]['prop_id']
-#     if trigger == '.':
-#         raise PreventUpdate
-#     elif trigger == 'zone_humide_unique.click_feature':
-#         points = [point[::-1] for point in input['geometry']['coordinates'][0][0]]
-#         return dl.Polygon(positions=points, color="#0000FF")
-#     else :
-#         print(cell)
-
+# Séléctionner une zone humide sur la carte zone_humide_unique change sa couleur
 app.clientside_callback(
     """
-    function(feature) {
+    function(data ,feature, cell) {
+        console.log("================================")
+        console.log(data[1])
+        console.log("================================")
+        if(cell.row_id !== "Undefined") {console.log(cell.row_id)}
         let coor = feature.geometry.coordinates[0][0]
         let returnTab = []
         coor.forEach(element => returnTab.push(element.reverse()))
         return returnTab
     }
     """,
-Output("selection", "positions"), Input("zone_humide_unique", "click_feature"))
+Output("selection", "positions"), [Input("site_unique", "children"), Input("zone_humide_unique", "click_feature"),  Input("tableau_des_zones", "active_cell")])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
