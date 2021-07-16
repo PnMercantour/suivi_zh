@@ -8,3 +8,4 @@ dash-table==4.11.3
 geobuf==1.1.1
 geopandas==0.9.0
 jsbeautifier==1.14.0
+python-dotenv
