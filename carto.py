@@ -34,8 +34,8 @@ siteLayer = dl.GeoJSON(url=app.get_asset_url('sites.json'), id="sites", options=
     if(!feature.properties){
         return
     }
-    console.log(feature);
-    console.log(layer);
+    cachedData.siteTable[feature.properties.id] = feature.geometry;
+    console.log(cachedData.siteTable);
     if(feature.properties.nom_site){
         layer.bindTooltip(feature.properties.nom_site)
     }
