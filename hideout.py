@@ -15,21 +15,22 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-baseLayer = dl.TileLayer(url="https://wxs.ign.fr/" + os.getenv('IGN_KEY') + "/wmts?" +
-                         "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
-                         "&STYLE=normal" +
-                         "&TILEMATRIXSET=PM" +
-                         "&FORMAT=image/jpeg" +
-                         "&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS" +
-                         "&TILEMATRIX={z}" +
-                         "&TILEROW={y}" +
-                         "&TILECOL={x}",
-                         minZoom=0,
-                         maxZoom=18,
-                         tileSize=256,
-                         attribution="IGN-F/Geoportail")
-
+baseLayer = dl.TileLayer()
+# url="https://wxs.ign.fr/" + os.getenv('IGN_KEY') + "/wmts?" +
+#                          "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
+#                          "&STYLE=normal" +
+#                          "&TILEMATRIXSET=PM" +
+#                          "&FORMAT=image/jpeg" +
+#                          "&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS" +
+#                          "&TILEMATRIX={z}" +
+#                          "&TILEROW={y}" +
+#                          "&TILECOL={x}",
+#                          minZoom=0,
+#                          maxZoom=18,
+#                          tileSize=256,
+#                          attribution="IGN-F/Geoportail"
 point_to_layer = assign("""function(feature, latlng, context){
+    console.log(context)
     if (context.props.hideout && feature.properties.id == context.props.hideout.selected_site) {
         circleOptions= {color: "red", fillColor: "red", fillOpacity: 0.8};
     }

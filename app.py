@@ -2,24 +2,28 @@ import dash
 import dash_html_components as html
 import dash_leaflet as dl
 import dash_table
-from dash.dependencies import Input, Output, ClientsideFunction
+from dash.dependencies import Input, Output, State, ClientsideFunction
 from dash.exceptions import PreventUpdate
-from dash_extensions.javascript import arrow_function, assign
+from dash_extensions.javascript import assign
+from pathlib import Path
 import json
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__)
 
+assign(""" () => {let test = {}} """)
 #création d'un dictionaire pour les couleurs des polygones
 js_style = assign("""
-function(feature) {
-    let t = {bon: "#1E90FF", moyen: "#FF7F50", mauvais: "#FF4500", sel: "FFFFFF"};
-    console.log(feature);
-    return {color: t[feature.properties.etat_zh]}
+function(feature, context) {
+    if (context.props.hideout && feature.properties.id == context.props.hideout.selected_site) {return {color:"#000000"}}
+    else {
+        let t = {bon: "#1E90FF", moyen: "#FF7F50", mauvais: "#FF4500"};
+        return {color: t[feature.properties.etat_zh]}}
 }""")
 
 fonction_couleur_carte = assign("""
 (feature, layer) => {
+    //table id + geometry
     if(!feature.properties){
         return
     }
@@ -30,19 +34,28 @@ fonction_couleur_carte = assign("""
 """)
 
 # Chargement de sites.json utilisation pour les données du tableaux des sites
-with open('assets/sites.json', 'r') as fichier:
+with open(Path(Path(__file__).parent, 'assets', 'sites.json'), 'r') as fichier:
     sites_json = json.loads(fichier.read())
     fichier.close()
 
+point_to_layer = assign("""function(feature, latlng, context){
+    if (context.props.hideout && feature.properties.id == context.props.hideout.selected_site) {
+        circleOptions= {color: "red", fillColor: "red", fillOpacity: 0.8};
+    }
+    else
+        circleOptions= {color: "blue"};
+    return L.circleMarker(latlng, circleOptions)  // send a simple circle marker.
+}""")
+
 # GeoJSON pour les sites
-carte_sites = dl.GeoJSON(id="carte_sites", url=app.get_asset_url('sites.json'), options=dict(onEachFeature=assign("""
-(feature, layer) => {
-    if(!feature.properties){
-        return
-    }
-    if(feature.properties.nom_site){
-        layer.bindTooltip(feature.properties.nom_site)
-    }
+carte_sites = dl.GeoJSON(id="carte_sites", url=app.get_asset_url('sites.json'), options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=assign("""
+    (feature, layer) => {
+        if(!feature.properties){
+            return
+        }
+        if(feature.properties.nom_site){
+            layer.bindTooltip(feature.properties.nom_site)
+        }
 }
 """)))
 
@@ -79,15 +92,16 @@ baseLayer = dl.TileLayer()
 # dl.WMSTileLayer(url="http://ows.mundialis.de/services/service?",
 #                    layers="TOPO-OSM-WMS", format="image/png")
 # Le layout
+# , dl.Marker('assets/pointer.png', position=[44.3,7])
 app.layout = html.Div([
     html.Div([
         tableau_des_sites
     ],style={'float':'left', 'paddingRight': '5vh'}),
     html.Div(
-        dl.Map(id="parc", children = [baseLayer, carte_sites, dl.Marker('assets/pointer.png', position=[44.3,7])],
+        dl.Map(id="parc", children = [baseLayer, carte_sites],
         center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
     html.Div([
-        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(onEachFeature=fonction_couleur_carte, style=js_style)), dl.Polygon(id="selection", positions=[], color="#000000")],zoom=15),
+        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=fonction_couleur_carte, style=js_style)), dl.Polygon(id="selection", positions=[], color="#000000")],zoom=15),
         tableau_des_zones
     ], style={'display':'flex', 'maxHeight': '50vh'}), html.Div(id='test')
 ])
@@ -141,21 +155,31 @@ def selection_cellule_tableau_des_zones(zone, tableau_zones_lignes):
     row = tableau_zones_lignes.index(zone['properties']['id'])
     return [{'row': row, 'column': 0}]
 
-# Séléctionner une zone humide sur la carte zone_humide_unique change sa couleur
 app.clientside_callback(
-    """
-    function(data ,feature, cell) {
-        console.log("================================")
-        console.log(data[1])
-        console.log("================================")
-        if(cell.row_id !== "Undefined") {console.log(cell.row_id)}
-        let coor = feature.geometry.coordinates[0][0]
-        let returnTab = []
-        coor.forEach(element => returnTab.push(element.reverse()))
-        return returnTab
-    }
-    """,
-Output("selection", "positions"), [Input("site_unique", "children"), Input("zone_humide_unique", "click_feature"),  Input("tableau_des_zones", "active_cell")])
+    """function(feature, hideout) {
+    if (feature == undefined) 
+        return hideout
+    else
+        return {...hideout, selected_site: feature.properties.id}
+    }""",
+    Output("carte_sites", "hideout"),
+    Input("carte_sites", "click_feature"),
+    State("carte_sites", "hideout"))
+
+app.clientside_callback(
+    """function(feature, hideout) {
+    if (feature == undefined) 
+        return hideout
+    else
+        return {...hideout, selected_site: feature.properties.id}
+    }""",
+    Output("zone_humide_unique", "hideout"),
+    Input("zone_humide_unique", "click_feature"),
+    State("zone_humide_unique", "hideout"))
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+# //console.log("================================")
+#         //console.log(data[1])
+#         //console.log("================================")
