@@ -3,7 +3,7 @@ import dash
 import dash_html_components as html
 import dash_leaflet as dl
 import dash_table
-from dash.dependencies import Input, Output, State, ClientsideFunction
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from dash_extensions.javascript import assign
 from pathlib import Path
@@ -105,10 +105,7 @@ baseLayer = dl.TileLayer(url="https://wxs.ign.fr/" + os.getenv('IGN_KEY') + "/wm
                          tileSize=256,
                          attribution="IGN-F/Geoportail")
 
-# dl.WMSTileLayer(url="http://ows.mundialis.de/services/service?",
-#                    layers="TOPO-OSM-WMS", format="image/png")
 # Le layout
-# , dl.Marker('assets/pointer.png', position=[44.3,7])
 app.layout = html.Div([
     html.Div([
         tableau_des_sites
@@ -117,10 +114,23 @@ app.layout = html.Div([
         dl.Map(id="parc", children = [baseLayer, carte_sites],
         center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
     html.Div([
-        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=fonction_couleur_carte, style=js_style), zoomToBounds=True), dl.Polygon(id="selection", positions=[], color="#000000")],zoom=15),
+        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=fonction_couleur_carte, style=js_style), zoomToBounds=True)]),
         tableau_des_zones
     ], style={'display':'flex', 'maxHeight': '50vh'}), html.Div(id='test')
 ])
+
+@app.callback(Output('test', 'children'), Input('carte_sites', 'click_feature'))
+def test(input):
+    with open('assets/sites/'+str(input['properties']['id'])+'.json', 'r') as f:
+        content = f.read()
+        with open('assets/cachedData.js', 'r') as js_file:
+            list_of_lines = js_file.readlines()
+            list_of_lines[1] =  'siteTable : '+content+',\n'
+            with open('assets/cachedData.js', 'w') as js_file:
+                js_file.writelines(list_of_lines)
+            js_file.close()
+        f.close()
+    return 'ok'
 
 def trouve_le_centroid(id):
     for elem in sites_json['features']:
@@ -130,38 +140,48 @@ def trouve_le_centroid(id):
 def trouve_le_fichier_du_site(id):
     return app.get_asset_url('sites/'+str(id)+'.json')
 
-@app.callback([Output('zone_humide_unique', 'url'), Output('site_unique', 'center')], [Input('carte_sites', 'click_feature'), Input('tableau_des_sites', 'selected_cells')])
-def maj_carte_site_unique(feature, cell):
-    trigger = dash.callback_context.triggered[0]['prop_id']
-    if trigger == '.':
-        raise PreventUpdate
-    if trigger == 'carte_sites.click_feature':
-        id = feature['properties']['id']
-        return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
-    if trigger == 'tableau_des_sites.selected_cells':
-        id = cell[0]['row_id']
-        return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
+# @app.callback([Output('zone_humide_unique', 'url'), Output('site_unique', 'center')], [Input('carte_sites', 'click_feature'), Input('tableau_des_sites', 'selected_cells')])
+# def maj_carte_site_unique(feature, cell):
+#     trigger = dash.callback_context.triggered[0]['prop_id']
+#     if trigger == '.':
+#         raise PreventUpdate
+#     if trigger == 'carte_sites.click_feature':
+#         id = feature['properties']['id']
+#         return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
+#     if trigger == 'tableau_des_sites.selected_cells':
+#         id = cell[0]['row_id']
+#         return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
 
-@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns'), Output('tableau_des_sites', 'selected_cells')], [Input("tableau_des_sites", "selected_cells"), Input("carte_sites", "click_feature"), Input('tableau_des_sites', 'derived_viewport_row_ids')])
-def maj_tableau_des_sites(cell, feature, sites_lignes):
-    trigger = dash.callback_context.triggered[0]['prop_id']
-    columns = [{'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat_zh'}]
-    if trigger == '.':
-        raise PreventUpdate
-    if trigger == 'carte_sites.click_feature': 
-        with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as fichier_json:
-            site = json.loads(fichier_json.read())
-            fichier_json.close()   
-        ligne = sites_lignes.index(feature['properties']['id'])
-        return [dict(zone['properties']) for zone in site['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns], [{'row': ligne, 'column':0}]
-    if trigger == 'tableau_des_sites.selected_cells':
-        with open('assets/sites/'+str(cell[0]['row_id'])+'.json', 'r') as fichier_json:
-            site = json.loads(fichier_json.read())
-            fichier_json.close()
-        for elem in sites_json['features']:
-            if elem['properties']['id'] == cell[0]['row_id']:
-                nom_site = elem['properties']['nom_site']
-        return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns], cell
+# @app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns'), Output('tableau_des_sites', 'selected_cells')], [Input("tableau_des_sites", "selected_cells"), Input("carte_sites", "click_feature"), Input('tableau_des_sites', 'derived_viewport_row_ids')])
+# def maj_tableau_des_sites(cell, feature, sites_lignes):
+#     trigger = dash.callback_context.triggered[0]['prop_id']
+#     columns = [{'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat_zh'}]
+#     if trigger == '.':
+#         raise PreventUpdate
+#     if trigger == 'carte_sites.click_feature': 
+#         with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as fichier_json:
+#             site = json.loads(fichier_json.read())
+#             fichier_json.close()   
+#         ligne = sites_lignes.index(feature['properties']['id'])
+#         return [dict(zone['properties']) for zone in site['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns], [{'row': ligne, 'column':0}]
+#     if trigger == 'tableau_des_sites.selected_cells':
+#         with open('assets/sites/'+str(cell[0]['row_id'])+'.json', 'r') as fichier_json:
+#             site = json.loads(fichier_json.read())
+#             fichier_json.close()
+#         for elem in sites_json['features']:
+#             if elem['properties']['id'] == cell[0]['row_id']:
+#                 nom_site = elem['properties']['nom_site']
+#         return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns], cell
+
+app.clientside_callback(
+    """
+    function(){
+        return cachedData.siteTable
+    }
+    """,
+    Output('zone_humide_unique','data'),
+    Input('carte_sites', 'click_feature')
+)
 
 @app.callback([Output('tableau_des_zones', 'active_cell')], [Input('zone_humide_unique','click_feature'), Input('tableau_des_zones', 'derived_viewport_row_ids')]) 
 def selection_cellule_tableau_des_zones(zone, tableau_zones_lignes):

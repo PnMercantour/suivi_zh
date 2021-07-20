@@ -1,14 +1,10 @@
 import os
 import dash
-import dash_core_components as dcc
 import dash_html_components as html
-import plotly.express as px
 import dash_leaflet as dl
-import dash_leaflet.express as dlx
 from dash.dependencies import Input, Output, State
-from dash_extensions.javascript import assign, arrow_function
+from dash_extensions.javascript import assign
 from dotenv import load_dotenv
-import json
 
 load_dotenv('.env/.env')
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
