@@ -1,3 +1,4 @@
+import os
 import dash
 import dash_html_components as html
 import dash_leaflet as dl
@@ -6,15 +7,18 @@ from dash.dependencies import Input, Output, State, ClientsideFunction
 from dash.exceptions import PreventUpdate
 from dash_extensions.javascript import assign
 from pathlib import Path
+from dotenv import load_dotenv
 import json
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+load_dotenv('.env/.env')
 
 app = dash.Dash(__name__)
 
-assign(""" () => {let test = {}} """)
+#assign(""" () => {let test = {}} """)
 #création d'un dictionaire pour les couleurs des polygones
 js_style = assign("""
 function(feature, context) {
+    //if(document.getElementById('tableau_des_zones').getElementByClassName('cell--selected')) {console.log("ok")}
     if (context.props.hideout && feature.properties.id == context.props.hideout.selected_site) {return {color:"#000000"}}
     else {
         let t = {bon: "#1E90FF", moyen: "#FF7F50", mauvais: "#FF4500"};
@@ -87,7 +91,19 @@ tableau_des_sites = dash_table.DataTable(
 
 # Création de la dataframe, un tableau passé en paramètre de dl.Map dans le layout
 # Le fond de carte
-baseLayer = dl.TileLayer()
+baseLayer = dl.TileLayer(url="https://wxs.ign.fr/" + os.getenv('IGN_KEY') + "/wmts?" +
+                         "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
+                         "&STYLE=normal" +
+                         "&TILEMATRIXSET=PM" +
+                         "&FORMAT=image/jpeg" +
+                         "&LAYER=GEOGRAPHICALGRIDSYSTEMS.MAPS" +
+                         "&TILEMATRIX={z}" +
+                         "&TILEROW={y}" +
+                         "&TILECOL={x}",
+                         minZoom=0,
+                         maxZoom=18,
+                         tileSize=256,
+                         attribution="IGN-F/Geoportail")
 
 # dl.WMSTileLayer(url="http://ows.mundialis.de/services/service?",
 #                    layers="TOPO-OSM-WMS", format="image/png")
@@ -101,7 +117,7 @@ app.layout = html.Div([
         dl.Map(id="parc", children = [baseLayer, carte_sites],
         center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
     html.Div([
-        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=fonction_couleur_carte, style=js_style)), dl.Polygon(id="selection", positions=[], color="#000000")],zoom=15),
+        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=fonction_couleur_carte, style=js_style), zoomToBounds=True), dl.Polygon(id="selection", positions=[], color="#000000")],zoom=15),
         tableau_des_zones
     ], style={'display':'flex', 'maxHeight': '50vh'}), html.Div(id='test')
 ])
@@ -164,7 +180,8 @@ app.clientside_callback(
     }""",
     Output("carte_sites", "hideout"),
     Input("carte_sites", "click_feature"),
-    State("carte_sites", "hideout"))
+    State("carte_sites", "hideout")
+    )
 
 app.clientside_callback(
     """function(feature, hideout) {
@@ -175,11 +192,8 @@ app.clientside_callback(
     }""",
     Output("zone_humide_unique", "hideout"),
     Input("zone_humide_unique", "click_feature"),
-    State("zone_humide_unique", "hideout"))
+    State("carte_sites", "hideout")
+    )
 
 if __name__ == '__main__':
     app.run_server(debug=True)
-
-# //console.log("================================")
-#         //console.log(data[1])
-#         //console.log("================================")
