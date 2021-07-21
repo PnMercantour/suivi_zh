@@ -18,7 +18,6 @@ app = dash.Dash(__name__)
 #création d'un dictionaire pour les couleurs des polygones
 js_style = assign("""
 function(feature, context) {
-    //if(document.getElementById('tableau_des_zones').getElementByClassName('cell--selected')) {console.log("ok")}
     if (context.props.hideout && feature.properties.id == context.props.hideout.selected_site) {return {color:"#000000"}}
     else {
         let t = {bon: "#1E90FF", moyen: "#FF7F50", mauvais: "#FF4500"};
@@ -27,10 +26,10 @@ function(feature, context) {
 
 fonction_couleur_carte = assign("""
 (feature, layer) => {
-    //table id + geometry
     if(!feature.properties){
         return
     }
+    cachedData.zhTable[feature.properties.id] = {surface : feature.properties.surface, etat: feature.properties.etat_zh}
     if(feature.properties.etat_zh){
         layer.bindTooltip(feature.properties.etat_zh)
     }
@@ -64,9 +63,11 @@ siteLayer = dl.GeoJSON(id="siteLayer", url=app.get_asset_url('sites.json'), opti
 }
 """)))
 
-tableau_des_zones = dash_table.DataTable(
-            id='tableau_des_zones',
-            columns=[{"name": "nom site", "id": "nom_site"}],
+zhLayer = dl.GeoJSON(id='zhLayer', options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=fonction_couleur_carte, style=js_style), zoomToBounds=True)
+
+zhTable = dash_table.DataTable(
+            id='zhTable',
+            columns=[],
             data=[],
             sort_action='native',
             filter_action='native',
@@ -115,8 +116,8 @@ app.layout = html.Div([
         dl.Map(id="parc", children = [baseLayer, siteLayer],
         center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
     html.Div([
-        dl.Map(id="site_unique", children=[baseLayer, dl.GeoJSON(id='zone_humide_unique', options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=fonction_couleur_carte, style=js_style), zoomToBounds=True)]),
-        tableau_des_zones
+        dl.Map(id="site_unique", children=[baseLayer, zhLayer]),
+        zhTable
     ], style={'display':'flex', 'maxHeight': '50vh'}), html.Div(id='test')
 ])
 
@@ -128,29 +129,41 @@ def trouve_le_centroid(id):
 def trouve_le_fichier_du_site(id):
     return app.get_asset_url('sites/'+str(id)+'.json')
 
-@app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns'), Output('siteTable', 'selected_cells')], [Input("siteTable", "selected_cells"), Input("siteLayer", "click_feature"), Input('siteTable', 'derived_viewport_row_ids')])
-def maj_siteTable(cell, feature, sites_lignes):
+@app.callback([Output('zhLayer', 'url'), Output('site_unique', 'center')], [Input('siteLayer', 'click_feature'), Input('siteTable', 'selected_cells')])
+def maj_carte_site_unique(feature, cell):
     trigger = dash.callback_context.triggered[0]['prop_id']
-    columns = [{'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat_zh'}]
     if trigger == '.':
         raise PreventUpdate
-    if trigger == 'siteLayer.click_feature': 
-        with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as fichier_json:
-            site = json.loads(fichier_json.read())
-            fichier_json.close()   
-        ligne = sites_lignes.index(feature['properties']['id'])
-        return [dict(zone['properties']) for zone in site['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns], [{'row': ligne, 'column':0}]
+    if trigger == 'siteLayer.click_feature':
+        id = feature['properties']['id']
+        return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
     if trigger == 'siteTable.selected_cells':
-        with open('assets/sites/'+str(cell[0]['row_id'])+'.json', 'r') as fichier_json:
-            site = json.loads(fichier_json.read())
-            fichier_json.close()
-        for elem in sites_json['features']:
-            if elem['properties']['id'] == cell[0]['row_id']:
-                nom_site = elem['properties']['nom_site']
-        return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns], cell
+        id = cell[0]['row_id']
+        return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
 
-@app.callback([Output('tableau_des_zones', 'active_cell')], [Input('zone_humide_unique','click_feature'), Input('tableau_des_zones', 'derived_viewport_row_ids')], prevent_initial_call=True) 
-def selection_cellule_tableau_des_zones(zone, tableau_zones_lignes):
+# @app.callback([Output('zhTable', 'data'), Output('zhTable', 'columns'), Output('siteTable', 'selected_cells')], [Input("siteTable", "selected_cells"), Input("siteLayer", "click_feature"), Input('siteTable', 'derived_viewport_row_ids')])
+# def maj_siteTable(cell, feature, sites_lignes):
+#     trigger = dash.callback_context.triggered[0]['prop_id']
+#     columns = [{'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat_zh'}]
+#     if trigger == '.':
+#         raise PreventUpdate
+#     if trigger == 'siteLayer.click_feature': 
+#         with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as fichier_json:
+#             site = json.loads(fichier_json.read())
+#             fichier_json.close()   
+#         ligne = sites_lignes.index(feature['properties']['id'])
+#         return [dict(zone['properties']) for zone in site['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns], [{'row': ligne, 'column':0}]
+#     if trigger == 'siteTable.selected_cells':
+#         with open('assets/sites/'+str(cell[0]['row_id'])+'.json', 'r') as fichier_json:
+#             site = json.loads(fichier_json.read())
+#             fichier_json.close()
+#         for elem in sites_json['features']:
+#             if elem['properties']['id'] == cell[0]['row_id']:
+#                 nom_site = elem['properties']['nom_site']
+#         return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns], cell
+
+@app.callback([Output('zhTable', 'active_cell')], [Input('zhLayer','click_feature'), Input('zhTable', 'derived_viewport_row_ids')], prevent_initial_call=True) 
+def zhTable(zone, tableau_zones_lignes):
     trigger = dash.callback_context.triggered[0]['prop_id']
     if trigger == '.':
         raise PreventUpdate
@@ -179,17 +192,30 @@ app.clientside_callback(
     else
         return {...hideout, selected_site: feature.properties.id}
     }""",
-    Output("zone_humide_unique", "hideout"),
-    Input("zone_humide_unique", "click_feature"),
+    Output("zhLayer", "hideout"),
+    Input("zhLayer", "click_feature"),
     State("siteLayer", "hideout")
     )
 
 app.clientside_callback(
     """function(hideout) {
-    return cachedData.siteTable.map(( feature, id) => ({nom_site: feature.properties.nom_site, id}));
+    return cachedData.siteTable.map((feature, id) => ({nom_site: feature.properties.nom_site, id}));
     }""",
     Output("siteTable", "data"),
     Input("siteLayer", "hideout"))
+
+app.clientside_callback(
+    """function(site, hideout) {
+        i = site.selected_site
+        console.log(i)
+        const nom = cachedData.siteTable[i].properties.nom_site
+    let table = cachedData.zhTable.map((feature, id) => ({surface: feature.surface, etat: feature.etat, id}))
+    return [table, [{"name": [nom, "surface"], "id": "surface"}, {"name": [nom, "état"], "id": "etat"}]];
+    }""",
+    Output("zhTable", "data"),
+    Output("zhTable", "columns"),
+    Input("siteLayer", "hideout"),
+    Input("zhLayer", "hideout"))
 
 if __name__ == '__main__':
     app.run_server(debug=True)
