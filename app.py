@@ -52,7 +52,7 @@ point_to_layer = assign("""function(feature, latlng, context){
 }""")
 
 # GeoJSON pour les sites
-carte_sites = dl.GeoJSON(id="carte_sites", url=app.get_asset_url('sites.json'), options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=assign("""
+carte_sites = dl.GeoJSON(id="carte_sites", data=sites_json, options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=assign("""
     (feature, layer) => {
         if(!feature.properties){
             return
@@ -119,6 +119,32 @@ app.layout = html.Div([
     ], style={'display':'flex', 'maxHeight': '50vh'}), html.Div(id='test')
 ])
 
+# @app.callback(Output('test', 'children'), Input('carte_sites', 'click_feature'))
+# def test(input):
+#     with open('assets/sites/'+str(input['properties']['id'])+'.json', 'r') as f:
+#         content = f.read()
+#         with open('assets/cachedData.js', 'r') as js_file:
+#             list_of_lines = js_file.readlines()
+#             list_of_lines[1] =  'siteTable : '+content+',\n'
+#             with open('assets/cachedData.js', 'w') as js_file:
+#                 js_file.writelines(list_of_lines)
+#             js_file.close()
+#         f.close()
+#     return 'ok'
+#================================================
+# app.clientside_callback(
+#     """
+#     function(data, cell, carte){
+#         const elem = L.DomUtil.get('parc')
+#         console.log(elem)
+#         const context = elem.getContext('2d')
+#         console.log(context)
+#         data.features.forEach(feature => {if(cell.row_id && feature.properties.id === cell.row_id){ dashExtensions.default.function2(feature, feature.geometry.coordinates, context)}})
+#     }
+#     """,
+#     Output('carte_sites', 'options'), Input('carte_sites', 'data'), Input('tableau_des_sites', 'active_cell'), Input('parc', 'children')
+# )
+#==============================================================================
 def trouve_le_centroid(id):
     for elem in sites_json['features']:
         if elem['properties']['id'] == id:
@@ -126,18 +152,6 @@ def trouve_le_centroid(id):
 
 def trouve_le_fichier_du_site(id):
     return app.get_asset_url('sites/'+str(id)+'.json')
-
-@app.callback([Output('zone_humide_unique', 'url'), Output('site_unique', 'center')], [Input('carte_sites', 'click_feature'), Input('tableau_des_sites', 'selected_cells')])
-def maj_carte_site_unique(feature, cell):
-    trigger = dash.callback_context.triggered[0]['prop_id']
-    if trigger == '.':
-        raise PreventUpdate
-    if trigger == 'carte_sites.click_feature':
-        id = feature['properties']['id']
-        return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
-    if trigger == 'tableau_des_sites.selected_cells':
-        id = cell[0]['row_id']
-        return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
 
 @app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns'), Output('tableau_des_sites', 'selected_cells')], [Input("tableau_des_sites", "selected_cells"), Input("carte_sites", "click_feature"), Input('tableau_des_sites', 'derived_viewport_row_ids')])
 def maj_tableau_des_sites(cell, feature, sites_lignes):
@@ -160,23 +174,26 @@ def maj_tableau_des_sites(cell, feature, sites_lignes):
                 nom_site = elem['properties']['nom_site']
         return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns], cell
 
-@app.callback([Output('tableau_des_zones', 'active_cell')], [Input('zone_humide_unique','click_feature'), Input('tableau_des_zones', 'derived_viewport_row_ids')]) 
+@app.callback([Output('tableau_des_zones', 'active_cell')], [Input('zone_humide_unique','click_feature'), Input('tableau_des_zones', 'derived_viewport_row_ids')], prevent_initial_call=True) 
 def selection_cellule_tableau_des_zones(zone, tableau_zones_lignes):
     trigger = dash.callback_context.triggered[0]['prop_id']
     if trigger == '.':
         raise PreventUpdate
     row = tableau_zones_lignes.index(zone['properties']['id'])
     return [{'row': row, 'column': 0}]
-
+#&& trigger === "tableau_des_sites.active_cell"
 app.clientside_callback(
-    """function(feature, hideout) {
-    if (feature == undefined) 
-        return hideout
+    """function(feature, cell, hideout) {
+    if (feature == undefined && dash_clientside.callback_context.triggered[0].prop_id === '.') 
+        return dash_clientside.no_update
+    else if (dash_clientside.callback_context.triggered[0].prop_id === "tableau_des_sites.active_cell" )
+        return {...hideout, selected_site: cell.row_id}
     else
         return {...hideout, selected_site: feature.properties.id}
     }""",
     Output("carte_sites", "hideout"),
     Input("carte_sites", "click_feature"),
+    Input("tableau_des_sites", "active_cell"),
     State("carte_sites", "hideout")
     )
 
