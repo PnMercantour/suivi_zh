@@ -153,18 +153,6 @@ def trouve_le_centroid(id):
 def trouve_le_fichier_du_site(id):
     return app.get_asset_url('sites/'+str(id)+'.json')
 
-# @app.callback([Output('zone_humide_unique', 'url'), Output('site_unique', 'center')], [Input('carte_sites', 'click_feature'), Input('tableau_des_sites', 'selected_cells')])
-# def maj_carte_site_unique(feature, cell):
-#     trigger = dash.callback_context.triggered[0]['prop_id']
-#     if trigger == '.':
-#         raise PreventUpdate
-#     if trigger == 'carte_sites.click_feature':
-#         id = feature['properties']['id']
-#         return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
-#     if trigger == 'tableau_des_sites.selected_cells':
-#         id = cell[0]['row_id']
-#         return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
-
 @app.callback([Output('tableau_des_zones', 'data'), Output('tableau_des_zones', 'columns'), Output('tableau_des_sites', 'selected_cells')], [Input("tableau_des_sites", "selected_cells"), Input("carte_sites", "click_feature"), Input('tableau_des_sites', 'derived_viewport_row_ids')])
 def maj_tableau_des_sites(cell, feature, sites_lignes):
     trigger = dash.callback_context.triggered[0]['prop_id']
@@ -196,8 +184,8 @@ def selection_cellule_tableau_des_zones(zone, tableau_zones_lignes):
 #&& trigger === "tableau_des_sites.active_cell"
 app.clientside_callback(
     """function(feature, cell, hideout) {
-    if (feature == undefined) 
-        return hideout
+    if (feature == undefined && dash_clientside.callback_context.triggered[0].prop_id === '.') 
+        return dash_clientside.no_update
     else if (dash_clientside.callback_context.triggered[0].prop_id === "tableau_des_sites.active_cell" )
         return {...hideout, selected_site: cell.row_id}
     else
