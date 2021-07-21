@@ -197,12 +197,11 @@ def selection_cellule_tableau_des_zones(zone, tableau_zones_lignes):
 app.clientside_callback(
     """function(feature, cell, hideout) {
     if (feature == undefined) 
-        {return hideout}
+        return hideout
     else if (dash_clientside.callback_context.triggered[0].prop_id === "tableau_des_sites.active_cell" )
-        {console.log("ok")
-        return {...hideout, selected_site: cell.row_id}}
+        return {...hideout, selected_site: cell.row_id}
     else
-        {return {...hideout, selected_site: feature.properties.id}}
+        return {...hideout, selected_site: feature.properties.id}
     }""",
     Output("carte_sites", "hideout"),
     Input("carte_sites", "click_feature"),
