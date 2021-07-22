@@ -46,22 +46,18 @@ siteLayer = dl.GeoJSON(url=app.get_asset_url('sites.json'), id="sites", options=
 """)))
 # Le layout
 app.layout = html.Div([
-    dl.Map(children=[baseLayer, siteLayer],
+    dl.Map(id='map', children=[baseLayer, siteLayer],
            center=[44.3, 7], zoom=9,
            style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"}),
     html.Div(id="site_selectionne"),
 ])
 
 app.clientside_callback(
-    """function(feature, hideout) {
-    if (feature == undefined) 
-        return hideout
-    else
-        return {...hideout, selected_site: feature.properties.id}
-    }""",
+    """(click_feature, click_lat_lng, hideout) => [{...hideout, selected_site: (click_feature)? click_feature.properties.id : -1}, null]""",
     Output("sites", "hideout"),
+    Output("sites", "click_feature"),
     Input("sites", "click_feature"),
+    Input("map", "click_lat_lng"),
     State("sites", "hideout"))
-
 if __name__ == '__main__':
     app.run_server(debug=True)
