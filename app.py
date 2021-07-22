@@ -1,18 +1,24 @@
 import os
+import plotly.express as px
 import dash
 import dash_html_components as html
+import dash_core_components as dcc
 import dash_leaflet as dl
 import dash_table
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from dash_extensions.javascript import assign
 from pathlib import Path
+import pandas
 from dotenv import load_dotenv
 import json
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 load_dotenv('.env/.env')
 
 app = dash.Dash(__name__)
+
+df = pandas.read_csv(
+    Path(Path(__file__).parent, 'assets', 'habitat.csv'))
 
 #assign(""" () => {let test = {}} """)
 #création d'un dictionaire pour les couleurs des polygones
@@ -117,8 +123,10 @@ app.layout = html.Div([
         center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
     html.Div([
         dl.Map(id="site_unique", children=[baseLayer, zhLayer]),
-        zhTable
-    ], style={'display':'flex', 'maxHeight': '50vh'}), html.Div(id='test')
+        zhTable,
+        dcc.Graph(id="pie-chart", figure=px.pie(df[df["id_zh"] == 374],
+              values='proportion', names='code'), style={"backgroundColor": "yellow"})
+    ], style={'display':'flex', 'flexWrap': 'wrap', 'maxHeight': '50vh'})
 ])
 
 def trouve_le_centroid(id):
@@ -216,6 +224,15 @@ app.clientside_callback(
     Output("zhTable", "columns"),
     Input("siteLayer", "hideout"),
     Input("zhLayer", "hideout"))
+
+@app.callback(
+    Output("pie-chart", "figure"),
+    Input("siteLayer", "hideout"))
+def generate_chart(hideout):
+    id_zh = hideout['selected_site']
+    print('callback', id_zh)
+    fig = px.pie(df[df["id_zh"] == id_zh], values='proportion', names='code')
+    return fig
 
 if __name__ == '__main__':
     app.run_server(debug=True)
