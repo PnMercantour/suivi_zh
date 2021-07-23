@@ -151,50 +151,39 @@ def maj_carte_site_unique(feature, cell, hideout):
         id = cell[0]['row_id']
         return {'display':'flex', 'flexWrap': 'wrap', 'maxHeight': '50vh'}, trouve_le_fichier_du_site(id), trouve_le_centroid(id)
 
-# @app.callback([Output('zhTable', 'data'), Output('zhTable', 'columns'), Output('siteTable', 'selected_cells')], [Input("siteTable", "selected_cells"), Input("siteLayer", "click_feature"), Input('siteTable', 'derived_viewport_row_ids')])
-# def maj_siteTable(cell, feature, sites_lignes):
+# @app.callback([Output('zhTable', 'active_cell')], [Input('zhLayer','click_feature'), Input('zhTable', 'derived_viewport_row_ids')], prevent_initial_call=True) 
+# def zhTable(zone, tableau_zones_lignes):
 #     trigger = dash.callback_context.triggered[0]['prop_id']
-#     columns = [{'name': 'surface', 'id': 'surface'}, {'name':'etat', 'id': 'etat_zh'}]
 #     if trigger == '.':
 #         raise PreventUpdate
-#     if trigger == 'siteLayer.click_feature': 
-#         with open('assets/sites/'+str(feature['properties']['id'])+'.json', 'r') as fichier_json:
-#             site = json.loads(fichier_json.read())
-#             fichier_json.close()   
-#         ligne = sites_lignes.index(feature['properties']['id'])
-#         return [dict(zone['properties']) for zone in site['features']], [{'name': [feature['properties']['nom_site'], column['name']], 'id': column['id']} for column in columns], [{'row': ligne, 'column':0}]
-#     if trigger == 'siteTable.selected_cells':
-#         with open('assets/sites/'+str(cell[0]['row_id'])+'.json', 'r') as fichier_json:
-#             site = json.loads(fichier_json.read())
-#             fichier_json.close()
-#         for elem in sites_json['features']:
-#             if elem['properties']['id'] == cell[0]['row_id']:
-#                 nom_site = elem['properties']['nom_site']
-#         return [dict(zone['properties'])for zone in site['features']], [{'name': [nom_site, column['name']], 'id': column['id']} for column in columns], cell
-
-@app.callback([Output('zhTable', 'active_cell')], [Input('zhLayer','click_feature'), Input('zhTable', 'derived_viewport_row_ids')], prevent_initial_call=True) 
-def zhTable(zone, tableau_zones_lignes):
-    trigger = dash.callback_context.triggered[0]['prop_id']
-    if trigger == '.':
-        raise PreventUpdate
-    row = tableau_zones_lignes.index(zone['properties']['id'])
-    return [{'row': row, 'column': 0}]
+#     row = tableau_zones_lignes.index(zone['properties']['id'])
+#     return [{'row': row, 'column': 0}]
 
 app.clientside_callback(
-    """function(feature, cell, click_lat_lng, hideout) {
+    """function(feature, cell, click_lat_lng, hideout, data) {
         if (feature == undefined && dash_clientside.callback_context.triggered[0].prop_id === '.') 
             return dash_clientside.no_update
         else if (dash_clientside.callback_context.triggered[0].prop_id === "siteTable.active_cell" )
-            return [{...hideout, selected_site: (cell)? cell.row_id : -1}, null] //[{'row': -1, 'column': 0}]
+            return [{...hideout, selected_site: (cell)? cell.row_id : -1}, null, cell]            
+        else if (dash_clientside.callback_context.triggered[0].prop_id === "siteLayer.click_feature" ){
+            for(const elem of data){
+                if(elem === feature.properties.id){
+                    return [{...hideout, selected_site: (feature)? feature.properties.id : -1}, null, {'row': data.indexOf(elem), 'column': 0}, [{'row': data.indexOf(elem), 'column': 0}]] 
+                }
+            }
+}        
         else
-            return [{...hideout, selected_site: (feature)? feature.properties.id : -1}, null] //, [{'row': -1, 'column': 0}]
+            return [{...hideout, selected_site: (feature)? feature.properties.id : -1}, null, null, []] //, [{'row': -1, 'column': 0}]
         }""",
     Output("siteLayer", "hideout"),
     Output("siteLayer", "click_feature"),
+    Output("siteTable", "active_cell"),
+    Output("siteTable", "selected_cells"),
     Input("siteLayer", "click_feature"),
     Input("siteTable", "active_cell"),
     Input("parc", "click_lat_lng"),
-    State("siteLayer", "hideout")
+    State("siteLayer", "hideout"),
+    State("siteTable", "derived_viewport_row_ids")
     )
 
 app.clientside_callback(
