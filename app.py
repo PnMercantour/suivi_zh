@@ -121,7 +121,7 @@ app.layout = html.Div([
     html.Div(
         dl.Map(id="parc", children = [baseLayer, siteLayer],
         center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
-    html.Div([
+    html.Div(id="div_zh",children=[
         dl.Map(id="site_unique", children=[baseLayer, zhLayer]),
         zhTable,
         dcc.Graph(id="pie-chart", figure=px.pie(df[df["id_zh"] == 374],
@@ -137,17 +137,19 @@ def trouve_le_centroid(id):
 def trouve_le_fichier_du_site(id):
     return app.get_asset_url('sites/'+str(id)+'.json')
 
-@app.callback([Output('zhLayer', 'url'), Output('site_unique', 'center')], [Input('siteLayer', 'click_feature'), Input('siteTable', 'selected_cells')])
-def maj_carte_site_unique(feature, cell):
+@app.callback([Output("div_zh", "style") ,Output('zhLayer', 'url'), Output('site_unique', 'center')], [Input('siteLayer', 'click_feature'), Input('siteTable', 'selected_cells'), State("siteLayer", "hideout")])
+def maj_carte_site_unique(feature, cell, hideout):
     trigger = dash.callback_context.triggered[0]['prop_id']
     if trigger == '.':
         raise PreventUpdate
+    if hideout['selected_site'] == -1:
+        return {'display': 'none'}, '', []
     if trigger == 'siteLayer.click_feature':
-        id = feature['properties']['id']
-        return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
+        id = hideout['selected_site']
+        return {'display':'flex', 'flexWrap': 'wrap', 'maxHeight': '50vh'}, trouve_le_fichier_du_site(id), trouve_le_centroid(id)
     if trigger == 'siteTable.selected_cells':
         id = cell[0]['row_id']
-        return trouve_le_fichier_du_site(id), trouve_le_centroid(id)
+        return {'display':'flex', 'flexWrap': 'wrap', 'maxHeight': '50vh'}, trouve_le_fichier_du_site(id), trouve_le_centroid(id)
 
 @app.callback([Output('zhTable', 'active_cell')], [Input('zhLayer','click_feature'), Input('zhTable', 'derived_viewport_row_ids')], prevent_initial_call=True) 
 def zhTable(zone, tableau_zones_lignes):
@@ -158,24 +160,26 @@ def zhTable(zone, tableau_zones_lignes):
     return [{'row': row, 'column': 0}]
 
 app.clientside_callback(
-    """function(feature, cell, hideout) {
-    if (feature == undefined && dash_clientside.callback_context.triggered[0].prop_id === '.') 
-        return dash_clientside.no_update
-    else if (dash_clientside.callback_context.triggered[0].prop_id === "siteTable.active_cell" )
-        return {...hideout, selected_site: cell.row_id}
-    else
-        return {...hideout, selected_site: feature.properties.id}
-    }""",
+    """function(feature, cell, click_lat_lng, hideout) {
+        if (feature == undefined && dash_clientside.callback_context.triggered[0].prop_id === '.') 
+            return dash_clientside.no_update
+        else if (dash_clientside.callback_context.triggered[0].prop_id === "siteTable.active_cell" )
+            return [{...hideout, selected_site: (cell)? cell.row_id : -1}, null] //[{'row': -1, 'column': 0}]
+        else
+            return [{...hideout, selected_site: (feature)? feature.properties.id : -1}, null] //, [{'row': -1, 'column': 0}]
+        }""",
     Output("siteLayer", "hideout"),
+    Output("siteLayer", "click_feature"),
     Input("siteLayer", "click_feature"),
     Input("siteTable", "active_cell"),
+    Input("parc", "click_lat_lng"),
     State("siteLayer", "hideout")
     )
 
 app.clientside_callback(
     """function(feature, hideout) {
     if (feature == undefined) 
-        return hideout
+        return dash_clientside.no_update
     else
         return {...hideout, selected_site: feature.properties.id}
     }""",
@@ -194,10 +198,10 @@ app.clientside_callback(
 app.clientside_callback(
     """function(site, hideout) {
         i = site.selected_site
-        console.log(i)
         const nom = cachedData.siteTable[i].properties.nom_site
-    let table = cachedData.zhTable.map((feature, id) => ({surface: feature.surface, etat: feature.etat, id}))
-    return [table, [{"name": [nom, "surface"], "id": "surface"}, {"name": [nom, "état"], "id": "etat"}]];
+        let table = cachedData.zhTable.map((feature, id) => ({surface: feature.surface, etat: feature.etat, id}))
+        cachedData.zhTable = []
+        return [table, [{"name": [nom, "surface"], "id": "surface"}, {"name": [nom, "état"], "id": "etat"}]];
     }""",
     Output("zhTable", "data"),
     Output("zhTable", "columns"),
@@ -206,10 +210,9 @@ app.clientside_callback(
 
 @app.callback(
     Output("pie-chart", "figure"),
-    Input("siteLayer", "hideout"))
+    Input("zhLayer", "hideout"))
 def generate_chart(hideout):
     id_zh = hideout['selected_site']
-    print('callback', id_zh)
     fig = px.pie(df[df["id_zh"] == id_zh], values='proportion', names='code')
     return fig
 
