@@ -168,8 +168,7 @@ app.clientside_callback(
         else if (dash_clientside.callback_context.triggered[0].prop_id === "siteLayer.click_feature" ){
             for(const elem of data){
                 if(elem === feature.properties.id){
-                    console.log(elem)
-                    return [{...hideout, selected_site: (feature)? feature.properties.id : -1}, null, {'row': elem-1, 'column': 0}, [{'row': elem-1, 'column': 0}]] 
+                    return [{...hideout, selected_site: (feature)? feature.properties.id : -1}, null, {'row': data.indexOf(elem), 'column': 0}, [{'row': data.indexOf(elem), 'column': 0}]] 
                 }
             }
 }        
