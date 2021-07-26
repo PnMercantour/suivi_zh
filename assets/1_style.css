@@ -13,6 +13,10 @@ body {
     margin-right: 5vh;  
 }
 
-#tableau_des_sites, #tableau_des_zones, #site_unique, #parc {
+#siteTable {
+    min-width: 50vh;
+}
+
+#siteTable, #zhTable, #zhLayer, #parc, #pie-chart {
     box-shadow: 3px 3px 3px lightgrey;
 }
