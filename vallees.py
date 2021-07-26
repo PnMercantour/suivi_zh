@@ -50,7 +50,7 @@ sitePointToLayer = assign("""function(feature, latlng, context){
         if (feature.properties.id == context.props.hideout.id) {
             circleOptions= {color: "red", fillColor: "red", fillOpacity: 0.8};
         } else if (feature.properties.id_vallee == context.props.hideout.id_vallee) {
-            circleOptions= {color: "blue", fillColor: "blue", fillOpacity:0.5};
+            circleOptions= {color: "red", fillColor: "blue"};
         } else {
             circleOptions= {color: "blue"};
         }
