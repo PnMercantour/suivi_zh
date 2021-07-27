@@ -2,6 +2,7 @@ import os
 import dash
 import dash_html_components as html
 import dash_leaflet as dl
+import dash_table
 from dash.dependencies import Input, Output, State
 from dash_extensions.javascript import assign
 from dotenv import load_dotenv
@@ -34,30 +35,56 @@ point_to_layer = assign("""function(feature, latlng, context){
     return L.circleMarker(latlng, circleOptions)  // send a simple circle marker.
 }""")
 
-siteLayer = dl.GeoJSON(url=app.get_asset_url('sites.json'), id="sites", options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=assign("""
+siteLayer = dl.GeoJSON(url=app.get_asset_url('sites.json'), id="siteLayer", options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=assign("""
 (feature, layer) => {
     if(!feature.properties){
         return
     }
+    cachedData.siteTable[feature.properties.id] = feature;
     if(feature.properties.nom_site){
         layer.bindTooltip(feature.properties.nom_site)
     }
 }
 """)))
+
+siteTable = dash_table.DataTable(
+    id='siteTable',
+    columns=[{"name": "Site", "id": "nom_site"}],
+    data=[],
+    sort_action='native',
+    filter_action='native',
+    style_data_conditional=[
+        {'if': {'row_index': 'odd'},
+         'backgroundColor': 'rgb(248, 248, 248)'
+         }
+    ]
+)
 # Le layout
 app.layout = html.Div([
-    dl.Map(id='map', children=[baseLayer, siteLayer],
+    dl.Map(children=[baseLayer, siteLayer],
            center=[44.3, 7], zoom=9,
            style={'width': '100%', 'height': '50vh', 'margin': "auto", "display": "block"}),
-    html.Div(id="site_selectionne"),
+    html.Div(siteTable)
 ])
 
 app.clientside_callback(
-    """(click_feature, click_lat_lng, hideout) => [{...hideout, selected_site: (click_feature)? click_feature.properties.id : -1}, null]""",
-    Output("sites", "hideout"),
-    Output("sites", "click_feature"),
-    Input("sites", "click_feature"),
-    Input("map", "click_lat_lng"),
-    State("sites", "hideout"))
+    """function(feature, hideout) {
+    if (feature == undefined)
+        return hideout
+    else
+        return {...hideout, selected_site: feature.properties.id}
+    }""",
+    Output("siteLayer", "hideout"),
+    Input("siteLayer", "click_feature"),
+    State("siteLayer", "hideout"))
+
+
+app.clientside_callback(
+    """function(hideout) {
+    return cachedData.siteTable.map(( feature, id) => ({nom_site: feature.properties.nom_site, id}));
+    }""",
+    Output("siteTable", "data"),
+    Input("siteLayer", "hideout"))
+
 if __name__ == '__main__':
     app.run_server(debug=True)

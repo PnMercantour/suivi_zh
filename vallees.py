@@ -121,7 +121,7 @@ app.clientside_callback(
   click_lat_lng,
   hideout
 ) {
-  console.log(vallee_feature);
+  console.log(dash_clientside.callback_context);
   const triggers = dash_clientside.callback_context.triggered;
   if (triggers.some((o) => o.prop_id == "siteLayer.click_feature")){
     // update "site" and "vallee"

@@ -10,7 +10,7 @@ from dash_extensions.javascript import assign, arrow_function
 from dotenv import load_dotenv
 import json
 
-load_dotenv('.env')
+load_dotenv('.env/.env')
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
