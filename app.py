@@ -231,7 +231,7 @@ app.clientside_callback(
     """function(hideout, id_vallee) {
         let res = cachedData.siteTable.map((feature, id) => ({nom_site: feature.properties.nom_site, id_vallee: feature.properties.id_vallee, id}))
         if (id_vallee !== null) {
-            return res.filter(elem => elem.id_vallee == id_vallee)
+            return res.filter(elem => elem.id_vallee === id_vallee)
         }
         else
             return res
