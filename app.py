@@ -188,32 +188,69 @@ def maj_carte_site_unique(feature, cell, hideout):
 #     return [{'row': row, 'column': 0}]
 
 app.clientside_callback(
-    """function(feature, cell, click_lat_lng, hideout, data) {
-        const triggers = dash_clientside.callback_context.triggered
-        if (feature == undefined && dash_clientside.callback_context.triggered[0].prop_id === '.') 
-            return dash_clientside.no_update
-        else if (triggers.some((o) => o.prop_id == "siteTable.active_cell"))
-            return [{...hideout, selected_site: (cell)? cell.row_id : -1}, null, cell]            
-        else if (triggers.some((o) => o.prop_id == "siteLayer.click_feature")){
-            for(const elem of data){
-                if(elem === feature.properties.id){
-                    return [{...hideout, selected_site: (feature)? feature.properties.id : -1}, null, {'row': data.indexOf(elem), 'column': 0}, [{'row': data.indexOf(elem), 'column': 0}]] 
-                }
+"""function(site_feature, 
+    vallee_feature, 
+    cell, 
+    click_lat_lng, 
+    dropdown_value, 
+    hideout, 
+    data){
+    const trigger = dash_clientside.callback_context.triggered
+    let return_hideout = {}
+    let return_siteLayer_clickfeature = site_feature
+    let return_valleeLayer_clickfeature = vallee_feature
+    let return_active_cell = {}
+    let return_selected_cells = []
+    let return_siteTable_data = []
+    let cached_data_site = cachedData.siteTable.map((feature, id) => ({nom_site: feature.properties.nom_site, id_vallee: feature.properties.id_vallee, id}))
+    if (trigger.some((o) => o.prop_id == "siteTable.active_cell")){
+        return_hideout = {...hideout, selected_site: (cell)? cell.row_id : null}
+        return_siteLayer_clickfeature = null
+        return_active_cell = cell
+    }
+    if (trigger.some((o) => o.prop_id == "siteLayer.click_feature")){
+        for(const elem of data){
+            if(elem === site_feature.properties.id){
+                return_hideout = {...hideout, selected_site: (site_feature)? site_feature.properties.id : null}
+                return_siteLayer_clickfeature = null
+                return_active_cell = {'row': data.indexOf(elem), 'column': 0}
+                return_selected_cells = [{'row': data.indexOf(elem), 'column': 0}]
             }
-}        
-        else
-            return [{...hideout, selected_site: (feature)? feature.properties.id : -1}, null, null, []] //, [{'row': -1, 'column': 0}]
-        }""",
+        }
+    }
+    if (trigger.some((o) => o.prop_id == "valleeLayer.click_feature")) {
+            return_hideout = {...hideout, selected_site: undefined, id_vallee: vallee_feature.properties.id}
+            return_siteLayer_clickfeature = null
+            return_valleeLayer_clickfeature = cachedData.valleeTable[vallee_feature.properties.id]
+    }
+    if (trigger.some((o) => o.prop_id == "map.click_lat_lng")){
+        return_hideout = {id: undefined, id_vallee: undefined}
+        return_active_cell = null
+        return_selected_cells = null
+    }
+    if (trigger.some((o) => o.prop_id == "vallée_dropdown.value") && dropdown_value !== null) {
+        return_siteTable_data = cached_data_site.filter((elem) => elem.id_vallee === dropdown_value+1)
+    }
+    else{
+        return_siteTable_data = cached_data_site
+    }
+    console.log([return_hideout, return_siteLayer_clickfeature, return_valleeLayer_clickfeature, return_active_cell, return_selected_cells, return_siteTable_data])
+    return [return_hideout, return_siteLayer_clickfeature, return_valleeLayer_clickfeature, return_active_cell, return_selected_cells, return_siteTable_data]
+}""",        
     Output("siteLayer", "hideout"),
     Output("siteLayer", "click_feature"),
+    Output("valleeLayer", 'click_feature'),
     Output("siteTable", "active_cell"),
     Output("siteTable", "selected_cells"),
+    Output("siteTable", "data"),
     Input("siteLayer", "click_feature"),
+    Input("valleeLayer", "click_feature"),
     Input("siteTable", "active_cell"),
     Input("parc", "click_lat_lng"),
+    Input('vallée_dropdown', 'value'),
     State("siteLayer", "hideout"),
     State("siteTable", "derived_viewport_row_ids")
-    )
+)
 
 app.clientside_callback(
     """function(feature, hideout) {
@@ -227,31 +264,31 @@ app.clientside_callback(
     State("siteLayer", "hideout")
     )
 
-app.clientside_callback(
-    """function(hideout, id_vallee) {
-        let res = cachedData.siteTable.map((feature, id) => ({nom_site: feature.properties.nom_site, id_vallee: feature.properties.id_vallee, id}))
-        if (id_vallee !== null) {
-            return res.filter(elem => elem.id_vallee === id_vallee)
-        }
-        else
-            return res
-    }""",
-    Output("siteTable", "data"),
-    Input("siteLayer", "hideout"),
-    Input('vallée_dropdown', 'value'))
+# app.clientside_callback(
+#     """function(hideout, id_vallee) {
+#         let res = cachedData.siteTable.map((feature, id) => ({nom_site: feature.properties.nom_site, id_vallee: feature.properties.id_vallee, id}))
+#         if (id_vallee !== null) {
+#             return res.filter(elem => elem.id_vallee === id_vallee)
+#         }
+#         else
+#             return res
+#     }""",
+#     Output("siteTable", "data"),
+#     Input("siteLayer", "hideout"),
+#     Input('vallée_dropdown', 'value'))
 
-app.clientside_callback(
-    """function(site, hideout) {
-        i = site.selected_site
-        const nom = cachedData.siteTable[i].properties.nom_site
-        let table = cachedData.zhTable.map((feature, id) => ({surface: feature.surface, etat: feature.etat, id}))
-        cachedData.zhTable = []
-        return [table, [{"name": [nom, "surface"], "id": "surface"}, {"name": [nom, "état"], "id": "etat"}]];
-    }""",
-    Output("zhTable", "data"),
-    Output("zhTable", "columns"),
-    Input("siteLayer", "hideout"),
-    Input("zhLayer", "hideout"))
+# app.clientside_callback(
+#     """function(site, hideout) {
+#         i = site.selected_site
+#         const nom = cachedData.siteTable[i].properties.nom_site
+#         let table = cachedData.zhTable.map((feature, id) => ({surface: feature.surface, etat: feature.etat, id}))
+#         cachedData.zhTable = []
+#         return [table, [{"name": [nom, "surface"], "id": "surface"}, {"name": [nom, "état"], "id": "etat"}]];
+#     }""",
+#     Output("zhTable", "data"),
+#     Output("zhTable", "columns"),
+#     Input("siteLayer", "hideout"),
+#     Input("zhLayer", "hideout"))
 
 @app.callback(
     Output("pie-chart", "figure"),
