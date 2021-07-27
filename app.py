@@ -47,6 +47,12 @@ with open(Path(Path(__file__).parent, 'assets', 'sites.json'), 'r') as fichier:
     sites_json = json.loads(fichier.read())
     fichier.close()
 
+# Charger le nom des vallées
+with open(Path(Path(__file__).parent, 'assets', 'vallees.json'), 'r') as fichier:
+    vallees_json = json.loads(fichier.read())
+    noms_vallees = [elem['properties']['nom'] for elem in vallees_json['features']]
+    fichier.close()
+
 point_to_layer = assign("""function(feature, latlng, context){
     if (context.props.hideout && feature.properties.id == context.props.hideout.selected_site) {
         circleOptions= {color: "red", fillColor: "red", fillOpacity: 0.8};
@@ -57,7 +63,10 @@ point_to_layer = assign("""function(feature, latlng, context){
 }""")
 
 # GeoJSON pour les sites
-siteLayer = dl.GeoJSON(id="siteLayer", url=app.get_asset_url('sites.json'), options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=assign("""
+siteLayer = dl.GeoJSON(id="siteLayer", 
+    url=app.get_asset_url('sites.json'), 
+    hideout={'selected_site':None, 'selected_vallee':None}, 
+    options=dict(pointToLayer=point_to_layer, onEachFeature=assign("""
     (feature, layer) => {
         if(!feature.properties){
             return
@@ -69,7 +78,25 @@ siteLayer = dl.GeoJSON(id="siteLayer", url=app.get_asset_url('sites.json'), opti
 }
 """)))
 
-zhLayer = dl.GeoJSON(id='zhLayer', options=dict(pointToLayer=point_to_layer, hideout=dict(selected_site=-1), onEachFeature=fonction_couleur_carte, style=js_style), zoomToBounds=True)
+zhLayer = dl.GeoJSON(id='zhLayer', 
+    hideout={'selected_site':None}, 
+    options=dict(pointToLayer=point_to_layer, onEachFeature=fonction_couleur_carte, style=js_style), 
+    zoomToBounds=True)
+
+valleeLayer = dl.GeoJSON(
+    url=app.get_asset_url('vallees.json'),
+    id="valleeLayer",
+    options=dict(onEachFeature=assign("""
+(feature, layer) => {
+    if(!feature.properties){
+        return
+    }
+    cachedData.valleeTable[feature.properties.id] = feature;
+    if(feature.properties.nom){
+        layer.bindTooltip(feature.properties.nom)
+    }
+}
+""")))
 
 zhTable = dash_table.DataTable(
             id='zhTable',
@@ -87,7 +114,7 @@ zhTable = dash_table.DataTable(
 siteTable = dash_table.DataTable(
         id='siteTable',
         columns=[{"name": "nom_site", "id": "nom_site"}],
-        data=[{'nom_site':index['properties']}['nom_site'] for index in sites_json['features']],
+        data=[], #{'nom_site':index['properties']}['nom_site'] for index in sites_json['features']
         sort_action='native',
         filter_action='native',
         style_data_conditional=[
@@ -116,10 +143,11 @@ baseLayer = dl.TileLayer(url="https://wxs.ign.fr/" + os.getenv('IGN_KEY') + "/wm
 # Le layout
 app.layout = html.Div([
     html.Div([
+        dcc.Dropdown(id='vallée_dropdown', options=[{'label': nom, 'value': noms_vallees.index(nom)} for nom in noms_vallees], value=None),
         siteTable
     ],style={'float':'left', 'paddingRight': '5vh'}),
     html.Div(
-        dl.Map(id="parc", children = [baseLayer, siteLayer],
+        dl.Map(id="parc", children = [baseLayer, siteLayer, valleeLayer],
         center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
     html.Div(id="div_zh",children=[
         dl.Map(id="site_unique", children=[baseLayer, zhLayer]),
@@ -142,11 +170,11 @@ def maj_carte_site_unique(feature, cell, hideout):
     trigger = dash.callback_context.triggered[0]['prop_id']
     if trigger == '.':
         raise PreventUpdate
-    if hideout['selected_site'] == -1:
-        return {'display': 'none'}, '', []
+    # if hideout['selected_site'] == None:
+    #     return {'display': 'none'}, '', []
     if trigger == 'siteLayer.click_feature':
         id = hideout['selected_site']
-        return {'display':'flex', 'flexWrap': 'wrap', 'maxHeight': '50vh'}, trouve_le_fichier_du_site(id), trouve_le_centroid(id)
+        return {'display':'flex', 'flexWrap': 'wrap', 'maxHeight': '50vh'}, trouve_le_fichier_du_site(id), trouve_le_centroid(id) #features['geometry']['coordinates']
     if trigger == 'siteTable.selected_cells':
         id = cell[0]['row_id']
         return {'display':'flex', 'flexWrap': 'wrap', 'maxHeight': '50vh'}, trouve_le_fichier_du_site(id), trouve_le_centroid(id)
@@ -161,11 +189,12 @@ def maj_carte_site_unique(feature, cell, hideout):
 
 app.clientside_callback(
     """function(feature, cell, click_lat_lng, hideout, data) {
+        const triggers = dash_clientside.callback_context.triggered
         if (feature == undefined && dash_clientside.callback_context.triggered[0].prop_id === '.') 
             return dash_clientside.no_update
-        else if (dash_clientside.callback_context.triggered[0].prop_id === "siteTable.active_cell" )
+        else if (triggers.some((o) => o.prop_id == "siteTable.active_cell"))
             return [{...hideout, selected_site: (cell)? cell.row_id : -1}, null, cell]            
-        else if (dash_clientside.callback_context.triggered[0].prop_id === "siteLayer.click_feature" ){
+        else if (triggers.some((o) => o.prop_id == "siteLayer.click_feature")){
             for(const elem of data){
                 if(elem === feature.properties.id){
                     return [{...hideout, selected_site: (feature)? feature.properties.id : -1}, null, {'row': data.indexOf(elem), 'column': 0}, [{'row': data.indexOf(elem), 'column': 0}]] 
@@ -199,11 +228,17 @@ app.clientside_callback(
     )
 
 app.clientside_callback(
-    """function(hideout) {
-    return cachedData.siteTable.map((feature, id) => ({nom_site: feature.properties.nom_site, id}));
+    """function(hideout, id_vallee) {
+        let res = cachedData.siteTable.map((feature, id) => ({nom_site: feature.properties.nom_site, id_vallee: feature.properties.id_vallee, id}))
+        if (id_vallee !== null) {
+            return res.filter(elem => elem.id_vallee == id_vallee)
+        }
+        else
+            return res
     }""",
     Output("siteTable", "data"),
-    Input("siteLayer", "hideout"))
+    Input("siteLayer", "hideout"),
+    Input('vallée_dropdown', 'value'))
 
 app.clientside_callback(
     """function(site, hideout) {
