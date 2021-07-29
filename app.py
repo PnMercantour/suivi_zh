@@ -24,7 +24,7 @@ df = pandas.read_csv(
 #création d'un dictionaire pour les couleurs des polygones
 js_style = assign("""
 function(feature, context) {
-    if (context.props.hideout && feature.properties.id == context.props.hideout.selected_site) {return {color:"#000000"}}
+    if (context.props.hideout && feature.properties.id == context.props.hideout.selected_zone) {return {color:"#000000"}}
     else {
         let t = {bon: "#1E90FF", moyen: "#FF7F50", mauvais: "#FF4500"};
         return {color: t[feature.properties.etat_zh]}}
@@ -164,46 +164,48 @@ app.layout = html.Div([
 ])
 
 app.clientside_callback(
-    """function(site_feature, cell, dropdown_value, hideout, data) {
+    """function(site_feature, vallee_feature, click_lat_lng, cell, dropdown_value, hideout, data) {
         let dropdown_options = []
         cachedData.valleeTable.forEach((elem) => dropdown_options.push({label: elem.properties.nom, value: elem.properties.id}))
         const triggers = dash_clientside.callback_context.triggered
         let return_hideout = {selected_site: null, selected_vallee: null}
-        let return_click_feature = site_feature
         let return_active_cell = {'row': -1, 'column': 0}
         let return_selected_cells = []
         const objet_data = cachedData.siteTable.map((feature, id) => ({nom_site: feature.properties.nom_site, id_vallee: feature.properties.id_vallee, id}))
         let return_siteTable_data = dropdown_value ? objet_data.filter((elem) => (elem.id_vallee === dropdown_value)) : objet_data
         let return_zhLayer_url = "assets/sites/"
-        let return_zhLayer_hideout = {selected_site: null, nom_site: null}
         if(triggers.some((o) => o.prop_id === "siteLayer.click_feature")){
-            return_hideout = {selected_site: site_feature.properties.id, selected_vallee: site_feature.properties.id_vallee}
+            return_hideout = {selected_site: site_feature.properties.id, selected_vallee: site_feature.properties.id_vallee, nom_site: site_feature.properties.nom_site}
             data.forEach(elem => {if(elem === site_feature.properties.id) return_active_cell = {'row': data.indexOf(elem), 'column': 0}})
             return_zhLayer_url += site_feature.properties.id+".json"
-            return_zhLayer_hideout = {selected_site: site_feature.properties.id, nom_site: site_feature.properties.nom_site}
+            return_vallee_feature = cachedData.valleeTable[site_feature.properties.id_vallee]
+        }
+        if(triggers.some((o) => o.prop_id === "valleeLayer.click_feature")) {
+            return_hideout = {selected_site: null, selected_vallee: vallee_feature.properties.id}
         }
         if(triggers.some((o) => o.prop_id === "siteTable.active_cell")){
             cachedData.siteTable.forEach((site) => {
                 if(site.properties.id === cell.row_id){
-                    return_hideout = {selected_site: cell.row_id, selected_vallee: site.properties.id_vallee }
+                    return_hideout = {selected_site: cell.row_id, selected_vallee: site.properties.id_vallee, nom_site: site.properties.nom_site}
                     return_active_cell = cell
                 }
             })
             return_zhLayer_url += cell.row_id+".json"
-            return_zhLayer_hideout = {selected_site: cell.row_id, nom_site: cachedData.siteTable.filter((site) => site.properties.id === cell.row_id)[0].properties.nom_site}
         }
     
-        return [return_hideout, site_feature, return_active_cell, return_selected_cells, return_siteTable_data, return_zhLayer_url, return_zhLayer_hideout, dropdown_options]
+        return [return_hideout, {}, {}, return_active_cell, return_selected_cells, return_siteTable_data, return_zhLayer_url, dropdown_options]
     }""",
     Output("siteLayer", "hideout"),
     Output("siteLayer", "click_feature"),
+    Output("valleeLayer", "click_feature"),
     Output("siteTable", "active_cell"),
     Output("siteTable", "selected_cells"),
     Output("siteTable", "data"),
     Output("zhLayer", "url"),
-    Output("zhLayer", "hideout"),
     Output("vallee_dropdown", "options"),
     Input("siteLayer", "click_feature"),
+    Input("valleeLayer", "click_feature"),
+    Input("parc", "click_lat_lng"),
     Input("siteTable", "active_cell"),
     Input("vallee_dropdown", "value"),
     State("siteLayer", "hideout"),
@@ -212,44 +214,26 @@ app.clientside_callback(
 
 app.clientside_callback(
     """
-    function(hideout){
-        console.log(cachedData.zhTable)
-        const zhTable_data = cachedData.zhTable.map((feature, id) => ({surface: feature.surface, etat: feature.etat, id}))
+    function(zhfeature, hideout, data){
+        data = []
+        cachedData.zhTable.map((feature, id) => data.push({surface: feature.surface, etat: feature.etat, id}))
+        const triggers = dash_clientside.callback_context.triggered
+        let return_hideout = hideout
+        if(triggers.some((o) => o.prop_id === "zhLayer.click_feature")){
+            return_hideout = {...return_hideout, selected_zone: zhfeature.properties.id}
+        }
         const zhTable_columns = [{"name": [hideout.nom_site, "surface"], "id": "surface"}, {"name": [hideout.nom_site, "état"], "id": "etat"}]
         cachedData.zhTable = []
-        console.log(cachedData.zhTable)
-        return [zhTable_data, zhTable_columns]
+        return [data, zhTable_columns, return_hideout]
     }
     """,
     Output("zhTable", "data"),
     Output("zhTable", "columns"),
-    Input("zhLayer", "hideout"),
+    Output("zhLayer", "hideout"),
+    Input("zhLayer", "click_feature"),
+    Input("siteLayer", "hideout"),
+    Input("zhTable", "data"),
 )
-
-# app.clientside_callback(
-#     """function(feature, hideout) {
-#     if (feature == undefined) 
-#         return dash_clientside.no_update
-#     else
-#         return {...hideout, selected_site: feature.properties.id}
-#     }""",
-#     Output("zhLayer", "hideout"),
-#     Input("zhLayer", "click_feature"),
-#     State("siteLayer", "hideout")
-#    )
-
-# app.clientside_callback(
-#     """function(site, hideout) {
-#         i = site.selected_site
-#         const nom = cachedData.siteTable[i].properties.nom_site
-#         let table = cachedData.zhTable.map((feature, id) => ({surface: feature.surface, etat: feature.etat, id}))
-#         cachedData.zhTable = []
-#         return [table, [{"name": [nom, "surface"], "id": "surface"}, {"name": [nom, "état"], "id": "etat"}]];
-#     }""",
-#     Output("zhTable", "data"),
-#     Output("zhTable", "columns"),
-#     Input("siteLayer", "hideout"),
-#     Input("zhLayer", "hideout"))
 
 # @app.callback(
 #     Output("pie-chart", "figure"),
