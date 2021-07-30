@@ -20,3 +20,13 @@ body {
 #siteTable, #zhTable, #zhLayer, #parc, #pie-chart {
     box-shadow: 3px 3px 3px lightgrey;
 }
+
+#dropdownDiv {
+    display: flex;
+    flex-grow: 1;
+    justify-content: space-around;
+}
+
+#valleeDropdown, #siteDropdown {
+    min-width: 40vh;
+}
