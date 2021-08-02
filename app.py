@@ -20,6 +20,14 @@ app = dash.Dash(__name__)
 df = pandas.read_csv(
     Path(Path(__file__).parent, 'assets', 'habitat.csv'))
 
+def featurePropertiesFromJson(kind):
+    with open(Path(Path(__file__).parent, 'assets', f'{kind}.json'), 'r') as file:
+        json_data = json.load(file)
+        return [feature['properties'] for feature in json_data['features']]
+
+# keep all site options in memory
+site__feature_properties = featurePropertiesFromJson('sites')
+
 #assign(""" () => {let test = {}} """)
 #création d'un dictionaire pour les couleurs des polygones
 js_style = assign("""
@@ -41,11 +49,6 @@ fonction_couleur_carte = assign("""
     }
 }
 """)
-
-# Chargement de sites.json utilisation pour les données du tableaux des sites
-with open(Path(Path(__file__).parent, 'assets', 'sites.json'), 'r') as fichier:
-    sites_json = json.loads(fichier.read())
-    fichier.close()
 
 sitePointToLayer = assign("""function(feature, latlng, context){
     if (context.props.hideout) {
@@ -117,18 +120,18 @@ zhTable = dash_table.DataTable(
         ], page_size=10,  merge_duplicate_headers=True,
 )
 
-siteTable = dash_table.DataTable(
-        id='siteTable',
-        columns=[{"name": "nom_site", "id": "nom_site"}],
-        data=[{'nom_site':index['properties']}['nom_site'] for index in sites_json['features']],
-        sort_action='native',
-        filter_action='native',
-        style_data_conditional=[
-            {'if': {'row_index': 'odd'},
-            'backgroundColor': 'rgb(248, 248, 248)'
-            }
-        ]
-)
+# siteTable = dash_table.DataTable(
+#         id='siteTable',
+#         columns=[{"name": "nom_site", "id": "nom_site"}],
+#         data=[{'nom_site':index}['nom_site'] for index in site__feature_properties],
+#         sort_action='native',
+#         filter_action='native',
+#         style_data_conditional=[
+#             {'if': {'row_index': 'odd'},
+#             'backgroundColor': 'rgb(248, 248, 248)'
+#             }
+#         ]
+# )
 
 # Création de la dataframe, un tableau passé en paramètre de dl.Map dans le layout
 # Le fond de carte
@@ -148,15 +151,15 @@ baseLayer = dl.TileLayer(url="https://wxs.ign.fr/" + os.getenv('IGN_KEY') + "/wm
 
 # Le layout
 app.layout = html.Div([
-    html.Div([
-        dcc.Dropdown(id="vallee_dropdown"),
-        siteTable
-    ],style={'float':'left', 'paddingRight': '5vh'}),
+    html.Div(id="dropdownDiv", children=[
+        dcc.Dropdown(id="valleeDropdown", options = [{'label': property['nom'], 'value': property['id']} for property in featurePropertiesFromJson('vallees')]), 
+        dcc.Dropdown(id="siteDropdown")
+    ]),
     html.Div(
         dl.Map(id="parc", children = [baseLayer, valleeLayer, siteLayer],
         center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
     html.Div(id="div_zh",children=[
-        dl.Map(id="site_unique", children=[baseLayer, zhLayer]),
+        dl.Map(id="site_unique", children=[baseLayer, zhLayer], center=[44.3, 7]),
         zhTable,
         dcc.Graph(id="pie-chart", figure=px.pie(df[df["id_zh"] == 374],
               values='proportion', names='code'), style={"backgroundColor": "yellow"})
@@ -164,76 +167,80 @@ app.layout = html.Div([
 ])
 
 app.clientside_callback(
-    """function(site_feature, vallee_feature, click_lat_lng, cell, dropdown_value, hideout, data) {
-        let dropdown_options = []
-        cachedData.valleeTable.forEach((elem) => dropdown_options.push({label: elem.properties.nom, value: elem.properties.id}))
+    """function(dropdown_value, valleeDropdown_value, site_feature, vallee_feature, click_lat_lng, hideout) {
         const triggers = dash_clientside.callback_context.triggered
         let return_hideout = {selected_site: null, selected_vallee: null}
         let return_active_cell = {'row': -1, 'column': 0}
-        let return_selected_cells = []
-        const objet_data = cachedData.siteTable.map((feature, id) => ({nom_site: feature.properties.nom_site, id_vallee: feature.properties.id_vallee, id}))
-        let return_siteTable_data = dropdown_value ? objet_data.filter((elem) => (elem.id_vallee === dropdown_value)) : objet_data
         let return_zhLayer_url = "assets/sites/"
+        let return_valleeDropdown_value
         if(triggers.some((o) => o.prop_id === "siteLayer.click_feature")){
             return_hideout = {selected_site: site_feature.properties.id, selected_vallee: site_feature.properties.id_vallee, nom_site: site_feature.properties.nom_site}
-            data.forEach(elem => {if(elem === site_feature.properties.id) return_active_cell = {'row': data.indexOf(elem), 'column': 0}})
             return_zhLayer_url += site_feature.properties.id+".json"
             return_vallee_feature = cachedData.valleeTable[site_feature.properties.id_vallee]
         }
         if(triggers.some((o) => o.prop_id === "valleeLayer.click_feature")) {
             return_hideout = {selected_site: null, selected_vallee: vallee_feature.properties.id}
         }
-        if(triggers.some((o) => o.prop_id === "siteTable.active_cell")){
-            cachedData.siteTable.forEach((site) => {
-                if(site.properties.id === cell.row_id){
-                    return_hideout = {selected_site: cell.row_id, selected_vallee: site.properties.id_vallee, nom_site: site.properties.nom_site}
-                    return_active_cell = cell
-                }
-            })
-            return_zhLayer_url += cell.row_id+".json"
+        if(site_feature === undefined && vallee_feature===undefined) {
+            return_hideout = {selected_site: null, selected_vallee: null}
+            dropdown_value = 0 
         }
-    
-        return [return_hideout, {}, {}, return_active_cell, return_selected_cells, return_siteTable_data, return_zhLayer_url, dropdown_options]
+        if(triggers.some((o) => o.prop_id === "siteDropdown.value")) {
+            cachedData.siteTable.forEach((elem)=>{if(elem.properties.id===dropdown_value){return_valleeDropdown_value = elem.properties.id_vallee}})
+            return_hideout = {selected_site: dropdown_value, selected_vallee: return_valleeDropdown_value}
+        }
+        if(triggers.some((o) => o.prop_id === "valleeDropdown.value")) {
+            return_hideout = {...return_hideout, selected_vallee: valleeDropdown_value}
+        }
+        return_valleeDropdown_value = return_valleeDropdown_value ? return_valleeDropdown_value : return_hideout.selected_vallee
+        const return_siteDropdown_value = return_hideout.selected_site ? return_hideout.selected_site : dropdown_value
+        console.log(return_hideout)
+        return [return_hideout, {}, {}, return_zhLayer_url, return_valleeDropdown_value, return_siteDropdown_value]
     }""",
     Output("siteLayer", "hideout"),
     Output("siteLayer", "click_feature"),
     Output("valleeLayer", "click_feature"),
-    Output("siteTable", "active_cell"),
-    Output("siteTable", "selected_cells"),
-    Output("siteTable", "data"),
     Output("zhLayer", "url"),
-    Output("vallee_dropdown", "options"),
+    Output("valleeDropdown", "value"),
+    Output("siteDropdown", "value"),
+    Input("siteDropdown", "value"),
+    Input("valleeDropdown", "value"),
     Input("siteLayer", "click_feature"),
     Input("valleeLayer", "click_feature"),
-    Input("parc", "click_lat_lng"),
-    Input("siteTable", "active_cell"),
-    Input("vallee_dropdown", "value"),
+    Input("parc", "click_lat_lng"), 
     State("siteLayer", "hideout"),
-    State("siteTable", "derived_viewport_row_ids")
 )
-
-app.clientside_callback(
-    """
-    function(zhfeature, hideout, data){
-        data = []
-        cachedData.zhTable.map((feature, id) => data.push({surface: feature.surface, etat: feature.etat, id}))
-        const triggers = dash_clientside.callback_context.triggered
-        let return_hideout = hideout
-        if(triggers.some((o) => o.prop_id === "zhLayer.click_feature")){
-            return_hideout = {...return_hideout, selected_zone: zhfeature.properties.id}
-        }
-        const zhTable_columns = [{"name": [hideout.nom_site, "surface"], "id": "surface"}, {"name": [hideout.nom_site, "état"], "id": "etat"}]
-        cachedData.zhTable = []
-        return [data, zhTable_columns, return_hideout]
-    }
-    """,
-    Output("zhTable", "data"),
-    Output("zhTable", "columns"),
-    Output("zhLayer", "hideout"),
-    Input("zhLayer", "click_feature"),
-    Input("siteLayer", "hideout"),
-    Input("zhTable", "data"),
-)
+#, Output("valleeDropdown", "value")
+@ app.callback(Output("siteDropdown", "options"), Input("valleeDropdown", "value"))
+def dropdownsOptions(valleeValue):
+    if valleeValue != 0 and valleeValue != None:
+        siteOptions = [{'label': index['nom_site'], 'value': index['id']} for index in filter(lambda item : item['id_vallee']==valleeValue, site__feature_properties)]
+    else:
+        siteOptions = [{'label': property['nom_site'], 'value': property['id']} for property in site__feature_properties]
+    return siteOptions
+    
+# app.clientside_callback(
+#     """
+#     function(zhfeature, hideout, data){
+#         data = []
+#         cachedData.zhTable.map((feature, id) => data.push({surface: feature.surface, etat: feature.etat, id}))
+#         const triggers = dash_clientside.callback_context.triggered
+#         let return_hideout = hideout
+#         if(triggers.some((o) => o.prop_id === "zhLayer.click_feature")){
+#             return_hideout = {...return_hideout, selected_zone: zhfeature.properties.id}
+#         }
+#         const zhTable_columns = [{"name": [hideout.nom_site, "surface"], "id": "surface"}, {"name": [hideout.nom_site, "état"], "id": "etat"}]
+#         cachedData.zhTable = []
+#         return [data, zhTable_columns, return_hideout]
+#     }
+#     """,
+#     Output("zhTable", "data"),
+#     Output("zhTable", "columns"),
+#     Output("zhLayer", "hideout"),
+#     Input("zhLayer", "click_feature"),
+#     Input("siteLayer", "hideout"),
+#     Input("zhTable", "data"),
+# )
 
 # @app.callback(
 #     Output("pie-chart", "figure"),
