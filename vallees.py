@@ -140,41 +140,52 @@ app.clientside_callback(
   //console.log(dash_clientside.callback_context);
   const triggers = dash_clientside.callback_context.triggered;
 
-  let new_site_feature = null, new_vallee_feature = null;
+  let id = null, id_vallee = null;
 
   if (triggers.some((o) => o.prop_id == "siteLayer.click_feature")){
     // update "site" and "vallee"
-    new_site_feature = site_feature;
+    if (site_feature != null) {
+      id = (site_feature.properties.id != hideout.id)? site_feature.properties.id: null;
+      id_vallee = site_feature.properties.id_vallee;
+    } else {
+      // should not happen
+      console.log( 'Warning, site click_feature triggered with null feature', hideout);
+      id = null;
+      id_vallee = hideout.id_vallee;
+    }
   } else
   if (triggers.some((o) => o.prop_id == "valleeLayer.click_feature")) {
     // update "vallee" and reset "site"
-    new_site_feature = null;
-    new_vallee_feature = vallee_feature;
+    id = null;
+    if (vallee_feature != null) {
+        id_vallee = (vallee_feature.properties.id != hideout.id_vallee)? vallee_feature.properties.id: null;
+    } else {
+      // should not happen
+      console.log( 'Warning, vallee click_feature triggered with null feature', hideout);
+      id_vallee = null;
+    }
   } else
   if (triggers.some((o) => o.prop_id == "map.click_lat_lng")){
-    new_site_feature = null;
-    new_vallee_feature = null;
+    id = null;
+    id_vallee = null;
   } else
   if (triggers.some((o) => o.prop_id == "siteDropdown.value")){
-    new_site_feature = site_dropdown? cachedData.siteTable[site_dropdown] : null;
+    if (site_dropdown != null){
+      id = site_dropdown;
+      id_vallee = (cachedData.siteTable[id]) ? cachedData.siteTable[id].properties.id_vallee : hideout.id_vallee;
+    } else {
+      id = null;
+      id_vallee = hideout.id_vallee;
+    }
   } else
   if (triggers.some((o) => o.prop_id == "valleeDropdown.value")){
-    new_site_feature = null;
-    new_vallee_feature = vallee_dropdown? cachedData.valleeTable[vallee_dropdown]: null;
+    id = null;
+    id_vallee = vallee_dropdown;
   }
 
-  let id = null, id_vallee = null;
-  if (new_site_feature != null) {
-      id = new_site_feature.properties.id;
-      id_vallee = new_site_feature.properties.id_vallee;
-      new_vallee_feature = cachedData.valleeTable[id_vallee];
-  } else if (new_vallee_feature != null) {
-      id_vallee = new_vallee_feature.properties.id;
-  } else {
-  }
   let result = [
-    {...hideout, id, id_vallee}, new_site_feature, //siteLayer
-    new_vallee_feature, //valleeLayer
+    {...hideout, id, id_vallee}, null, //siteLayer
+    null, //valleeLayer
     id, //siteDropdown
     id_vallee, //valleeDropdown
     ];
