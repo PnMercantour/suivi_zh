@@ -7,19 +7,24 @@ body {
     min-height: 50vh; 
 }
 
+#detail_site {
+    display:flex;
+    flex-wrap: 'wrap';
+    max-height: '50vh';
+}
+
 #site_unique {
     max-width: 60%; 
     min-height: 50vh;
-    margin-right: 5vh;  
 }
 
 #siteTable {
     min-width: 50vh;
 }
 
-#siteTable, #zhTable, #zhLayer, #parc, #pie-chart {
+/* #siteTable, #zhTable, #zhLayer, #parc, #pie-chart {
     box-shadow: 3px 3px 3px lightgrey;
-}
+} */
 
 #dropdownDiv {
     display: flex;
