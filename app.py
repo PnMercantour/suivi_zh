@@ -8,10 +8,12 @@ import dash_table
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from dash_extensions.javascript import assign
+from dash_table import DataTable
 from pathlib import Path
 import pandas
 from dotenv import load_dotenv
 import json
+import functools
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 load_dotenv('.env/.env')
 
@@ -29,6 +31,9 @@ site_feature_properties = featurePropertiesFromJson('sites')
 # Pie Chart csv
 df = pandas.read_csv(
     Path(Path(__file__).parent, 'assets', 'habitat.csv'))
+# Notice csv
+df_notice = pandas.read_csv(
+    Path(Path(__file__).parent, 'assets', 'notice.csv'))
 
 #=====CREATION DES FONCTION POUR LES LAYERS=====#
 # création d'un dictionaire pour les couleurs des polygones
@@ -151,10 +156,18 @@ app.layout = html.Div([
         center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
     html.Div("Lorem ipsum", id="detailParc", hidden=True), html.Div(id="detailVallee", hidden=True),
     html.Div(id="detailSite",children=[
-        dl.Map(id="site_unique", children=[baseLayer, zh_layer], center=[44.3, 7]),
+        html.Div(id='detailSiteAnalyseFeatures', children=[dl.Map(id="site_unique", children=[baseLayer, zh_layer], center=[44.3, 7]),
         zhTable,
         dcc.Graph(id="pie-chart", figure=px.pie(df[df["id_zh"] == 374],
-              values='proportion', names='code'))
+              values='proportion', names='code'))]),
+        DataTable(
+            id='noticeTable',
+            columns=[
+                dict(name='Notices', id='link',
+                     type='text', presentation='markdown'),
+            ],
+            data=None
+        )
     ]),
 ])
 #=====LES CALLBACKS=====#
@@ -177,8 +190,8 @@ app.clientside_callback(
         if(triggers.some((o) => o.prop_id === "siteLayer.click_feature" )){
             return_hideout = {selected_site: site_feature.properties.id, selected_vallee: site_feature.properties.id_vallee, nom_site: site_feature.properties.nom_site}
         } else
-        if(triggers.some((o) => o.prop_id === "siteDropdown.value")) {//filtrer par id
-            return_hideout = {selected_site: dropdown_value, selected_vallee: dropdown_value ? cachedData.siteTable.filter((elem) => elem.properties.id === dropdown_value)[0].properties.id_vallee : valleeDropdown_value}
+        if(triggers.some((o) => o.prop_id === "siteDropdown.value")) {
+            return_hideout = {selected_site: dropdown_value, selected_vallee: dropdown_value ?cachedData.siteTable[dropdown_value].properties.id_vallee : valleeDropdown_value}
         }
         // following statement updates "vallee" reset "site" => both valleeLayer and valleeDropdown could update selected_vallee
         else 
@@ -212,20 +225,20 @@ app.clientside_callback(
 )
 
 #=====CALLBACK DE GESTION DES PARTIES DETAILS=====#
-@app.callback([Output("detailParc", "hidden"), Output("detailVallee", "hidden"), Output("detailSite", "hidden")], Input("siteLayer", "hideout"))
-def detail(hideout):
+@app.callback([Output("detailParc", "hidden"), Output("detailVallee", "hidden"), Output("detailSite", "hidden"), Output("detailSiteAnalyseFeatures", "style")], Input("siteLayer", "hideout"))
+def detail_features(hideout):
     if all(propertie==None for propertie in hideout.values()) :
-        return [False, True, True]
+        return [False, True, True, {}]
     elif hideout['selected_vallee'] is not None and hideout['selected_site'] is None:
-        return [True, False, True]
+        return [True, False, True, {}]
     else :
-        return [True, True, False]
+        return [True, True, False, {'display':'flex', 'flexWrap': 'wrap'}]
 
 #=====LES CALLBACKS DE detailSite=====#
 @app.callback([Output("zhLayer", "url"), Output("zhTable", "data")], Input("siteLayer", "hideout"))
 def zhLayer_url(hideout):
     if hideout['selected_site']:
-        data = map(lambda x : {'surface': x['surface'], 'etat': x['etat_zh']}, featurePropertiesFromJson("sites/"+str(hideout['selected_site'])))
+        data = map(lambda x : {'surface': x['surface'], 'etat': x['etat_zh'], 'id': x['id']}, featurePropertiesFromJson("sites/"+str(hideout['selected_site'])))
         url = "/assets/sites/"+str(hideout['selected_site'])+".json"
         return url, list(data)
     else:
@@ -233,12 +246,34 @@ def zhLayer_url(hideout):
 
 @app.callback(
     Output("pie-chart", "figure"),
-    Input("zhLayer", "hideout"))
-def generate_chart(hideout):
-    if hideout:
+    Input("zhLayer", "hideout"),
+    Input("zhTable", "data"))
+def generate_chart(hideout, data):
+    if hideout['selected_site'] is not None and hideout['selected_zone'] is None:
+        surface_site=functools.reduce(lambda a,b: a+b, [i['surface'] for i in data])
+        csv_habitat = list(zip(df['code'], df['proportion'], df['id_zh']))
+        surface_zh = {x['id']:x['surface']for x in data}
+        df_par_site = [{'proportion':((zone[1]*surface_zh[zone[2]])/surface_site), 'code':zone[0]} for zone in csv_habitat if any(line['id']==zone[2] for line in data)]
+        return px.pie(df_par_site if df_par_site else [{'proportion':100, 'code':'ERROR'}], values='proportion', names='code')
+    elif hideout['selected_zone']:
         id_zh = hideout['selected_zone']
         fig = px.pie(df[df["id_zh"] == id_zh], values='proportion', names='code')
         return fig
+    else:
+        raise PreventUpdate
+
+@app.callback(
+    Output("noticeTable", "data"),
+    Input("siteLayer", "hideout"))
+def updateNoticeTable(hideout):
+    if hideout['selected_site']:
+        id = hideout['selected_site']
+        data = df_notice[df_notice["id_site"] == id].to_dict('records')
+        for item in data:
+            item['link'] = f"""[{item['nom']}]({app.get_asset_url('pdf/' + item['nom']).replace(' ', '%20')})"""
+        return data
+    else:
+        return None
 
 app.clientside_callback(
         """function(zhfeature, hideout){
