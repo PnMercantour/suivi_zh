@@ -2,10 +2,9 @@ body {
     background-color: #f2f2f2;
 }
 #detailSiteAnalyseFeatures{
-    display: grid;
-    grid-template-columns: 60vh auto 180vh;
-    grid-gap: 5vh;
-    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
 }
 
 #dropdownDiv {
@@ -19,23 +18,25 @@ body {
     min-height: 50vh; 
 }
 
-#site_unique {
-    grid-column: 1 ;
+#partieBasse {
+    padding-top: 5vh;
 }
+
 #detailSite, #detailParc, #detailVallee {
     padding-left: 5vh;
     padding-right: 5vh;
 }
-#siteTable {
-    min-width: 50vh;
+
+#site_unique {
+    max-width: 50vh;
+    min-height: 50vh;
 }
 
 #zhTable {
-    grid-column: 2 ;
+    min-width: 20vh;
 }
 
 #pie-chart {
-    grid-column: 3;
     max-width: 30%; 
 }
 

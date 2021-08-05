@@ -170,8 +170,8 @@ app.layout = html.Div([
     ]),
     html.Div(
         dl.Map(id="parc", children = [baseLayer, valleeLayer, site_layer],
-        center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
-    html.Div(id="partiBasse", children=[detail_parc , detail_vallee,detail_site])
+        center=[44.3, 7], zoom=9)),
+    html.Div(id="partieBasse", children=[detail_parc , detail_vallee,html.Div(id="controleStyleDetailSite",children=[detail_site])])
     
 ])
 #=====LES CALLBACKS=====#
@@ -229,9 +229,9 @@ app.clientside_callback(
 )
 
 #=====CALLBACK DE GESTION DES PARTIES DETAILS=====#
-@app.callback([Output("detailParc", "hidden"), Output("detailVallee", "hidden"), Output("detailSite", "hidden")], Input("siteLayer", "hideout"))
+@app.callback([Output("detailParc", "hidden"), Output("detailVallee", "hidden"), Output("controleStyleDetailSite", "hidden")], Input("siteLayer", "hideout"))
 def detail_features(hideout):
-    if all(propertie==None for propertie in hideout.values()) :
+    if all(property==None for property in hideout.values()) :
         return [False, True, True]
     elif hideout['selected_vallee'] is not None and hideout['selected_site'] is None:
         return [True, False, True]
