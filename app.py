@@ -145,17 +145,10 @@ zhTable = dash_table.DataTable(
         ], page_size=10,  merge_duplicate_headers=True,
 )
 
-#=====CREATION DU LAYOUT=====#
-app.layout = html.Div([
-    html.Div(id="dropdownDiv", children=[
-        dcc.Dropdown(id="valleeDropdown", options = [{'label': property['nom'], 'value': property['id']} for property in featurePropertiesFromJson('vallees')], placeholder = "Sélection d'une vallée"), 
-        dcc.Dropdown(id="siteDropdown", placeholder = "Sélection d'un site")
-    ]),
-    html.Div(
-        dl.Map(id="parc", children = [baseLayer, valleeLayer, site_layer],
-        center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
-    html.Div("Lorem ipsum", id="detailParc", hidden=True), html.Div(id="detailVallee", hidden=True),
-    html.Div(id="detailSite",children=[
+#=====CREATION DES DIVS POUR LA PARTIE BASSE=====#
+detail_parc = html.Div("Lorem ipsum", id="detailParc", hidden=True)
+detail_vallee = html.Div(id="detailVallee", hidden=True)
+detail_site = html.Div(id="detailSite",children=[
         html.Div(id='detailSiteAnalyseFeatures', children=[dl.Map(id="site_unique", children=[baseLayer, zh_layer], center=[44.3, 7]),
         zhTable,
         dcc.Graph(id="pie-chart", figure=px.pie(df[df["id_zh"] == 374],
@@ -168,7 +161,18 @@ app.layout = html.Div([
             ],
             data=None
         )
+    ])
+#=====CREATION DU LAYOUT=====#
+app.layout = html.Div([
+    html.Div(id="dropdownDiv", children=[
+        dcc.Dropdown(id="valleeDropdown", options = [{'label': property['nom'], 'value': property['id']} for property in featurePropertiesFromJson('vallees')], placeholder = "Sélection d'une vallée"), 
+        dcc.Dropdown(id="siteDropdown", placeholder = "Sélection d'un site")
     ]),
+    html.Div(
+        dl.Map(id="parc", children = [baseLayer, valleeLayer, site_layer],
+        center=[44.3, 7], zoom=9),style={'display':'flex', 'paddingBottom':'5vh'}),
+    html.Div(id="partiBasse", children=[detail_parc , detail_vallee,detail_site])
+    
 ])
 #=====LES CALLBACKS=====#
 
@@ -225,14 +229,14 @@ app.clientside_callback(
 )
 
 #=====CALLBACK DE GESTION DES PARTIES DETAILS=====#
-@app.callback([Output("detailParc", "hidden"), Output("detailVallee", "hidden"), Output("detailSite", "hidden"), Output("detailSiteAnalyseFeatures", "style")], Input("siteLayer", "hideout"))
+@app.callback([Output("detailParc", "hidden"), Output("detailVallee", "hidden"), Output("detailSite", "hidden")], Input("siteLayer", "hideout"))
 def detail_features(hideout):
     if all(propertie==None for propertie in hideout.values()) :
-        return [False, True, True, {}]
+        return [False, True, True]
     elif hideout['selected_vallee'] is not None and hideout['selected_site'] is None:
-        return [True, False, True, {}]
+        return [True, False, True]
     else :
-        return [True, True, False, {'display':'flex', 'flexWrap': 'wrap'}]
+        return [True, True, False]
 
 #=====LES CALLBACKS DE detailSite=====#
 @app.callback([Output("zhLayer", "url"), Output("zhTable", "data")], Input("siteLayer", "hideout"))
@@ -254,7 +258,7 @@ def generate_chart(hideout, data):
         csv_habitat = list(zip(df['code'], df['proportion'], df['id_zh']))
         surface_zh = {x['id']:x['surface']for x in data}
         df_par_site = [{'proportion':((zone[1]*surface_zh[zone[2]])/surface_site), 'code':zone[0]} for zone in csv_habitat if any(line['id']==zone[2] for line in data)]
-        return px.pie(df_par_site if df_par_site else [{'proportion':100, 'code':'ERROR'}], values='proportion', names='code')
+        return px.pie(df_par_site if df_par_site else [{'proportion':100, 'code':'Pas de données'}], values='proportion', names='code')
     elif hideout['selected_zone']:
         id_zh = hideout['selected_zone']
         fig = px.pie(df[df["id_zh"] == id_zh], values='proportion', names='code')
