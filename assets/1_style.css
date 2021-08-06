@@ -1,6 +1,7 @@
 body {
     background-color: #f2f2f2;
 }
+
 #detailSiteAnalyseFeatures{
     display: flex;
     flex-wrap: wrap;
@@ -51,6 +52,7 @@ body {
     z-index: 10000;
     background-color: #f2f2f2;
     padding-bottom: 2vh;
+    padding-top: 2vh;
 }
 
 #valleeDropdown, #siteDropdown {

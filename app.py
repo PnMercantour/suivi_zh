@@ -146,13 +146,13 @@ zhTable = dash_table.DataTable(
 )
 
 #=====CREATION DES DIVS POUR LA PARTIE BASSE=====#
-detail_parc = html.Div("Lorem ipsum", id="detailParc", hidden=True)
-detail_vallee = html.Div(id="detailVallee", hidden=True)
+detail_parc = html.Div("Lorem ipsum", id="detailParc", hidden=True, key="detailParc")
+detail_vallee = html.Div(id="detailVallee", hidden=True, key="detailVallee")
 detail_site = html.Div(id="detailSite",children=[
         html.Div(id='detailSiteAnalyseFeatures', children=[dl.Map(id="site_unique", children=[baseLayer, zh_layer], center=[44.3, 7]),
         zhTable,
         dcc.Graph(id="pie-chart", figure=px.pie(df[df["id_zh"] == 374],
-              values='proportion', names='code'))]),
+              values='proportion', names='code'))], key='detailSiteAnalyseFeatures'),
         DataTable(
             id='noticeTable',
             columns=[
@@ -161,19 +161,20 @@ detail_site = html.Div(id="detailSite",children=[
             ],
             data=None
         )
-    ])
+        
+    ],key="detailSite")
 #=====CREATION DU LAYOUT=====#
 app.layout = html.Div([
     html.Div(id="dropdownDiv", children=[
         dcc.Dropdown(id="valleeDropdown", options = [{'label': property['nom'], 'value': property['id']} for property in featurePropertiesFromJson('vallees')], placeholder = "Sélection d'une vallée"), 
         dcc.Dropdown(id="siteDropdown", placeholder = "Sélection d'un site")
-    ]),
+    ], key="dropdownDiv"),
     html.Div(
         dl.Map(id="parc", children = [baseLayer, valleeLayer, site_layer],
-        center=[44.3, 7], zoom=9)),
-    html.Div(id="partieBasse", children=[detail_parc , detail_vallee,html.Div(id="controleStyleDetailSite",children=[detail_site])])
+        center=[44.3, 7], zoom=9), key="partieHaute"),
+    html.Div(id="partieBasse", children=[detail_parc , detail_vallee,html.Div(id="controleStyleDetailSite",children=[detail_site])], key='partieBasse')
     
-])
+], key='div')
 #=====LES CALLBACKS=====#
 
 #=====LES CALLBACKS PARTIE HAUTE=====#
@@ -242,7 +243,7 @@ def detail_features(hideout):
 @app.callback([Output("zhLayer", "url"), Output("zhTable", "data")], Input("siteLayer", "hideout"))
 def zhLayer_url(hideout):
     if hideout['selected_site']:
-        data = map(lambda x : {'surface': x['surface'], 'etat': x['etat_zh'], 'id': x['id']}, featurePropertiesFromJson("sites/"+str(hideout['selected_site'])))
+        data = map(lambda x : {'surface': x['surface'], 'etat': x['etat_zh'], 'id': x['id'], 'key':x['id']}, featurePropertiesFromJson("sites/"+str(hideout['selected_site'])))
         url = "/assets/sites/"+str(hideout['selected_site'])+".json"
         return url, list(data)
     else:
