@@ -280,21 +280,36 @@ def updateNoticeTable(hideout):
         return None
 
 app.clientside_callback(
-        """function(zhfeature, hideout){
+        """function(zhfeature, hideout, data_zhTable, cells, click_lat_lng){
             const triggers = dash_clientside.callback_context.triggered
-            let return_hideout 
+            let return_hideout = {...hideout, selected_zone: null}
+            let return_selected_cells = []
             if(triggers.some((o) => o.prop_id === "zhLayer.click_feature")){
                 return_hideout = {...hideout, selected_zone: zhfeature.properties.id}
-            } else {
-                return_hideout = {...hideout, selected_zone: null}
+                return_selected_cells = [{row: data_zhTable.indexOf(zhfeature.properties.id) , column: 0}, {row: data_zhTable.indexOf(zhfeature.properties.id) , column: 1}]
+            } else 
+            if(triggers.some((o) => o.prop_id === "zhTable.selected_cells")){
+                return_hideout = {...hideout, selected_zone: cells[0].row_id}
+                return_selected_cells = [{row: data_zhTable.indexOf(cells[0].row_id) , column: 0}, {row: data_zhTable.indexOf(cells[0].row_id) , column: 1}]
+            }
+            else 
+            if(triggers.some((o) => o.prop_id === "zhLayer.click_lat_lng")){
+                return_selected_cells = []
+                return_hideout = {...hideout, selected_zone: null} 
             }
             const zhTable_columns = [{"name": [hideout.nom_site, "surface"], "id": "surface"}, {"name": [hideout.nom_site, "état"], "id": "etat"}]
-            return [zhTable_columns, return_hideout]
+            return [zhTable_columns, return_hideout, return_selected_cells, undefined]
         }""",
         Output("zhTable", "columns"),
         Output("zhLayer", "hideout"),
+        Output("zhTable", "selected_cells"),
+        Output("zhTable", "active_cell"),
         Input("zhLayer", "click_feature"),
         Input("siteLayer", "hideout"),
+        Input('zhTable', 'derived_viewport_row_ids'),
+        Input("zhTable", "selected_cells"),
+        Input("site_unique", "click_lat_lng"),
+
 )
 
 if __name__ == '__main__':
