@@ -7,15 +7,12 @@ body {
     justify-content: space-between;
 }
 
-#dropdownDiv {
-    padding-bottom: 2vh;
-}
-
 #parc {
     margin-left: 5vh;
     margin-right: 5vh;
+    margin-top: 8vh;
     width: 100%;
-    min-height: 50vh; 
+    min-height: 50vh;
 }
 
 #partieBasse {
@@ -48,6 +45,12 @@ body {
     display: flex;
     flex-grow: 1;
     justify-content: space-around;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 10000;
+    background-color: #f2f2f2;
+    padding-bottom: 2vh;
 }
 
 #valleeDropdown, #siteDropdown {
