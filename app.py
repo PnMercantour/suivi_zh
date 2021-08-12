@@ -4,10 +4,9 @@ import dash
 import dash_html_components as html
 import dash_core_components as dcc
 import dash_leaflet as dl
-import dash_table
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
-from dash_extensions.javascript import assign
+from dash_extensions.javascript import assign, arrow_function
 from dash_table import DataTable
 from pathlib import Path
 import pandas
@@ -118,10 +117,11 @@ site_layer = dl.GeoJSON(id="siteLayer", url=app.get_asset_url('sites.json'), hid
 zh_layer = dl.GeoJSON(id='zhLayer', hideout={'selected_zone': None, 'selected_site': None, 'nom_site': None},
     options=dict( 
     onEachFeature=couleur_zh, style=js_style), 
-    zoomToBounds=True)
+    zoomToBoundsOnClick=True, zoomToBounds=True,
+    hoverStyle=arrow_function(dict(weight=2, fillOpacity=1)))
 
 #=====CREATION DES DATATABLES POUR L'APP=====#
-# siteTable = dash_table.DataTable(
+# siteTable = DataTable(
 #         id='siteTable',
 #         columns=[{"name": "nom_site", "id": "nom_site"}],
 #         data=[{'nom_site':index}['nom_site'] for index in site_feature_properties],
@@ -134,7 +134,7 @@ zh_layer = dl.GeoJSON(id='zhLayer', hideout={'selected_zone': None, 'selected_si
 #         ]
 # )
 
-zhTable = dash_table.DataTable(
+zhTable = DataTable(
             id='zhTable',
             columns=[],
             data=[],
@@ -144,15 +144,29 @@ zhTable = dash_table.DataTable(
             }
         ], page_size=10,  merge_duplicate_headers=True,
 )
-
+color_pie_chart={'A':'lightcyan',
+                                 'B':'cyan',
+                                 'C':'lightblue',
+                                 'D':'blue',
+                                 'F':'royalblue',
+                                 'G':'darkblue',
+                                 'H':'lightrange',
+                                 'I':'orange',
+                                 'J':'lightred',
+                                 'K':'red',
+                                 'M':'darkred',
+                                 'N':'lightgreen',
+                                 'P':'green',
+                                 'Q':'darkgreen',
+                                 'R':'grey','S':'black'}
 #=====CREATION DES DIVS POUR LA PARTIE BASSE=====#
 detail_parc = html.Div("Lorem ipsum", id="detailParc", hidden=True, key="detailParc")
 detail_vallee = html.Div(id="detailVallee", hidden=True, key="detailVallee")
 detail_site = html.Div(id="detailSite",children=[
-        html.Div(id='detailSiteAnalyseFeatures', children=[dl.Map(id="site_unique", children=[baseLayer, zh_layer], center=[44.3, 7]),
+        html.Div(id='detailSiteAnalyseFeatures', children=[dl.Map(id="site_unique", children=[baseLayer, zh_layer]),
         zhTable,
         dcc.Graph(id="pie-chart", figure=px.pie(df[df["id_zh"] == 374],
-              values='proportion', names='code'))], key='detailSiteAnalyseFeatures'),
+              values='proportion', names='code', color='code', color_discrete_map=color_pie_chart))], key='detailSiteAnalyseFeatures'),
         DataTable(
             id='noticeTable',
             columns=[
@@ -211,17 +225,19 @@ app.clientside_callback(
         // set dropdowns values 
         const return_valleeDropdown_value = return_hideout.selected_vallee 
         const return_siteDropdown_value = return_hideout.selected_site 
-        
+        const site_unique_center = site_feature ? [site_feature.geometry.coordinates[1], site_feature.geometry.coordinates[0]]:[44.3,7]
         return [return_hideout, 
         undefined, //reset siteLayer.click_feature
         undefined, //reset valleeLayer.click_feature
-        return_valleeDropdown_value, return_siteDropdown_value]
+        return_valleeDropdown_value, return_siteDropdown_value, 
+        site_unique_center] //last item = center for siteLayer
     }""",
     Output("siteLayer", "hideout"),
     Output("siteLayer", "click_feature"),
     Output("valleeLayer", "click_feature"),
     Output("valleeDropdown", "value"),
     Output("siteDropdown", "value"),
+    Output("site_unique", "center"),
     Input("siteDropdown", "value"),
     Input("valleeDropdown", "value"),
     Input("siteLayer", "click_feature"),
@@ -259,10 +275,10 @@ def generate_chart(hideout, data):
         csv_habitat = list(zip(df['code'], df['proportion'], df['id_zh']))
         surface_zh = {x['id']:x['surface']for x in data}
         df_par_site = [{'proportion':((zone[1]*surface_zh[zone[2]])/surface_site), 'code':zone[0]} for zone in csv_habitat if any(line['id']==zone[2] for line in data)]
-        return px.pie(df_par_site if df_par_site else [{'proportion':100, 'code':'Pas de données'}], values='proportion', names='code')
+        return px.pie(df_par_site if df_par_site else [{'proportion':100, 'code':'Pas de données'}], values='proportion', names='code', color='code', color_discrete_map=color_pie_chart)
     elif hideout['selected_zone']:
         id_zh = hideout['selected_zone']
-        fig = px.pie(df[df["id_zh"] == id_zh], values='proportion', names='code')
+        fig = px.pie(df[df["id_zh"] == id_zh], values='proportion', names='code', color='code', color_discrete_map=color_pie_chart)
         return fig
     else:
         raise PreventUpdate

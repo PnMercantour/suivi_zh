@@ -49,12 +49,12 @@ body {
     position: fixed;
     width: 100%;
     top: 0;
-    z-index: 10000;
+    z-index: 1;
     background-color: #f2f2f2;
-    padding-bottom: 2vh;
     padding-top: 2vh;
 }
 
 #valleeDropdown, #siteDropdown {
     min-width: 40vh;
+    font-family: system-ui;
 }

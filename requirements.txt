@@ -9,3 +9,4 @@ geobuf==1.1.1
 geopandas==0.9.0
 jsbeautifier==1.14.0
 python-dotenv
+dash-bootstrap-components
