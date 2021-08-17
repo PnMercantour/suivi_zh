@@ -121,18 +121,18 @@ zh_layer = dl.GeoJSON(id='zhLayer', hideout={'selected_zone': None, 'selected_si
     hoverStyle=arrow_function(dict(weight=2, fillOpacity=1)))
 
 #=====CREATION DES DATATABLES POUR L'APP=====#
-# siteTable = DataTable(
-#         id='siteTable',
-#         columns=[{"name": "nom_site", "id": "nom_site"}],
-#         data=[{'nom_site':index}['nom_site'] for index in site_feature_properties],
-#         sort_action='native',
-#         filter_action='native',
-#         style_data_conditional=[
-#             {'if': {'row_index': 'odd'},
-#             'backgroundColor': 'rgb(248, 248, 248)'
-#             }
-#         ]
-# )
+siteTable = DataTable(
+        id='siteTable',
+        columns=[{"name": "nom_site", "id": "nom_site"}],
+        data=[{'nom_site':index}['nom_site'] for index in site_feature_properties],
+        sort_action='native',
+        filter_action='native',
+        style_data_conditional=[
+            {'if': {'row_index': 'odd'},
+            'backgroundColor': 'rgb(248, 248, 248)'
+            }
+        ]
+)
 
 zhTable = DataTable(
             id='zhTable',
@@ -161,7 +161,7 @@ color_pie_chart={'A':'lightcyan',
                                  'R':'grey','S':'black'}
 #=====CREATION DES DIVS POUR LA PARTIE BASSE=====#
 detail_parc = html.Div("Lorem ipsum", id="detailParc", hidden=True, key="detailParc")
-detail_vallee = html.Div(id="detailVallee", hidden=True, key="detailVallee")
+detail_vallee = html.Div(id="detailVallee", hidden=True, key="detailVallee", children=[siteTable])
 detail_site = html.Div(id="detailSite",children=[
         html.Div(id='detailSiteAnalyseFeatures', children=[dl.Map(id="site_unique", children=[baseLayer, zh_layer]),
         zhTable,
@@ -226,6 +226,7 @@ app.clientside_callback(
         const return_valleeDropdown_value = return_hideout.selected_vallee 
         const return_siteDropdown_value = return_hideout.selected_site 
         const site_unique_center = site_feature ? [site_feature.geometry.coordinates[1], site_feature.geometry.coordinates[0]]:[44.3,7]
+        
         return [return_hideout, 
         undefined, //reset siteLayer.click_feature
         undefined, //reset valleeLayer.click_feature
@@ -254,6 +255,21 @@ def detail_features(hideout):
         return [True, False, True]
     else :
         return [True, True, False]
+
+#=====LES CALLBACKS DE detailVallee ======#
+
+app.clientside_callback(
+    """function(hideout){
+        let return_array = []
+        if(hideout.seleted_vallee !== null) {
+            cachedData.siteTable.filter(site => site.properties.id_vallee==hideout.selected_vallee).forEach(site=>return_array.push({"nom_site":site.properties.nom_site}))
+        }
+        return return_array
+    }""",
+    Output("siteTable", "data"),
+    Input("siteLayer", "hideout")
+)
+
 
 #=====LES CALLBACKS DE detailSite=====#
 @app.callback([Output("zhLayer", "url"), Output("zhTable", "data")], Input("siteLayer", "hideout"))

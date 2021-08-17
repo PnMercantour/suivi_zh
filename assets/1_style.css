@@ -49,7 +49,7 @@ body {
     position: fixed;
     width: 100%;
     top: 0;
-    z-index: 1;
+    z-index: 1000000;
     background-color: #f2f2f2;
     padding-top: 2vh;
 }
