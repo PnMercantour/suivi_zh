@@ -24,13 +24,15 @@ def get_url(notice):
     return app.get_asset_url('pdf/' + quote(notice['nom']))
 
 
+notice_table = html.Tbody(),
+
 component = dbc.Table([
     html.Thead(html.Tr([
         html.Th("Site"),
         html.Th("Date"),
         html.Th('Notice'),
     ])),
-    notice_table := html.Tbody(),
+    notice_table,
 ])
 
 
