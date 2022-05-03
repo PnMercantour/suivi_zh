@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 import json
 import functools
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-load_dotenv('.env/.env')
+load_dotenv('.env')
 
 #=====CREATION DE L'APP=====#
 app = dash.Dash(__name__)
