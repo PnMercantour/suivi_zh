@@ -28,7 +28,7 @@ assets_path = app_dir / 'assets'
 
 IGN_KEY = os.getenv('IGN_KEY')
 
-app = Dash(__name__, title=app_name, external_stylesheets=[
+app = Dash(__name__, title='Zones humides', external_stylesheets=[
            dbc.themes.SLATE, dbc.icons.FONT_AWESOME])
 
 ns = Namespace('PNM', 'zh')

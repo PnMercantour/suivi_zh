@@ -29,6 +29,7 @@ def ign(name=None):
                       minZoom=0,
                       maxZoom=18,
                       tileSize=256,
+                      opacity=0.6,
                       attribution="IGN-F/Geoportail")
     else:
         return dl.TileLayer(url="https://wxs.ign.fr/cartes/wmts?" +
@@ -44,3 +45,9 @@ def ign(name=None):
                       maxZoom=19,
                       tileSize=256,
                       attribution="IGN-F/Geoportail")
+
+def stamen(name=None):
+    if name=='toner':
+        return dl.TileLayer(url='//stamen-tiles.a.ssl.fastly.net/toner-background/{z}/{x}/{y}.png')
+    return dl.TileLayer(url="http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png",
+                     attribution="TODO")

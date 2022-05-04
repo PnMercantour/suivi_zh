@@ -25,58 +25,82 @@ window.PNM = Object.assign({}, window.PNM, {
     },
     siteFilter: (feature, context) => {
       let hideout = context.props.hideout;
-      return hideout.site == null && hideout.vallee != null && feature.properties.id_vallee == hideout.vallee;
+      return (
+        hideout.site == null &&
+        hideout.vallee != null &&
+        feature.properties.id_vallee == hideout.vallee
+      );
     },
     zhFilter: (feature, context) => {
       let hideout = context.props.hideout;
       return hideout.site != null;
     },
-    sitePointToLayer: (feature, latlng, context) => {
-      const unselected = { color: "grey", radius: 8, fillOpacity: 0.8 };
-      const selected = {
-        radius: 8,
-        color: "blue",
-        fillColor: "blue",
-        fillOpacity: 0.8,
-      };
-      let circleOptions;
-      if (context.props.hideout) {
-        if (context.props.hideout.site != null) {
-          if (feature.properties.id == context.props.hideout.site) {
-            circleOptions = selected;
-          } else {
-            circleOptions = unselected;
-          }
-        } else if (context.props.hideout.vallee != null) {
-          if (feature.properties.id_vallee == context.props.hideout.vallee) {
-            circleOptions = selected;
-          } else {
-            circleOptions = unselected;
-          }
-        } else {
-          circleOptions = selected;
-        }
-      } else {
-        circleOptions = selected;
-      }
-      return L.circleMarker(latlng, circleOptions); // send a simple circle marker.
+    defensFilter: (feature, context) => {
+      let hideout = context.props.hideout;
+      return hideout.site != null;
     },
-    valleeStateStyle: (feature, context) => {
-      if (context.props.hideout.vallee != null) {
+    siteSituationToLayer: (feature, latlng, context) => {
+      let color = "grey",
+        radius = 4;
+      if (feature.properties.id_site == context.props.hideout.site) {
+        radius = 7;
+        let etat = feature.properties.etat;
+        if (etat >= 2 / 3) color = "green";
+        else if (etat >= 1 / 3) color = "orange";
+        else color = "red";
+      } else if (
+        context.props.hideout.vallee == null ||
+        (feature.properties.id_site != null &&
+          context.props.hideout.vallee == feature.properties.id_vallee)
+      ) {
+        color = "blue";
+      }
+      return L.circleMarker(latlng, {
+        pane: "site_pane",
+        color: color,
+        fillColor: color,
+        radius: radius,
+        fillOpacity: 0.8,
+      });
+    },
+    valleeSituationStyle: (feature, context) => {
+      if (
+        context.props.hideout.site != null ||
+        context.props.hideout.vallee != feature.properties.id_vallee
+      ) {
         return {
-          color: 'white',
-          fillOpacity: 0,
-        }
+          color: "grey",
+          fillOpacity: 0.4,
+          pane: "vallee_pane",
+        };
       }
       let color = "red";
       let etat = feature.properties.etat;
       if (etat >= 2 / 3) color = "green";
       else if (etat >= 1 / 3) color = "orange";
       return {
-        color:'white',
+        color: color,
         fillColor: color,
-        fillOpacity:0.8,
+        fillOpacity: 0.4,
+        pane: "vallee_pane",
+      };
+    },
+    valleeStateStyle: (feature, context) => {
+      if (context.props.hideout.vallee != null) {
+        return {
+          color: "white",
+          fillOpacity: 0,
+        };
       }
+      let color = "red";
+      let etat = feature.properties.etat;
+      if (etat >= 2 / 3) color = "green";
+      else if (etat >= 1 / 3) color = "orange";
+      return {
+        color: "white",
+        fillColor: color,
+        fillOpacity: 0.8,
+      };
     },
     siteStatePointToLayer: (feature, latlng, context) => {
       let color = "red";
@@ -85,7 +109,7 @@ window.PNM = Object.assign({}, window.PNM, {
       else if (etat >= 1 / 3) color = "orange";
       return L.circleMarker(latlng, {
         radius: 14,
-        color: 'white',
+        color: "white",
         fillColor: color,
         fillOpacity: 0.8,
       });

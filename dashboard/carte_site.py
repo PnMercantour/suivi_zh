@@ -41,12 +41,24 @@ zones_humides = dl.GeoJSON(
     ),
 )
 
+defens = dl.GeoJSON(
+    url=app.get_asset_url('defens.json'),
+    hideout={'zh': None, 'site': None, 'vallee': None},
+    options=dict(
+        filter=ns('defensFilter'),
+        style={
+            'color': 'black',
+            'fillOpacity': 0
+        }
+    )
+)
 map = dl.Map(dl.LayersControl([
     dl.BaseLayer(tile.ign('carte'), name='IGN', checked=False),
     dl.BaseLayer(tile.ign('ortho'), name='Vue aérienne', checked=True),
     vallees,
     sites,
     dl.Overlay(zones_humides, name='Zones humides', checked=True),
+    dl.Overlay(defens, name='Défens', checked=True),
 
 ]),
     style={'width': '100%', 'height': '50vh'},
@@ -111,6 +123,7 @@ output = {
     'url': Output(zones_humides, 'url'),
     'site_hideout': Output(sites, 'hideout'),
     'vallee_hideout': Output(vallees, 'hideout'),
+    'defens_hideout': Output(defens, 'hideout'),
     'title': Output(title, 'children'),
 }
 
@@ -119,6 +132,7 @@ def update(zh, site, vallee, input):
     same_context = input['hideout']['site'] == site and input['hideout']['vallee'] == vallee
     return {
         'hideout': {'site': site, 'vallee': vallee, 'zh': zh},
+        'defens_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'site_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'vallee_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'title': no_update if same_context else make_title(site=site, vallee=vallee, zh=zh),
