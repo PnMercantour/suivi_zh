@@ -7,9 +7,12 @@ from dash import Dash
 import dash_bootstrap_components as dbc
 from dash_extensions.javascript import Namespace
 
-load_dotenv('.env')
 app_dir = Path(__file__).parent
 app_name = app_dir.name
+
+# .env file is read from project root directory
+load_dotenv(app_dir.parent/'.env')
+
 
 # Assume project root is one level up
 # data is shared by all apps, assets is app specific
