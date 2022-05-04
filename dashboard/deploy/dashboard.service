@@ -1,0 +1,12 @@
+[Unit]
+Description=Gunicorn instance to serve the dashboard web service
+After=network.target
+
+[Service]
+User=dashboard
+Group=dashboard
+WorkingDirectory=/home/dashboard/suivi_zh/dashboard
+ExecStart=/home/dashboard/suivi_zh/venv/bin/gunicorn
+
+[Install]
+WantedBy=multi-user.target
