@@ -3,7 +3,8 @@ from urllib.parse import quote
 from dash import html, Output
 import dash_bootstrap_components as dbc
 
-from config import data_path, app, list_sites, get_site_name
+from config import data_path, app
+from data import get_site_name, list_sites
 
 with (data_path / 'notice.csv').open('r') as csvfile:
     reader = csv.DictReader(csvfile)

@@ -10,7 +10,7 @@ zh_df.drop(columns=['geojson'], inplace=True)
 zh_df.columns = ['id_zh', 'nom_site', 'surface', 'etat']
 
 sites_df = DataFrame.from_records([{
-    'id_site': site['id'],
+    'id_site': site['id_site'],
     'nom_site': site['nom_site'],
     'id_vallee':site['id_vallee'],
 } for site in sites])
@@ -27,7 +27,7 @@ detail = pd.merge(pd.merge(zh_df, sites_df, on='nom_site'),
 PNM_bounds = [[43.8, 6.5], [44.5, 7.7]]
 
 vallee_data = {}
-with (assets_path/'vallee_test.json').open('r') as f:
+with (assets_path/'vallee_full.json').open('r') as f:
     # Maybe drop geometry
     for vallee in json.load(f)['features']:
         b = vallee['bbox']
@@ -39,7 +39,7 @@ with (assets_path/'vallee_test.json').open('r') as f:
         }
 
 site_data = {}
-with (assets_path/'site_test.json').open('r') as f:
+with (assets_path/'sites.json').open('r') as f:
     # Maybe drop geometry
     for site in json.load(f)['features']:
         b = site['bbox']
@@ -51,6 +51,16 @@ with (assets_path/'site_test.json').open('r') as f:
             'id_vallee': p['id_vallee']
         }
 
+def get_site_name(site_id):
+    if site_id is not None:
+        return site_data[int(site_id)]['nom_site']
+
+def get_site_vallee(site_id):
+    if site_id is not None:
+        return site_data[int(site_id)]['id_vallee']
+
+def list_sites(vallee_id):
+    return [site['id_site'] for site in site_data.values() if site['id_vallee'] == int(vallee_id)]
 
 def bounds(site=None, vallee=None):
     if site is not None:

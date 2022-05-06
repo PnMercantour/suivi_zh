@@ -21,7 +21,7 @@ vallees = dl.GeoJSON(
 )
 
 sites = dl.GeoJSON(
-    url=app.get_asset_url('site_full.json'),
+    url=app.get_asset_url('sites.json'),
     hideout={'zh': None, 'site': None, 'vallee': None},
     options=dict(
         filter=ns('siteFilter'),

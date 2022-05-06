@@ -7,7 +7,7 @@
 --		s_zh (surface totale des zh du site ou null)
 --		n_defens(nombre de défens du site ou null)
 --		s_defens (surface totale des défens du site ou null)
---		ratio (indicateur de pourcentage de surface de bonne qualité)
+--		etat (indicateur de pourcentage de surface de bonne qualité)
 -- geometry: point (le centroide des zh du site)
 -- bbox : la boîte englobante des zh du site
 -- https://datatracker.ietf.org/doc/html/rfc7946
@@ -31,7 +31,7 @@ features AS (
     json_build_object('type', 'Feature', 'properties',
       json_build_object('id_site', id_site, 'nom_site', nom_site, 'id_vallee',
       id_vallee, 'n_zh', n_zh, 's_zh', s_zh, 'n_defens', n_defens,
-      's_defens', s_defens, 'ratio', ratio), 'geometry', st_asgeojson
+      's_defens', s_defens, 'etat', ratio), 'geometry', st_asgeojson
       (site_geo.geom)::json, 'bbox', json_build_array(st_xmin (b), st_ymin (b), st_xmax
       (b), st_ymax (b))) feature
   FROM

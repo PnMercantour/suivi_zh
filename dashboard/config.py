@@ -53,24 +53,12 @@ def get_properties(id, list):
     return None
 
 
-def get_site_properties(site_id):
-    return get_properties(site_id, sites)
-
-
-def get_site_name(site_id):
-    return get_properties(site_id, sites)['nom_site']
-
-
 def get_vallee_properties(vallee_id):
     return get_properties(vallee_id, vallees)
 
 
 def get_vallee_name(vallee_id):
     return get_properties(vallee_id, vallees)['nom']
-
-
-def list_sites(vallee_id):
-    return [site['id'] for site in sites if site['id_vallee'] == int(vallee_id)]
 
 
 print('Running', app_name)
