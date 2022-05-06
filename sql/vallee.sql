@@ -14,7 +14,7 @@ vallee_xy as (select id_vallee, nom_vallee, geom, st_xmin(envelope), st_xmax(env
     json_build_object(
     'type', 'Feature', 
     'properties', json_build_object('id_vallee', id_vallee, 'nom_vallee', nom_vallee), 
-     'geometry', st_asgeojson (geom)::json,
+     'geometry', st_asgeojson (geom,6)::json,
      'bbox', json_build_array(st_xmin, st_ymin, st_xmax, st_ymax)
      ) feature
   FROM

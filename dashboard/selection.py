@@ -6,7 +6,7 @@ import notice
 import carte
 
 
-vallee_dropdown = dcc.Dropdown(options=[{'label': vallee['nom'], 'value': vallee['id']}
+vallee_dropdown = dcc.Dropdown(options=[{'label': vallee['nom_vallee'], 'value': vallee['id_vallee']}
                                for vallee in vallees], placeholder="Choisir une vallée")
 
 site_dropdown = dcc.Dropdown(options=[{'label': site['nom_site'], 'value': site['id_site']}

@@ -11,7 +11,7 @@ import tile
 title = html.Div('Etat des zones humides')
 
 vallees = dl.GeoJSON(
-    url=app.get_asset_url('vallee_full.json'),
+    url=app.get_asset_url('vallees.json'),
     hideout={'zh': None, 'site': None, 'vallee': None},
     options=dict(
         style=ns('valleeStateStyle'),
@@ -83,7 +83,6 @@ input = {
 
 
 def process(map_click, vallee, site, zh, hideout):
-    print(map_click, vallee, site, zh)
     if vallee:
         prev_site = hideout['site'] if hideout else None
         prev_vallee = hideout['vallee'] if hideout else None

@@ -23,7 +23,7 @@ defens_xy as (select id_defens, nom_defens, annee, geom, st_xmin(envelope), st_x
 		'id_defens', id_defens, 
 		'nom_defens', nom_defens, 
 		'annee', annee), 
-     'geometry', st_asgeojson (geom)::json,
+     'geometry', st_asgeojson (geom, 6)::json,
      'bbox', json_build_array(st_xmin, st_ymin, st_xmax, st_ymax)
      ) feature
   FROM

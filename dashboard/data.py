@@ -17,8 +17,8 @@ sites_df = DataFrame.from_records([{
 
 
 vallees_df = DataFrame.from_records([{
-    'id_vallee': vallee['id'],
-    'nom_vallee': vallee['nom'],
+    'id_vallee': vallee['id_vallee'],
+    'nom_vallee': vallee['nom_vallee'],
 } for vallee in vallees])
 
 detail = pd.merge(pd.merge(zh_df, sites_df, on='nom_site'),
@@ -27,7 +27,7 @@ detail = pd.merge(pd.merge(zh_df, sites_df, on='nom_site'),
 PNM_bounds = [[43.8, 6.5], [44.5, 7.7]]
 
 vallee_data = {}
-with (assets_path/'vallee_full.json').open('r') as f:
+with (assets_path/'vallees.json').open('r') as f:
     # Maybe drop geometry
     for vallee in json.load(f)['features']:
         b = vallee['bbox']

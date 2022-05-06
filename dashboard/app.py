@@ -61,7 +61,6 @@ def update(carte_input, selection_input, carte_site_input):
     if context is None:
         context = {'zh': None, 'site': None, 'vallee': None}
     context = {'zh': None, 'site': None, 'vallee': None, **context}
-    print(context)
     return {
         'carte': carte.update(**context),
         'carte_site': carte_site.update(**context, input=carte_site_input),
