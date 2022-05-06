@@ -19,16 +19,12 @@ window.PNM = Object.assign({}, window.PNM, {
         layer.bindTooltip(feature.properties.nom_site);
       }
     },
-    valleeFilter: (feature, context) => {
-      let hideout = context.props.hideout;
-      return hideout.vallee == null;
-    },
     siteFilter: (feature, context) => {
       let hideout = context.props.hideout;
       return (
         hideout.site == null &&
-        hideout.vallee != null &&
-        feature.properties.id_vallee == hideout.vallee
+        (hideout.vallee == null ||
+          feature.properties.id_vallee == hideout.vallee)
       );
     },
     zhFilter: (feature, context) => {
@@ -45,7 +41,8 @@ window.PNM = Object.assign({}, window.PNM, {
       if (feature.properties.id_site == context.props.hideout.site) {
         radius = 7;
         let etat = feature.properties.etat;
-        if (etat >= 2 / 3) color = "green";
+        if (etat == null) color = "grey";
+        else if (etat >= 2 / 3) color = "green";
         else if (etat >= 1 / 3) color = "orange";
         else color = "red";
       } else if (
@@ -74,44 +71,50 @@ window.PNM = Object.assign({}, window.PNM, {
           pane: "vallee_pane",
         };
       }
-      let color = "red";
-      let etat = feature.properties.etat;
-      if (etat >= 2 / 3) color = "green";
-      else if (etat >= 1 / 3) color = "orange";
       return {
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.4,
+        color: "grey",
+        fillOpacity: 0.8,
         pane: "vallee_pane",
       };
     },
     valleeStateStyle: (feature, context) => {
-      if (context.props.hideout.vallee != null) {
+      if (context.props.hideout.vallee == null) {
         return {
           color: "white",
           fillOpacity: 0,
+          pane: "detail_vallee_pane",
         };
       }
-      let color = "red";
-      let etat = feature.properties.etat;
-      if (etat >= 2 / 3) color = "green";
-      else if (etat >= 1 / 3) color = "orange";
+      if (context.props.hideout.site == null) {
+        if (context.props.hideout.vallee == feature.properties.id_vallee) {
+          return {
+            color: "yellow",
+            fillOpacity: 0,
+            pane: "detail_vallee_pane_s",
+          };
+        }
+      }
       return {
         color: "white",
-        fillColor: color,
-        fillOpacity: 0.8,
+        fillOpacity: 0,
+        pane: "detail_vallee_pane",
       };
     },
     siteStatePointToLayer: (feature, latlng, context) => {
-      let color = "red";
+      let color = "white";
+      if (feature.properties.n_defens != null) color = "black";
+      let fill_color;
       let etat = feature.properties.etat;
-      if (etat >= 2 / 3) color = "green";
-      else if (etat >= 1 / 3) color = "orange";
+      if (etat == null) fill_color = "grey";
+      else if (etat >= 2 / 3) fill_color = "green";
+      else if (etat >= 1 / 3) fill_color = "orange";
+      else fill_color = "red";
       return L.circleMarker(latlng, {
-        radius: 14,
-        color: "white",
-        fillColor: color,
+        radius: 10,
+        color: color,
+        fillColor: fill_color,
         fillOpacity: 0.8,
+        pane: "detail_site_pane",
       });
     },
 

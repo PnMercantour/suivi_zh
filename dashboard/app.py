@@ -16,7 +16,7 @@ app.layout = dbc.Container([
         dbc.Col([
             html.Img(src=app.get_asset_url(
                 'logo-structure.png'), width='100%'),
-            html.H2("Les zones humides"),
+            html.H1("Les zones humides"),
             selection.component,
             carte.component,
             gestion.component,

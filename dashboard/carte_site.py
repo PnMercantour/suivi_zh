@@ -14,8 +14,9 @@ vallees = dl.GeoJSON(
     url=app.get_asset_url('vallee_full.json'),
     hideout={'zh': None, 'site': None, 'vallee': None},
     options=dict(
-        filter=ns('valleeFilter'),
         style=ns('valleeStateStyle'),
+        # style={'color': 'white', 'fillOpacity': 0,
+        #        'pane': 'detail_vallee_pane'},
         onEachFeature=ns('pourChaqueVallee'),
     ),
 )
@@ -27,7 +28,7 @@ sites = dl.GeoJSON(
         filter=ns('siteFilter'),
         pointToLayer=ns('siteStatePointToLayer'),
         onEachFeature=ns('pourChaqueSite'),
-        pane='markerPane',
+        pane='detail_site_pane',
     ),
 )
 
@@ -55,13 +56,18 @@ defens = dl.GeoJSON(
 map = dl.Map(dl.LayersControl([
     dl.BaseLayer(tile.ign('carte'), name='IGN', checked=False),
     dl.BaseLayer(tile.ign('ortho'), name='Vue aérienne', checked=True),
-    vallees,
-    sites,
+    dl.Pane(
+        dl.Pane(vallees, name='detail_vallee_pane_s',
+                pane='detail_vallee_pane_s', style={'zIndex': 451}),
+        name='detail_vallee_pane',
+        pane='detail_vallee_pane', style={'zIndex': 450}),
+    dl.Pane(sites, name='detail_site_pane',
+            pane='detail_site_pane', style={'zIndex': 460}),
     dl.Overlay(zones_humides, name='Zones humides', checked=True),
     dl.Overlay(defens, name='Défens', checked=True),
 
 ]),
-    style={'width': '100%', 'height': '50vh'},
+    style={'width': '100%', 'height': '60vh'},
     bounds=data.bounds(),
 )
 
@@ -77,11 +83,14 @@ input = {
 
 
 def process(map_click, vallee, site, zh, hideout):
+    print(map_click, vallee, site, zh)
     if vallee:
+        prev_site = hideout['site'] if hideout else None
+        prev_vallee = hideout['vallee'] if hideout else None
         clicked_vallee = vallee['properties']['id_vallee']
         return{
             'site': None,
-            'vallee': clicked_vallee,
+            'vallee': clicked_vallee if (clicked_vallee != prev_vallee or prev_site is not None) else None,
         }
     if site:
         return {
