@@ -129,5 +129,4 @@ dmypy.json
 .pyre/
 
 # JS extension
-assets/dashExtensions_default.js 
 node_modules
