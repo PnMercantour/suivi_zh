@@ -31,15 +31,17 @@ component = dbc.Card([
     ]),
 ])
 
-
-@callback(output=dict(
-    figure=Output(graph, "figure"),
-),
-    inputs=dict(context=carte.context),
-)
-def update_etat(context):
-    id_site = context.get('site')
-    id_vallee = context.get('vallee')
+output = {
+    'figure': Output(graph, "figure")
+}
+# @callback(output=dict(
+#     figure=Output(graph, "figure"),
+# ),
+#     inputs=dict(context=carte.context),
+# )
+def update(state):
+    id_site = state['site']
+    id_vallee = state['vallee']
     if id_site is not None:
         the_df = df[df['id_site'] == id_site]
     elif id_vallee is not None:

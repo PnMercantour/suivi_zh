@@ -56,6 +56,7 @@ app.layout = dbc.Container([
         'selection': selection.output,
         'carte_site': carte_site.output,
         'gestion': gestion.output,
+        'etat': etat.output,
     },
     inputs={
         'client_state': State(client_state, 'data'),
@@ -85,6 +86,7 @@ def update(client_state, carte_input, selection_input, carte_site_input):
         'carte_site': carte_site.update(new_state, client_state, just_reloaded),
         'selection': selection.update(new_state),
         'gestion': gestion.update(new_state),
+        'etat': etat.update(new_state),
     }
 
 
