@@ -1,9 +1,11 @@
 import plotly.express as px
+import plotly.graph_objects as go
 from dash import dcc, html, callback, Output
 import dash_bootstrap_components as dbc
 import pandas
 import numpy as np
 import config
+from data import site_data, zh_data
 import data
 import carte
 
@@ -44,22 +46,31 @@ output = {
 def update(state):
     id_site = state['site']
     id_vallee = state['vallee']
+    aggreg = {}
+    all_sites = False
     if id_site is not None:
-        the_df = df[df['id_site'] == id_site]
+        site_list = [id_site]
     elif id_vallee is not None:
-        the_df = df[df['id_vallee'] == id_vallee]
+        site_list = data.list_sites(id_vallee)
     else:
-        the_df = df
-    figure = px.pie(
-        data_frame=the_df,
-        values='surface',
-        names='etat',
-        color='etat',
-        color_discrete_map=color_pie_chart,
-    )
-    # figure = px.bar(the_df, x='nom_site', y='surface', color= 'etat', color_discrete_map=color_pie_chart)
-    # figure.update_traces(hovertemplate = "%{values} m2")
-    # figure.update_traces(hovertemplate =None)
+        all_sites = True
+    for zh in zh_data.values():
+        if all_sites or (zh['id_site'] in site_list):
+            aggreg[zh['etat']] = zh['surface'] + aggreg.get(zh['etat'], 0)
+    values = [
+        aggreg.get('bon', 0),
+        aggreg.get('moyen', 0),
+        aggreg.get('mauvais', 0),
+    ]
+
+    fig = go.Figure(go.Pie(
+        sort=False,
+        values=values,
+        labels=['bon', 'moyen', 'mauvais'],
+        marker=dict(colors=['green', 'orange', 'red', ]),
+        hovertemplate="<br>Surface: %{text}</br>",
+        text=[str(value) + ' m2' for value in values],
+    ))
     return {
-        'figure': figure,
+        'figure': fig,
     }

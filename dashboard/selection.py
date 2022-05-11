@@ -1,16 +1,15 @@
 import dash_bootstrap_components as dbc
 from dash import Input, Output, callback, callback_context, html, no_update, dcc
-from config import vallees, sites
-from data import get_site_vallee
+from data import get_site_vallee, vallee_data, site_data
 import notice
 import carte
 
 
 vallee_dropdown = dcc.Dropdown(options=[{'label': vallee['nom_vallee'], 'value': vallee['id_vallee']}
-                               for vallee in vallees], placeholder="Choisir une vallée")
+                               for vallee in vallee_data.values()], placeholder="Choisir une vallée")
 
 site_dropdown = dcc.Dropdown(options=[{'label': site['nom_site'], 'value': site['id_site']}
-                             for site in sites], placeholder="Choisir un site")
+                             for site in site_data.values()], placeholder="Choisir un site")
 
 component = dbc.Card([
     dbc.CardHeader("Zone d'étude"),
@@ -61,10 +60,10 @@ def update(state):
         return {
             'vallee': None,
             'site': None,
-            'site_options': [{'label': site['nom_site'], 'value': site['id_site']} for site in sites]
+            'site_options': [{'label': site['nom_site'], 'value': site['id_site']} for site in site_data.values()]
         }
     return {
         'vallee': state['vallee'],
         'site': state['site'],
-        'site_options': [{'label': site['nom_site'], 'value': site['id_site']} for site in sites if site['id_vallee'] == state['vallee']]
+        'site_options': [{'label': site['nom_site'], 'value': site['id_site']} for site in site_data.values() if site['id_vallee'] == state['vallee']]
     }

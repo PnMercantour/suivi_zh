@@ -35,6 +35,13 @@ with (assets_path/'sites.json').open('r') as f:
             'etat': p['etat'],
         }
 
+zh_data = {}
+with (assets_path/'zh.json').open('r') as f:
+    # Maybe drop geometry
+    for zh in json.load(f)['features']:
+        p = zh['properties']
+        zh_data[p['id_zh']] = p
+
 zh_df = pd.read_csv(data_path / 'zh.csv', sep=';')
 zh_df.drop(columns=['geojson'], inplace=True)
 zh_df.columns = ['id_zh', 'nom_site', 'surface', 'etat']
