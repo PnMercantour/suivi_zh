@@ -36,7 +36,7 @@ map = dl.Map(dl.LayersControl([
     dl.BaseLayer(tile.ign('carte'), name='IGN', checked=False),
     dl.BaseLayer(tile.stamen('toner'), name='Noir et blanc', checked=True),
     dl.Pane(vallees, name='vallee_pane',
-            pane='vallee_pane', style={'zIndex': '(450)'}),
+            pane='vallee_pane', style={'zIndex': 450}),
     dl.Pane(sites, name='site_pane', pane='site_pane', style={'zIndex': 460}),
 ]),
     id='map',
@@ -49,35 +49,28 @@ input = {
     'map_click': Input(map, 'click_lat_lng'),
     'vallee': Input(vallees, 'click_feature'),
     'site': Input(sites, 'click_feature'),
-    'hideout': Input(sites, 'hideout'),
+    # 'hideout': Input(sites, 'hideout'),
 }
 
 
-def process(map_click, vallee, site, hideout):
-    triggers = [trigger['prop_id'] for trigger in callback_context.triggered]
-    if any([sites.id in trigger for trigger in triggers]):
-        if site:
-            prev_site = hideout['site'] if hideout else None
-            clicked_site = site['properties']['id_site']
-            return{
-                'site': clicked_site if clicked_site != prev_site else None,
-                'vallee': site['properties']['id_vallee'],
-            }
-    if any([vallees.id in trigger for trigger in triggers]):
-        if vallee:
-            prev_site = hideout['site'] if hideout else None
-            prev_vallee = hideout['vallee'] if hideout else None
-            clicked_vallee = vallee['properties']['id_vallee']
-            return{
-                'site': None,
-                'vallee': clicked_vallee if (clicked_vallee != prev_vallee or prev_site is not None) else None,
-            }
-    if any([map.id in trigger for trigger in triggers]):
-        if map:
-            return{
-                'site': None,
-                'vallee': None,
-            }
+def process(previous_state, map_click, vallee, site):
+    if site:
+        clicked_site = site['properties']['id_site']
+        return {
+            'vallee': site['properties']['id_vallee'],
+            'site': clicked_site if clicked_site != previous_state['site'] else None,
+        }
+    if vallee:
+        clicked_vallee = vallee['properties']['id_vallee']
+        return{
+            'vallee': clicked_vallee if (clicked_vallee != previous_state['vallee'] or previous_state['site'] is not None) else None,
+            'site': None,
+        }
+    if map_click:
+        return {
+            'vallee': None,
+            'site': None,
+        }
     return None
 
 
@@ -91,11 +84,11 @@ output = {
 }
 
 
-def update(zh, site, vallee):
+def update(state):
     return {
-        'hideout': {'site': site, 'vallee': vallee},
-        'vallee_hideout': {'site': site, 'vallee': vallee},
-        'bounds': data.bounds(vallee=vallee),
+        'hideout': {'site': state['site'], 'vallee': state['vallee']},
+        'vallee_hideout': {'site': state['site'], 'vallee': state['vallee']},
+        'bounds': data.bounds(vallee=state['vallee']),
         'map_click': None,
         'vallee_click': None,
         'site_click': None,

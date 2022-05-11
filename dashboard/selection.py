@@ -33,18 +33,18 @@ def process(vallee, site):
     if any([site_dropdown.id in trigger for trigger in triggers]):
         if site:
             return{
+                'vallee': get_site_vallee(site),
                 'site': site,
-                'vallee': get_site_vallee(site)
             }
         else:
             return{
-                'site': None,
                 'vallee': vallee,
+                'site': None,
             }
     if any([vallee_dropdown.id in trigger for trigger in triggers]):
         return{
-            'site': None,
             'vallee': vallee,
+            'site': None,
         }
     return None
 
@@ -56,15 +56,15 @@ output = {
 }
 
 
-def update(vallee, site, zh):
-    if vallee is None:
+def update(state):
+    if state['vallee'] is None:
         return {
             'vallee': None,
             'site': None,
             'site_options': [{'label': site['nom_site'], 'value': site['id_site']} for site in sites]
         }
     return {
-        'vallee': vallee,
-        'site': site,
-        'site_options': [{'label': site['nom_site'], 'value': site['id_site']} for site in sites if site['id_vallee'] == vallee]
+        'vallee': state['vallee'],
+        'site': state['site'],
+        'site_options': [{'label': site['nom_site'], 'value': site['id_site']} for site in sites if site['id_vallee'] == state['vallee']]
     }

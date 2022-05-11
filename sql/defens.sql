@@ -7,14 +7,13 @@
 -- https://datatracker.ietf.org/doc/html/rfc7946
 
 with defens as (
-	select  id id_defens, 
-	nom_defens, 
+	select  defens.id id_defens, 
+	nom_defens,
+  site.id id_site,
 	"annee impl" annee, 
-	st_transform(geom, 4326) geom, 
-	box2d(st_transform(geom, 4326)) envelope 
-	from eau_zh.defens),
-defens_xy as (select id_defens, nom_defens, annee, geom, st_xmin(envelope), st_xmax(envelope), st_ymin(envelope), st_ymax(envelope) from defens)
-,
+	st_transform(defens.geom, 4326) geom, 
+	box2d(st_transform(defens.geom, 4326)) envelope 
+	from eau_zh.defens join eau_zh.site using (nom_site)),
  features AS (
   SELECT
     json_build_object(
@@ -22,12 +21,13 @@ defens_xy as (select id_defens, nom_defens, annee, geom, st_xmin(envelope), st_x
     'properties', json_build_object(
 		'id_defens', id_defens, 
 		'nom_defens', nom_defens, 
+    'id_site', id_site,
 		'annee', annee), 
      'geometry', st_asgeojson (geom, 6)::json,
-     'bbox', json_build_array(st_xmin, st_ymin, st_xmax, st_ymax)
+     'bbox', json_build_array(st_xmin(envelope), st_ymin(envelope), st_xmax(envelope), st_ymax(envelope))
      ) feature
   FROM
-    defens_xy
+    defens
 )
 SELECT
   json_build_object('type', 'FeatureCollection', 'features', json_agg(feature))::text geojson

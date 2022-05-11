@@ -1,4 +1,4 @@
-from dash import callback, callback_context, html
+from dash import callback, callback_context, html, dcc, Input, State, Output
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 
@@ -10,7 +10,10 @@ import gestion
 # import habitat
 import etat
 
+client_state = dcc.Store(id='zh_client_state', storage_type='local')
+
 app.layout = dbc.Container([
+    client_state,
     html.Div(style={'height': '3vh'}),
     dbc.Row([
         dbc.Col([
@@ -42,32 +45,40 @@ app.layout = dbc.Container([
 
 @callback(
     output={
+        'client_state': Output(client_state, 'data'),
         'carte': carte.output,
         'selection': selection.output,
         'carte_site': carte_site.output
     },
     inputs={
+        'client_state': State(client_state, 'data'),
         'carte_input': carte.input,
         'selection_input': selection.input,
         'carte_site_input': carte_site.input
     }
 )
-def update(carte_input, selection_input, carte_site_input):
-    context = carte.process(**carte_input)
-    if context is None:
-        context = selection.process(**selection_input)
-    if context is None:
-        context = carte_site.process(**carte_site_input)
-    if context is None:
-        context = {'zh': None, 'site': None, 'vallee': None}
-    context = {'zh': None, 'site': None, 'vallee': None, **context}
+def update(client_state, carte_input, selection_input, carte_site_input):
+    if client_state is None: # No cookie, needs initialization
+        client_state= {
+            'vallee':None,
+            'site':None,
+            'zh':None,
+        }
+    changes = selection.process(**selection_input)
+    if changes is None:
+        changes = carte.process(client_state, **carte_input)
+    if changes is None:
+        changes = carte_site.process(client_state, **carte_site_input)
+    new_state= client_state if changes is None else {**client_state, **changes}
     return {
-        'carte': carte.update(**context),
-        'carte_site': carte_site.update(**context, input=carte_site_input),
-        'selection': selection.update(**context)
+        'client_state': new_state,
+        'carte': carte.update(new_state),
+        'carte_site': carte_site.update(new_state, client_state, changes is None),
+        'selection': selection.update(new_state)
     }
 
-server=app.server
+
+server = app.server
 
 if __name__ == "__main__":
     app.run_server(debug=True, host='0.0.0.0')

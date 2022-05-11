@@ -1,23 +1,10 @@
 window.PNM = Object.assign({}, window.PNM, {
   zh: {
     pourChaqueVallee: (feature, layer) => {
-      if (!feature.properties) {
-        return;
-      }
-      if (feature.properties.nom) {
-        layer.bindTooltip(feature.properties.nom);
-      }
-      if (feature.properties.nom_vallee) {
-        layer.bindTooltip(feature.properties.nom_vallee);
-      }
+      layer.bindTooltip(feature.properties.nom_vallee);
     },
     pourChaqueSite: (feature, layer) => {
-      if (!feature.properties) {
-        return;
-      }
-      if (feature.properties.nom_site) {
-        layer.bindTooltip(feature.properties.nom_site);
-      }
+      layer.bindTooltip(feature.properties.nom_site);
     },
     siteFilter: (feature, context) => {
       let hideout = context.props.hideout;
@@ -29,11 +16,11 @@ window.PNM = Object.assign({}, window.PNM, {
     },
     zhFilter: (feature, context) => {
       let hideout = context.props.hideout;
-      return hideout.site != null;
+      return feature.properties.id_site == hideout.site;
     },
     defensFilter: (feature, context) => {
       let hideout = context.props.hideout;
-      return hideout.site != null;
+      return feature.properties.id_site == hideout.site;
     },
     siteSituationToLayer: (feature, latlng, context) => {
       let color = "grey",
@@ -118,19 +105,26 @@ window.PNM = Object.assign({}, window.PNM, {
       });
     },
 
-    zhColor: (feature, context) => {
+    zhStyle: (feature, context) => {
       const colormap = { bon: "green", moyen: "orange", mauvais: "red" };
-      if (context.props.hideout.zh) {
-        if (feature.properties.id == context.props.hideout.zh) {
+      if (context.props.hideout.zh != null) {
+        if (feature.properties.id_zh == context.props.hideout.zh) {
           return {
-            fillColor: colormap[feature.properties.etat_zh],
-            fillOpacity: 1,
+            color: "yellow",
+            fillColor: colormap[feature.properties.etat],
+            fillOpacity: 0.8,
           };
         } else {
-          return { color: colormap[feature.properties.etat_zh] };
+          return {
+            color: colormap[feature.properties.etat],
+            fillOpacity: 0.2,
+          };
         }
       } else {
-        return { color: colormap[feature.properties.etat_zh], fillOpacity: 1 };
+        return {
+          color: colormap[feature.properties.etat],
+          fillOpacity: 0.5,
+        };
       }
     },
   },

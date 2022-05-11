@@ -12,7 +12,11 @@ title = html.Div('Etat des zones humides')
 
 vallees = dl.GeoJSON(
     url=app.get_asset_url('vallees.json'),
-    hideout={'zh': None, 'site': None, 'vallee': None},
+    hideout={
+        'vallee': None,
+        'site': None,
+        'zh': None,
+    },
     options=dict(
         style=ns('valleeStateStyle'),
         # style={'color': 'white', 'fillOpacity': 0,
@@ -23,7 +27,11 @@ vallees = dl.GeoJSON(
 
 sites = dl.GeoJSON(
     url=app.get_asset_url('sites.json'),
-    hideout={'zh': None, 'site': None, 'vallee': None},
+    hideout={
+        'vallee': None,
+        'site': None,
+        'zh': None,
+    },
     options=dict(
         filter=ns('siteFilter'),
         pointToLayer=ns('siteStatePointToLayer'),
@@ -33,9 +41,15 @@ sites = dl.GeoJSON(
 )
 
 zones_humides = dl.GeoJSON(
-    hideout={'zh': None, 'site': None, 'vallee': None},
+    url=app.get_asset_url('zh.json'),
+    hideout={
+        'vallee': None,
+        'site': None,
+        'zh': None,
+    },
     options=dict(
-        style=ns('zhColor'),
+        filter=ns('zhFilter'),
+        style=ns('zhStyle'),
         color='blue',
         fillOpacity=0.4,
         pane="markerPane",
@@ -44,7 +58,11 @@ zones_humides = dl.GeoJSON(
 
 defens = dl.GeoJSON(
     url=app.get_asset_url('defens.json'),
-    hideout={'zh': None, 'site': None, 'vallee': None},
+    hideout={
+        'vallee': None,
+        'site': None,
+        'zh': None,
+    },
     options=dict(
         filter=ns('defensFilter'),
         style={
@@ -78,36 +96,48 @@ input = {
     'vallee': Input(vallees, 'click_feature'),
     'site': Input(sites, 'click_feature'),
     'zh': Input(zones_humides, 'click_feature'),
-    'hideout': Input(zones_humides, 'hideout'),
 }
 
 
-def process(map_click, vallee, site, zh, hideout):
+def process(previous_state, map_click, vallee, site, zh):
     if vallee:
-        prev_site = hideout['site'] if hideout else None
-        prev_vallee = hideout['vallee'] if hideout else None
+        prev_site = previous_state['site']
+        prev_vallee = previous_state['vallee']
         clicked_vallee = vallee['properties']['id_vallee']
         return{
-            'site': None,
             'vallee': clicked_vallee if (clicked_vallee != prev_vallee or prev_site is not None) else None,
+            'site': prev_site if (clicked_vallee == prev_vallee and previous_state['zh'] is not None) else None,
+            'zh': None,
         }
     if site:
         return {
+            'vallee': site['properties']['id_vallee'],
             'site': site['properties']['id_site'],
-            'vallee': hideout['vallee'],
+            'zh': None,
         }
     if zh:
-        prev_zh = hideout['zh'] if hideout else None
-        clicked_zh = zh['properties']['id']
+        prev_zh = previous_state['zh']
+        clicked_zh = zh['properties']['id_zh']
         new_zh = clicked_zh if clicked_zh != prev_zh else None
-        return {**hideout, 'zh': new_zh}
+        return {
+            'zh': new_zh,
+        }
     if map_click:
-        if hideout['zh']:
-            return{**hideout, 'zh': None}
-        if hideout['site']:
-            return{**hideout, 'site': None, 'zh': None}
-        if hideout['vallee']:
-            return{'vallee': None, 'site': None, 'zh': None}
+        if previous_state['zh']:
+            return{
+                'zh': None,
+            }
+        if previous_state['site']:
+            return{
+                'site': None,
+                'zh': None,
+            }
+        if previous_state['vallee']:
+            return{
+                'vallee': None,
+                'site': None,
+                'zh': None,
+            }
     return None
 
 
@@ -128,7 +158,6 @@ output = {
     'site_click': Output(sites, 'click_feature'),
     'zh_click': Output(zones_humides, 'click_feature'),
     'bounds': Output(map, 'bounds'),
-    'url': Output(zones_humides, 'url'),
     'site_hideout': Output(sites, 'hideout'),
     'vallee_hideout': Output(vallees, 'hideout'),
     'defens_hideout': Output(defens, 'hideout'),
@@ -136,8 +165,12 @@ output = {
 }
 
 
-def update(zh, site, vallee, input):
-    same_context = input['hideout']['site'] == site and input['hideout']['vallee'] == vallee
+def update(new_state, old_state, force_update):
+    vallee = new_state['vallee']
+    site = new_state['site']
+    zh = new_state['zh']
+    same_context = not force_update and vallee is not None and site == old_state[
+        'site'] and vallee == old_state['vallee']
     return {
         'hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'defens_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
@@ -145,7 +178,6 @@ def update(zh, site, vallee, input):
         'vallee_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'title': no_update if same_context else make_title(site=site, vallee=vallee, zh=zh),
         'bounds': no_update if same_context else data.bounds(site=site, vallee=vallee),
-        'url': app.get_asset_url('sites/' + str(site) + '.json') if site is not None else None,
         'map_click': None,
         'vallee_click': None,
         'site_click': None,
