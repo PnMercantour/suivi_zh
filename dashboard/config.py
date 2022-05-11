@@ -33,34 +33,6 @@ app = Dash(__name__, title='Zones humides', external_stylesheets=[
 
 ns = Namespace('PNM', 'zh')
 
-
-def featurePropertiesFromJson(kind):
-    with (assets_path / f'{kind}.json').open('r') as file:
-        json_data = json.load(file)
-        return [feature['properties'] for feature in json_data['features']]
-
-
-sites = featurePropertiesFromJson('sites')
-vallees = featurePropertiesFromJson('vallees')
-
-
-def get_properties(id, list):
-    if id is None:
-        return None
-    for item in list:
-        if item['id'] == int(id):
-            return item
-    return None
-
-
-def get_vallee_properties(vallee_id):
-    return get_properties(vallee_id, vallees)
-
-
-def get_vallee_name(vallee_id):
-    return get_properties(vallee_id, vallees)['nom']
-
-
 print('Running', app_name)
 print('data:', data_path)
 print('assets', assets_path)

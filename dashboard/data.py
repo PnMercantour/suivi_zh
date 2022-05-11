@@ -3,28 +3,7 @@ import csv
 import pandas as pd
 import numpy as np
 from pandas import DataFrame
-from config import data_path, assets_path, vallees, sites
-
-zh_df = pd.read_csv(data_path / 'zh.csv', sep=';')
-zh_df.drop(columns=['geojson'], inplace=True)
-zh_df.columns = ['id_zh', 'nom_site', 'surface', 'etat']
-
-sites_df = DataFrame.from_records([{
-    'id_site': site['id_site'],
-    'nom_site': site['nom_site'],
-    'id_vallee':site['id_vallee'],
-} for site in sites])
-
-
-vallees_df = DataFrame.from_records([{
-    'id_vallee': vallee['id_vallee'],
-    'nom_vallee': vallee['nom_vallee'],
-} for vallee in vallees])
-
-detail = pd.merge(pd.merge(zh_df, sites_df, on='nom_site'),
-                  vallees_df, on='id_vallee')
-
-PNM_bounds = [[43.8, 6.5], [44.5, 7.7]]
+from config import data_path, assets_path
 
 vallee_data = {}
 with (assets_path/'vallees.json').open('r') as f:
@@ -48,19 +27,50 @@ with (assets_path/'sites.json').open('r') as f:
             'id_site': p['id_site'],
             'bounds': [[b[1], b[0]], [b[3], b[2]]],
             'nom_site': p['nom_site'],
-            'id_vallee': p['id_vallee']
+            'id_vallee': p['id_vallee'],
+            'n_zh': p['n_zh'],
+            's_zh': p['s_zh'],
+            'n_defens': p['n_defens'],
+            's_defens': p['s_defens'],
+            'etat': p['etat'],
         }
+
+zh_df = pd.read_csv(data_path / 'zh.csv', sep=';')
+zh_df.drop(columns=['geojson'], inplace=True)
+zh_df.columns = ['id_zh', 'nom_site', 'surface', 'etat']
+
+sites_df = DataFrame.from_records([{
+    'id_site': site['id_site'],
+    'nom_site': site['nom_site'],
+    'id_vallee':site['id_vallee'],
+} for site in site_data.values()])
+
+
+vallees_df = DataFrame.from_records([{
+    'id_vallee': vallee['id_vallee'],
+    'nom_vallee': vallee['nom_vallee'],
+} for vallee in vallee_data.values()])
+
+detail = pd.merge(pd.merge(zh_df, sites_df, on='nom_site'),
+                  vallees_df, on='id_vallee')
+
+PNM_bounds = [[43.8, 6.5], [44.5, 7.7]]
+
+
 
 def get_site_name(site_id):
     if site_id is not None:
         return site_data[int(site_id)]['nom_site']
 
+
 def get_site_vallee(site_id):
     if site_id is not None:
         return site_data[int(site_id)]['id_vallee']
 
+
 def list_sites(vallee_id):
     return [site['id_site'] for site in site_data.values() if site['id_vallee'] == int(vallee_id)]
+
 
 def bounds(site=None, vallee=None):
     if site is not None:

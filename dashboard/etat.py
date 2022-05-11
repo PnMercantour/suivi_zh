@@ -39,6 +39,8 @@ output = {
 # ),
 #     inputs=dict(context=carte.context),
 # )
+
+
 def update(state):
     id_site = state['site']
     id_vallee = state['vallee']
@@ -48,12 +50,16 @@ def update(state):
         the_df = df[df['id_vallee'] == id_vallee]
     else:
         the_df = df
+    figure = px.pie(
+        data_frame=the_df,
+        values='surface',
+        names='etat',
+        color='etat',
+        color_discrete_map=color_pie_chart,
+    )
+    # figure = px.bar(the_df, x='nom_site', y='surface', color= 'etat', color_discrete_map=color_pie_chart)
+    # figure.update_traces(hovertemplate = "%{values} m2")
+    # figure.update_traces(hovertemplate =None)
     return {
-        'figure': px.pie(
-            data_frame=the_df,
-            values='surface',
-            names='etat',
-            color='etat',
-            color_discrete_map=color_pie_chart,
-        ),
+        'figure': figure,
     }
