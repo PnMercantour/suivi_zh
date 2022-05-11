@@ -65,9 +65,11 @@ defens = dl.GeoJSON(
     },
     options=dict(
         filter=ns('defensFilter'),
+        onEachFeature=ns('defensTooltip'),
+        pane='shadowPane',
         style={
             'color': 'black',
-            'fillOpacity': 0
+            'fillOpacity': 0.2,
         }
     )
 )

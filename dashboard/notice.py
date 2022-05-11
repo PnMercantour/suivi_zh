@@ -12,12 +12,12 @@ with (data_path / 'notice.csv').open('r') as csvfile:
 
 
 def filter(id_site=None, id_vallee=None):
-    if id_site is None and id_vallee is None:
-        return notices
     if id_site is not None:
         site_list = [str(id_site)]
     elif id_vallee is not None:
         site_list = [str(id_site) for id_site in list_sites(id_vallee)]
+    else:
+        return notices
     return [notice for notice in notices if notice['id_site'] in site_list]
 
 
@@ -36,16 +36,15 @@ component = dbc.Table([
     notice_table,
 ])
 
+output = Output(notice_table, 'children')
 
-def update_component(context):
-    id_site = context.get('site')
-    id_vallee = context.get('vallee')
+
+def update(state):
+    id_site = state['site']
+    id_vallee = state['vallee']
     return [html.Tr([
         html.Td(get_site_name(notice['id_site'])),
         html.Td(notice['date']),
         html.Td(dbc.Button(html.I(className="fas fa-solid fa-download"), external_link=True,
                 href=get_url(notice), target='_blank', title=notice['nom'])),
     ]) for notice in filter(id_site, id_vallee)]
-
-
-output = Output(notice_table, 'children')

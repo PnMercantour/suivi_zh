@@ -22,19 +22,25 @@ app.layout = dbc.Container([
             html.H1("Les zones humides"),
             selection.component,
             carte.component,
-            gestion.component,
+            dbc.Row([
+                dbc.Col(html.Img(src=app.get_asset_url(
+                'logo_rfae-recadre.jpg'), width='100%'), md=6),
+                dbc.Col(html.Img(src=app.get_asset_url(
+                'picto_engage_pour_leau_valide.png'), width='50%'), md=6),
+            ])
         ], md=3),
         dbc.Col([
             carte_site.component,
-            # dbc.Row([
+            dbc.Row([
             #     # dbc.Col(gestion.component, md=6),
             #     dbc.Col(habitat.component, md=6),
-            #     dbc.Col(etat.component, md=6),
-            # ]),
+                dbc.Col(etat.component, md=6),
+            ]),
         ], md=6,
         ),
         dbc.Col([
-            etat.component,
+            # etat.component,
+            gestion.component,
             # habitat.component,
         ], md=3)
     ],
@@ -48,7 +54,8 @@ app.layout = dbc.Container([
         'client_state': Output(client_state, 'data'),
         'carte': carte.output,
         'selection': selection.output,
-        'carte_site': carte_site.output
+        'carte_site': carte_site.output,
+        'gestion': gestion.output,
     },
     inputs={
         'client_state': State(client_state, 'data'),
@@ -58,23 +65,26 @@ app.layout = dbc.Container([
     }
 )
 def update(client_state, carte_input, selection_input, carte_site_input):
-    if client_state is None: # No cookie, needs initialization
-        client_state= {
-            'vallee':None,
-            'site':None,
-            'zh':None,
+    if client_state is None:  # No cookie, needs initialization
+        client_state = {
+            'vallee': None,
+            'site': None,
+            'zh': None,
         }
     changes = selection.process(**selection_input)
     if changes is None:
         changes = carte.process(client_state, **carte_input)
     if changes is None:
         changes = carte_site.process(client_state, **carte_site_input)
-    new_state= client_state if changes is None else {**client_state, **changes}
+    just_reloaded = changes is None # no trigger, every component to be updated with last known client state (cookie)
+    new_state = client_state if just_reloaded else {
+        **client_state, **changes}
     return {
         'client_state': new_state,
         'carte': carte.update(new_state),
-        'carte_site': carte_site.update(new_state, client_state, changes is None),
-        'selection': selection.update(new_state)
+        'carte_site': carte_site.update(new_state, client_state, just_reloaded),
+        'selection': selection.update(new_state),
+        'gestion': gestion.update(new_state),
     }
 
 

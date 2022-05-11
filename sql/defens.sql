@@ -10,6 +10,7 @@ with defens as (
 	select  defens.id id_defens, 
 	nom_defens,
   site.id id_site,
+  surface,
 	"annee impl" annee, 
 	st_transform(defens.geom, 4326) geom, 
 	box2d(st_transform(defens.geom, 4326)) envelope 
@@ -22,6 +23,7 @@ with defens as (
 		'id_defens', id_defens, 
 		'nom_defens', nom_defens, 
     'id_site', id_site,
+    'surface', surface,
 		'annee', annee), 
      'geometry', st_asgeojson (geom, 6)::json,
      'bbox', json_build_array(st_xmin(envelope), st_ymin(envelope), st_xmax(envelope), st_ymax(envelope))

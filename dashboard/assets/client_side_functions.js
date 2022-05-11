@@ -6,6 +6,12 @@ window.PNM = Object.assign({}, window.PNM, {
     pourChaqueSite: (feature, layer) => {
       layer.bindTooltip(feature.properties.nom_site);
     },
+    defensTooltip: (feature, layer) => {
+      console.log(feature);
+      layer.bindTooltip(
+        `défens ${feature.properties.nom_defens}: ${feature.properties.surface} m2 (${feature.properties.annee})`
+      );
+    },
     siteFilter: (feature, context) => {
       let hideout = context.props.hideout;
       return (

@@ -6,18 +6,18 @@ import carte
 
 
 component = dbc.Card([
-    dbc.CardHeader('Notices de gestion'),
+    dbc.CardHeader('Mesures de gestion'),
     dbc.CardBody([
         notice.component,
     ]),
 ])
 
+output = {
+    'notice': notice.output,
+}
 
-@callback(output=dict(
-    notice=notice.output,
-),
-    inputs=dict(context=carte.context))
-def update_gestion(context):
+
+def update(state):
     return {
-        'notice': notice.update_component(context),
+        'notice': notice.update(state),
     }
