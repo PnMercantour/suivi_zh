@@ -7,7 +7,7 @@ import selection
 import carte
 import carte_site
 import gestion
-# import habitat
+import habitat
 import etat
 
 client_state = dcc.Store(id='zh_client_state', storage_type='local')
@@ -34,7 +34,8 @@ app.layout = dbc.Container([
             dbc.Row([
             #     # dbc.Col(gestion.component, md=6),
             #     dbc.Col(habitat.component, md=6),
-                dbc.Col(etat.component, md=6),
+                dbc.Col(etat.component, md=4),
+                dbc.Col(habitat.component, md=8),
             ]),
         ], md=6,
         ),
@@ -57,6 +58,7 @@ app.layout = dbc.Container([
         'carte_site': carte_site.output,
         'gestion': gestion.output,
         'etat': etat.output,
+        'habitat': habitat.output,
     },
     inputs={
         'client_state': State(client_state, 'data'),
@@ -87,6 +89,7 @@ def update(client_state, carte_input, selection_input, carte_site_input):
         'selection': selection.update(new_state),
         'gestion': gestion.update(new_state),
         'etat': etat.update(new_state),
+        'habitat': habitat.update(new_state),
     }
 
 

@@ -5,42 +5,39 @@ import numpy as np
 from pandas import DataFrame
 from config import data_path, assets_path
 
-vallee_data = {}
+
+def to_dict(l, key):
+    "builds a dict from an iterable <l>, indexing on <key>"
+    return {i[key]: i for i in l}
+
+
+def to_bounds(b):
+    "converts a standard bbox into leaflet bounds object"
+    return [[b[1], b[0]], [b[3], b[2]]]
+
+
 with (assets_path/'vallees.json').open('r') as f:
-    # Maybe drop geometry
-    for vallee in json.load(f)['features']:
-        b = vallee['bbox']
-        p = vallee['properties']
-        vallee_data[p['id_vallee']] = {
-            'id_vallee': p['id_vallee'],
-            'bounds': [[b[1], b[0]], [b[3], b[2]]],
-            'nom_vallee': p['nom_vallee'],
-        }
+    vallee_data = to_dict([
+        dict(s['properties'], bounds=to_bounds(s['bbox'])) for s in json.load(f)['features']
+    ], 'id_vallee')
 
-site_data = {}
+
 with (assets_path/'sites.json').open('r') as f:
-    # Maybe drop geometry
-    for site in json.load(f)['features']:
-        b = site['bbox']
-        p = site['properties']
-        site_data[p['id_site']] = {
-            'id_site': p['id_site'],
-            'bounds': [[b[1], b[0]], [b[3], b[2]]],
-            'nom_site': p['nom_site'],
-            'id_vallee': p['id_vallee'],
-            'n_zh': p['n_zh'],
-            's_zh': p['s_zh'],
-            'n_defens': p['n_defens'],
-            's_defens': p['s_defens'],
-            'etat': p['etat'],
-        }
+    site_data = to_dict([
+        dict(s['properties'], bounds=to_bounds(s['bbox'])) for s in json.load(f)['features']
+    ], 'id_site')
 
-zh_data = {}
+
 with (assets_path/'zh.json').open('r') as f:
-    # Maybe drop geometry
-    for zh in json.load(f)['features']:
-        p = zh['properties']
-        zh_data[p['id_zh']] = p
+    zh_data = to_dict([zh['properties']
+                      for zh in json.load(f)['features']], 'id_zh')
+
+
+with (assets_path/'habitat.json').open('r') as f:
+    habitat_data = json.load(f)
+
+with (assets_path/'ref_habitat.json').open('r') as f:
+    ref_habitat = to_dict(json.load(f), 'habitat')
 
 zh_df = pd.read_csv(data_path / 'zh.csv', sep=';')
 zh_df.drop(columns=['geojson'], inplace=True)
@@ -62,7 +59,6 @@ detail = pd.merge(pd.merge(zh_df, sites_df, on='nom_site'),
                   vallees_df, on='id_vallee')
 
 PNM_bounds = [[43.8, 6.5], [44.5, 7.7]]
-
 
 
 def get_site_name(site_id):

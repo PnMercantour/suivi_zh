@@ -7,6 +7,8 @@
 ```shell
 psql -f sql/site.sql -t -o dashboard/assets/sites.json service=projets
 psql -f sql/defens.sql -t -o dashboard/assets/defens.json service=projets
+psql -f sql/habitat.sql -t -o dashboard/assets/habitat.json service=projets
+
 ```
 construit le fichier global geojson des sites.
 

@@ -6,12 +6,72 @@ window.PNM = Object.assign({}, window.PNM, {
     pourChaqueSite: (feature, layer) => {
       layer.bindTooltip(feature.properties.nom_site);
     },
-    defensTooltip: (feature, layer) => {
-      console.log(feature);
-      layer.bindTooltip(
-        `défens ${feature.properties.nom_defens}: ${feature.properties.surface} m2 (${feature.properties.annee})`
-      );
+
+    siteTooltip: (feature, layer) => {
+      let defens = feature.properties.n_defens
+        ? `
+<br>${feature.properties.n_defens} defens sur ${feature.properties.s_defens} m<sup>2</sup>
+`
+        : "";
+      let surface = feature.properties.s_zh
+        ? `de ${feature.properties.s_zh} m<sup>2</sup>`
+        : "inconnue";
+      let etat = feature.properties.etat;
+      let etat_descr;
+      if (etat == null) etat_descr = "Etat inconnu";
+      else if (etat >= 2 / 3) etat_descr = "Bon état";
+      else if (etat >= 1 / 3) etat_descr = "Etat moyen";
+      else etat_descr = "Etat dégradé";
+      layer.bindTooltip(`
+Site <strong>${feature.properties.nom_site}</strong>
+<br> Etendue ${surface}
+${defens}
+<br>${etat_descr}
+<br><small>Id #${feature.properties.id_site}</small>
+`);
     },
+
+    zhTooltip: (feature, layer) => {
+      let etat = feature.properties.etat;
+      let etat_descr;
+      if (etat == "bon") etat_descr = "Bon état";
+      else if (etat == "moyen") etat_descr = "Etat moyen";
+      else if (etat == "mauvais") etat_descr = "Etat dégradé";
+      else etat_descr = "Etat inconnu";
+      layer.bindTooltip(`
+<strong>Zone humide</strong> 
+<br> ${feature.properties.surface} m<sup>2</sup>
+<br>${etat_descr} 
+<br> <em>${feature.properties.source} (${feature.properties.annee})</em>
+<br><small>Id #${feature.properties.id_zh}</small>
+`);
+    },
+
+    defensTooltip: (feature, layer) => {
+      layer.bindTooltip(`
+Défens <strong>${feature.properties.nom_defens}</strong>
+<br> Surface de ${feature.properties.surface} m<sup>2</sup>
+<br>Mis en place en ${feature.properties.annee}
+<br><small>Id #${feature.properties.id_defens}</small>
+`);
+    },
+
+    ebfTooltip: (feature, layer) => {
+      layer.bindTooltip(`
+<strong>Espace de bon fonctionnement</strong> 
+<br>Etendue de ${Math.round(feature.properties.surface / 10000)} ha
+<br><small>Id #${feature.properties.id_ebf}</small>
+`);
+    },
+
+    rhomeoTooltip: (feature, layer) => {
+      layer.bindTooltip(`
+<strong>Point de mesure Rhomeo</strong> 
+<br>${feature.properties.releves} relevés
+<br><em>${feature.properties.organisme}</em>
+`);
+    },
+
     siteFilter: (feature, context) => {
       let hideout = context.props.hideout;
       return (
@@ -27,6 +87,10 @@ window.PNM = Object.assign({}, window.PNM, {
     defensFilter: (feature, context) => {
       let hideout = context.props.hideout;
       return feature.properties.id_site == hideout.site;
+    },
+    ebfFilter: (feature, context) => {
+      let hideout = context.props.hideout;
+      return hideout.vallee != null;
     },
     siteSituationToLayer: (feature, latlng, context) => {
       let color = "grey",
@@ -108,6 +172,15 @@ window.PNM = Object.assign({}, window.PNM, {
         fillColor: fill_color,
         fillOpacity: 0.8,
         pane: "detail_site_pane",
+      });
+    },
+
+    rhomeoPointToLayer: (feature, latlng, context) => {
+      return L.circleMarker(latlng, {
+        radius: 4,
+        color: "purple",
+        fillOpacity: 0.8,
+        pane: "rhomeo_pane",
       });
     },
 

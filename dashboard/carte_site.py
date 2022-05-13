@@ -35,7 +35,7 @@ sites = dl.GeoJSON(
     options=dict(
         filter=ns('siteFilter'),
         pointToLayer=ns('siteStatePointToLayer'),
-        onEachFeature=ns('pourChaqueSite'),
+        onEachFeature=ns('siteTooltip'),
         pane='detail_site_pane',
     ),
 )
@@ -49,13 +49,13 @@ zones_humides = dl.GeoJSON(
     },
     options=dict(
         filter=ns('zhFilter'),
+        onEachFeature=ns('zhTooltip'),
         style=ns('zhStyle'),
         color='blue',
         fillOpacity=0.4,
         pane="markerPane",
     ),
 )
-
 defens = dl.GeoJSON(
     url=app.get_asset_url('defens.json'),
     hideout={
@@ -73,20 +73,60 @@ defens = dl.GeoJSON(
         }
     )
 )
-map = dl.Map(dl.LayersControl([
-    dl.BaseLayer(tile.ign('carte'), name='IGN', checked=False),
-    dl.BaseLayer(tile.ign('ortho'), name='Vue aérienne', checked=True),
-    dl.Pane(
-        dl.Pane(vallees, name='detail_vallee_pane_s',
-                pane='detail_vallee_pane_s', style={'zIndex': 451}),
-        name='detail_vallee_pane',
-        pane='detail_vallee_pane', style={'zIndex': 450}),
-    dl.Pane(sites, name='detail_site_pane',
-            pane='detail_site_pane', style={'zIndex': 460}),
-    dl.Overlay(zones_humides, name='Zones humides', checked=True),
-    dl.Overlay(defens, name='Défens', checked=True),
 
-]),
+ebf = dl.GeoJSON(
+    url=app.get_asset_url('ebf.json'),
+    hideout={
+        'vallee': None,
+        'site': None,
+        'zh': None,
+    },
+    options=dict(
+        filter=ns('ebfFilter'),
+        onEachFeature=ns('ebfTooltip'),
+        pane='detail_ebf_pane',
+        style={
+            'color': 'blue',
+            'fillOpacity': 0.1,
+        }
+    )
+)
+
+rhomeo = dl.GeoJSON(
+    url=app.get_asset_url('rhomeo.json'),
+    options=dict(
+        pointToLayer=ns('rhomeoPointToLayer'),
+
+        onEachFeature=ns('rhomeoTooltip'),
+        # pane='detail_ebf_pane',
+        # style={
+        #     'color': 'blue',
+        #     'fillOpacity': 0.1,
+        # }
+    )
+)
+
+map = dl.Map(
+    dl.LayersControl([
+        dl.BaseLayer(tile.ign('carte'), name='IGN', checked=False),
+        dl.BaseLayer(tile.ign('ortho'), name='Vue aérienne', checked=True),
+        dl.Pane(
+            dl.Pane(vallees, name='detail_vallee_pane_s',
+                    pane='detail_vallee_pane_s', style={'zIndex': 451}),
+            name='detail_vallee_pane',
+            pane='detail_vallee_pane', style={'zIndex': 450}),
+        dl.Pane(sites, name='detail_site_pane',
+                pane='detail_site_pane', style={'zIndex': 460}),
+        dl.Overlay(dl.Pane(ebf, name='detail_ebf_pane',
+                           pane='detail_ebf_pane', style={'zIndex': 455}),
+                   name='Espaces de bon fonctionnement', checked=False),
+        dl.Overlay(zones_humides, name='Zones humides', checked=True),
+        dl.Overlay(defens, name='Défens', checked=True),
+        dl.Overlay(dl.Pane(rhomeo, name='rhomeo_pane',
+                           pane='rhomeo_pane', style={'zIndex': 600}),
+                   name='Relevés Rhomeo', checked=False),
+
+    ]),
     style={'width': '100%', 'height': '60vh'},
     bounds=data.bounds(),
 )
@@ -145,11 +185,11 @@ def process(previous_state, map_click, vallee, site, zh):
 
 def make_title(zh=None, site=None, vallee=None):
     if vallee is None:
-        return "Etat des zones humides des vallées du Parc national du Mercantour"
+        return "Zones humides du Parc national du Mercantour"
     if site is None:
-        return f"Etat des sites de la vallée {data.vallee_data[vallee]['nom_vallee']}"
+        return f"Zones humides de la vallée {data.vallee_data[vallee]['nom_vallee']}"
 
-    return f"Etat du site {data.site_data[site]['nom_site']} ({data.vallee_data[vallee]['nom_vallee']})"
+    return f"Zones humides du site {data.site_data[site]['nom_site']} ({data.vallee_data[vallee]['nom_vallee']})"
 
 
 # component internal output properties
@@ -163,6 +203,7 @@ output = {
     'site_hideout': Output(sites, 'hideout'),
     'vallee_hideout': Output(vallees, 'hideout'),
     'defens_hideout': Output(defens, 'hideout'),
+    'ebf_hideout': Output(ebf, 'hideout'),
     'title': Output(title, 'children'),
 }
 
@@ -178,6 +219,7 @@ def update(new_state, old_state, force_update):
         'defens_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'site_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'vallee_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
+        'ebf_hideout': {'vallee': vallee},  # don't use site
         'title': no_update if same_context else make_title(site=site, vallee=vallee, zh=zh),
         'bounds': no_update if same_context else data.bounds(site=site, vallee=vallee),
         'map_click': None,
