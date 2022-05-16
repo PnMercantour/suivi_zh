@@ -12,7 +12,7 @@ import tile
 vallees = dl.GeoJSON(
     url=app.get_asset_url('vallees.json'),
     id='vallees',
-    hideout={'zh': None, 'site': None, 'vallee': None},
+    hideout={'vallee': None, 'site': None},
     options=dict(
         style=ns('valleeSituationStyle'),
         onEachFeature=ns('pourChaqueVallee'),
@@ -23,24 +23,35 @@ vallees = dl.GeoJSON(
 sites = dl.GeoJSON(
     url=app.get_asset_url('sites.json'),
     id='sites',
-    hideout={'site': None, 'vallee': None},
+    hideout={'vallee': None, 'site': None},
     options=dict(
+        filter=ns('siteSituationFilter'),
         pointToLayer=ns('siteSituationToLayer'),
-        onEachFeature=ns('pourChaqueSite'),
+        onEachFeature=ns('siteTooltip'),
         pane="site_pane",
     ),
 )
 
 # https://leafletjs.com/reference.html#map-pane
-map = dl.Map(dl.LayersControl([
-    dl.BaseLayer(tile.ign('carte'), name='IGN', checked=False),
-    dl.BaseLayer(tile.stamen('toner'), name='Noir et blanc', checked=True),
+map = dl.Map([
+    tile.stamen('toner'),
     dl.Pane(vallees, name='vallee_pane',
             pane='vallee_pane', style={'zIndex': 450}),
-    dl.Pane(sites, name='site_pane', pane='site_pane', style={'zIndex': 460}),
-]),
+    dl.Pane(
+        dl.Pane(
+            sites,
+            name='site_pane',
+            pane='site_pane',
+            style={'zIndex': 460},
+        ),
+        name='selected_site_pane',
+        pane='selected_site_pane',
+        style={'zIndex': 470},
+    ),
+],
     id='map',
-    bounds=data.bounds(),
+    bounds=data.PNM_bounds,
+    zoomControl=False,
     style={'width': '100%', 'height': '30vh'},
 )
 
@@ -49,7 +60,6 @@ input = {
     'map_click': Input(map, 'click_lat_lng'),
     'vallee': Input(vallees, 'click_feature'),
     'site': Input(sites, 'click_feature'),
-    # 'hideout': Input(sites, 'hideout'),
 }
 
 
@@ -88,7 +98,7 @@ def update(state):
     return {
         'hideout': {'site': state['site'], 'vallee': state['vallee']},
         'vallee_hideout': {'site': state['site'], 'vallee': state['vallee']},
-        'bounds': data.bounds(vallee=state['vallee']),
+        'bounds': data.PNM_bounds,  # reset bounds to initial value
         'map_click': None,
         'vallee_click': None,
         'site_click': None,

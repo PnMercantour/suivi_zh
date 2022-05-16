@@ -3,10 +3,54 @@ window.PNM = Object.assign({}, window.PNM, {
     pourChaqueVallee: (feature, layer) => {
       layer.bindTooltip(feature.properties.nom_vallee);
     },
-    pourChaqueSite: (feature, layer) => {
-      layer.bindTooltip(feature.properties.nom_site);
-    },
 
+    // Situation map
+    siteSituationFilter: (feature, context) => {
+      let hideout = context.props.hideout;
+      return feature.properties.id_site == hideout.site;
+    },
+    siteSituationToLayer: (feature, latlng, context) => {
+      let color = "white",
+        radius = 2,
+        opacity = 1,
+        pane = "site_pane";
+      if (feature.properties.id_site == context.props.hideout.site) {
+        radius = 4;
+        pane = "selected_site_pane";
+        opacity = 1;
+        let etat = feature.properties.etat;
+        if (etat == null) color = "black";
+        else if (etat >= 2 / 3) color = "green";
+        else if (etat >= 1 / 3) color = "orange";
+        else color = "red";
+      }
+      return L.circleMarker(latlng, {
+        pane: "site_pane",
+        color: color,
+        fillColor: color,
+        radius: radius,
+        opacity: opacity,
+        fillOpacity: opacity,
+      });
+    },
+    valleeSituationStyle: (feature, context) => {
+      if (
+        context.props.hideout.site != null ||
+        context.props.hideout.vallee != feature.properties.id_vallee
+      ) {
+        return {
+          color: "grey",
+          fillOpacity: 0.4,
+          pane: "vallee_pane",
+        };
+      }
+      return {
+        color: "grey",
+        fillOpacity: 0.8,
+        pane: "vallee_pane",
+      };
+    },
+    // main map
     siteTooltip: (feature, layer) => {
       let defens = feature.properties.n_defens
         ? `
@@ -92,48 +136,7 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       let hideout = context.props.hideout;
       return hideout.vallee != null;
     },
-    siteSituationToLayer: (feature, latlng, context) => {
-      let color = "grey",
-        radius = 4;
-      if (feature.properties.id_site == context.props.hideout.site) {
-        radius = 7;
-        let etat = feature.properties.etat;
-        if (etat == null) color = "grey";
-        else if (etat >= 2 / 3) color = "green";
-        else if (etat >= 1 / 3) color = "orange";
-        else color = "red";
-      } else if (
-        context.props.hideout.vallee == null ||
-        (feature.properties.id_site != null &&
-          context.props.hideout.vallee == feature.properties.id_vallee)
-      ) {
-        color = "blue";
-      }
-      return L.circleMarker(latlng, {
-        pane: "site_pane",
-        color: color,
-        fillColor: color,
-        radius: radius,
-        fillOpacity: 0.8,
-      });
-    },
-    valleeSituationStyle: (feature, context) => {
-      if (
-        context.props.hideout.site != null ||
-        context.props.hideout.vallee != feature.properties.id_vallee
-      ) {
-        return {
-          color: "grey",
-          fillOpacity: 0.4,
-          pane: "vallee_pane",
-        };
-      }
-      return {
-        color: "grey",
-        fillOpacity: 0.8,
-        pane: "vallee_pane",
-      };
-    },
+
     valleeStateStyle: (feature, context) => {
       if (context.props.hideout.vallee == null) {
         return {
@@ -158,19 +161,21 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       };
     },
     siteStatePointToLayer: (feature, latlng, context) => {
-      let color = "white";
-      if (feature.properties.n_defens != null) color = "black";
       let fill_color;
       let etat = feature.properties.etat;
       if (etat == null) fill_color = "grey";
       else if (etat >= 2 / 3) fill_color = "green";
       else if (etat >= 1 / 3) fill_color = "orange";
       else fill_color = "red";
+
+      let radius = context.props.hideout.vallee ? 10 : 5;
+      let color = (feature.properties.n_defens != null)? 'black': fill_color;
+      
       return L.circleMarker(latlng, {
-        radius: 10,
+        radius: radius,
         color: color,
         fillColor: fill_color,
-        fillOpacity: 0.8,
+        fillOpacity: 1,
         pane: "detail_site_pane",
       });
     },

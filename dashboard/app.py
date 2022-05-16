@@ -14,11 +14,11 @@ client_state = dcc.Store(id='zh_client_state', storage_type='local')
 
 app.layout = dbc.Container([
     client_state,
-    html.Div(style={'height': '3vh'}),
+    html.Div(style={'height': '1vh'}),
     dbc.Row([
         dbc.Col([
             html.Img(src=app.get_asset_url(
-                'logo-structure.png'), width='100%'),
+                'logo-structure.png'), width='80%'),
             html.H1("Les zones humides"),
             selection.component,
             carte.component,
