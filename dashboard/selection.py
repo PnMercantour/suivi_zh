@@ -1,6 +1,6 @@
 import dash_bootstrap_components as dbc
 from dash import Input, Output, callback, callback_context, html, no_update, dcc
-from data import get_site_vallee, vallee_data, site_data
+from data import get_vallee_id, vallee_data, site_data
 import notice
 import carte
 
@@ -32,7 +32,7 @@ def process(vallee, site):
     if any([site_dropdown.id in trigger for trigger in triggers]):
         if site:
             return{
-                'vallee': get_site_vallee(site),
+                'vallee': get_vallee_id(site),
                 'site': site,
             }
         else:

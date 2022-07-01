@@ -10,7 +10,7 @@ import tile
 
 
 vallees = dl.GeoJSON(
-    url=app.get_asset_url('vallees.json'),
+    url=app.get_asset_url('vallee.json'),
     id='vallees',
     hideout={'vallee': None, 'site': None},
     options=dict(
@@ -21,7 +21,7 @@ vallees = dl.GeoJSON(
 )
 
 sites = dl.GeoJSON(
-    url=app.get_asset_url('sites.json'),
+    url=app.get_asset_url('site.json'),
     id='sites',
     hideout={'vallee': None, 'site': None},
     options=dict(

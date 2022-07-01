@@ -2,14 +2,10 @@
 import plotly.graph_objects as go
 from dash import dcc, html, callback, Output
 import dash_bootstrap_components as dbc
-import pandas
-import numpy as np
 import config
-from data import site_data, zh_data
-import data
+from data import zh_data, list_sites
 import carte
 
-df = data.detail
 
 color_pie_chart = {
     'bon': 'green',
@@ -18,13 +14,6 @@ color_pie_chart = {
 }
 
 graph = dcc.Graph(
-    # figure=px.pie(
-    #     data_frame=df,
-    #     values='surface',
-    #     names='etat',
-    #     color='etat',
-    #     color_discrete_map=color_pie_chart,
-    # )
 )
 
 component = dbc.Card([
@@ -47,7 +36,7 @@ def update(state):
     if id_site is not None:
         site_list = [id_site]
     elif id_vallee is not None:
-        site_list = data.list_sites(id_vallee)
+        site_list = list_sites(id_vallee)
     else:
         all_sites = True
     for zh in zh_data.values():
@@ -64,7 +53,6 @@ def update(state):
         values=values,
         labels=['bon', 'moyen', 'mauvais'],
         marker=dict(colors=['green', 'orange', 'red', ]),
-        # rotation=360,
         direction='clockwise',
         hovertemplate="<br>Surface: %{text}</br>",
         text=[str(value) + ' m2' for value in values],

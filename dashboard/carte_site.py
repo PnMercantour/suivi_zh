@@ -11,7 +11,7 @@ import tile
 title = html.Div('Etat des zones humides')
 
 vallees = dl.GeoJSON(
-    url=app.get_asset_url('vallees.json'),
+    url=app.get_asset_url('vallee.json'),
     hideout={
         'vallee': None,
         'site': None,
@@ -26,7 +26,7 @@ vallees = dl.GeoJSON(
 )
 
 sites = dl.GeoJSON(
-    url=app.get_asset_url('sites.json'),
+    url=app.get_asset_url('site.json'),
     hideout={
         'vallee': None,
         'site': None,

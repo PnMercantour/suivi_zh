@@ -1,0 +1,10 @@
+#!/bin/sh
+psql -f sql/defens.sql -t -o dashboard/assets/defens.json service=projets
+psql -f sql/ebf.sql -t -o dashboard/assets/ebf.json service=projets
+psql -f sql/habitat.sql -t -o dashboard/assets/habitat.json service=projets
+psql -f sql/notice.sql -t -o dashboard/assets/notice.json service=projets
+psql -f sql/ref_habitat.sql -t -o dashboard/assets/ref_habitat.json service=projets
+psql -f sql/rhomeo.sql -t -o dashboard/assets/rhomeo.json service=projets
+psql -f sql/site.sql -t -o dashboard/assets/site.json service=projets
+psql -f sql/vallee.sql -t -o dashboard/assets/vallee.json service=projets
+psql -f sql/zh.sql -t -o dashboard/assets/zh.json service=projets
