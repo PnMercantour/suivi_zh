@@ -96,7 +96,7 @@ ${defens}
 Défens <strong>${feature.properties.nom_defens}</strong>
 <br> Surface de ${feature.properties.surface} m<sup>2</sup>
 <br>Mis en place en ${feature.properties.annee}
-<br><small>Id #${feature.properties.id_defens}</small>
+<br><small>Id #${feature.properties.id}</small>
 `);
     },
 
@@ -169,8 +169,8 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       else fill_color = "red";
 
       let radius = context.props.hideout.vallee ? 10 : 5;
-      let color = (feature.properties.n_defens != null)? 'black': fill_color;
-      
+      let color = feature.properties.n_defens != null ? "black" : fill_color;
+
       return L.circleMarker(latlng, {
         radius: radius,
         color: color,
