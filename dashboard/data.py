@@ -34,10 +34,12 @@ with (assets_path/'zh.json').open('r') as f:
 
 
 with (assets_path/'habitat.json').open('r') as f:
-    habitat_data = json.load(f)
+    habitat_data = to_dict(habitat['properties']
+                           for habitat in json.load(f)['features'])
 
 with (assets_path/'ref_habitat.json').open('r') as f:
-    ref_habitat = to_dict(json.load(f), 'habitat')
+    ref_habitat = to_dict(ref['properties']
+                          for ref in json.load(f)['features'])
 
 with (assets_path/'notice.json').open('r') as f:
     notice_data = to_dict([notice['properties']
@@ -77,6 +79,10 @@ def get_vallee_id(site_id):
 
 def list_sites(vallee_id):
     return [site['id_site'] for site in site_data.values() if site['id_vallee'] == int(vallee_id)]
+
+
+def get_site_id(zh_id):
+    return zh_data[zh_id]['id_site']
 
 
 def get_notices(id_site=None, id_vallee=None):
