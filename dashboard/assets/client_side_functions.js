@@ -104,7 +104,7 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       layer.bindTooltip(`
 <strong>Espace de bon fonctionnement</strong> 
 <br>Etendue de ${Math.round(feature.properties.surface / 10000)} ha
-<br><small>Id #${feature.properties.id_ebf}</small>
+<br><small>Id #${feature.properties.id}</small>
 `);
     },
 
