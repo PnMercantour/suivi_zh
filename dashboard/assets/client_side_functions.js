@@ -87,7 +87,7 @@ ${defens}
 <br> ${feature.properties.surface} m<sup>2</sup>
 <br>${etat_descr} 
 <br> <em>${feature.properties.source} (${feature.properties.annee})</em>
-<br><small>Id #${feature.properties.id_zh}</small>
+<br><small>Id #${feature.properties.id}</small>
 `);
     },
 
@@ -192,7 +192,7 @@ Défens <strong>${feature.properties.nom_defens}</strong>
     zhStyle: (feature, context) => {
       const colormap = { bon: "green", moyen: "orange", mauvais: "red" };
       if (context.props.hideout.zh != null) {
-        if (feature.properties.id_zh == context.props.hideout.zh) {
+        if (feature.properties.id == context.props.hideout.zh) {
           return {
             color: "yellow",
             fillColor: colormap[feature.properties.etat],

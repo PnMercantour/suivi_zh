@@ -30,7 +30,7 @@ with (assets_path/'site.json').open('r') as f:
 
 with (assets_path/'zh.json').open('r') as f:
     zh_data = to_dict([zh['properties']
-                      for zh in json.load(f)['features']], 'id_zh')
+                      for zh in json.load(f)['features']])
 
 
 with (assets_path/'habitat.json').open('r') as f:

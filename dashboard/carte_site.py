@@ -159,7 +159,7 @@ def process(previous_state, map_click, vallee, site, zh):
         }
     if zh:
         prev_zh = previous_state['zh']
-        clicked_zh = zh['properties']['id_zh']
+        clicked_zh = zh['properties']['id']
         new_zh = clicked_zh if clicked_zh != prev_zh else None
         return {
             'zh': new_zh,
