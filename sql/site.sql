@@ -89,6 +89,7 @@ bbox_4326 AS (
 ),
 features AS (
   SELECT
+    nom_site,
     json_build_object('type', 'Feature', 'properties',
       json_build_object('id', id, 'nom_site', nom_site, 'id_vallee', id_vallee,
       'ids_zh', ids_zh, 's_zh', s_zh, 'ids_defens', ids_defens, 's_defens',
@@ -103,5 +104,10 @@ features AS (
   --LEFT JOIN eau_zh.v_site_etat USING (nom_site))
   SELECT
     json_build_object('type', 'FeatureCollection', 'features', json_agg(feature))::text geojson
-FROM
-  features;
+FROM (
+  SELECT
+    feature
+  FROM
+    features
+  ORDER BY
+    nom_site) f;

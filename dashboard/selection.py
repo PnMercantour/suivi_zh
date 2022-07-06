@@ -5,7 +5,15 @@ import notice
 import carte
 
 
-vallee_dropdown = dcc.Dropdown(options=[{'label': vallee['nom_vallee'], 'value': vallee['id']}
+def n_sites(l):
+    if l is None:
+        return ''
+    if len(l) == 1:
+        return '(1 site)'
+    return f'({len(l)} sites)'
+
+
+vallee_dropdown = dcc.Dropdown(options=[{'label': f"{vallee['nom_vallee']} {n_sites(vallee['ids_site'])}", 'value': vallee['id']}
                                for vallee in vallee_data.values()], placeholder="Choisir une vallée")
 
 site_dropdown = dcc.Dropdown(options=[{'label': site['nom_site'], 'value': site['id']}
@@ -62,8 +70,11 @@ def update(state):
             'site': None,
             'site_options': [{'label': site['nom_site'], 'value': site['id']} for site in site_data.values()]
         }
+    vallee_id = state['vallee']
+    vallee = vallee_data[vallee_id]
+    sites = [site_data[id] for id in vallee['ids_site']]
     return {
-        'vallee': state['vallee'],
+        'vallee': vallee_id,
         'site': state['site'],
-        'site_options': [{'label': site['nom_site'], 'value': site['id']} for site in site_data.values() if site['id_vallee'] == state['vallee']]
+        'site_options': [{'label': site['nom_site'], 'value': site['id']} for site in sites]
     }

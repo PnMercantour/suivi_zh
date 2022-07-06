@@ -7,8 +7,7 @@ WITH releves AS (
   FROM
     eau_zh."zh_rhomeo_releves_placettes_ZH_PNM_CBNA_2020"
   GROUP BY
-    geom,
-    organisme
+    geom
   UNION
   SELECT
     geom,
@@ -17,8 +16,7 @@ WITH releves AS (
   FROM
     eau_zh."zh_rhomeo_releves_placettes_ZH_PNM_CBNMED_2020"
   GROUP BY
-    geom,
-    organisme
+    geom
 ),
 features AS (
   SELECT
