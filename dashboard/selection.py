@@ -5,10 +5,10 @@ import notice
 import carte
 
 
-vallee_dropdown = dcc.Dropdown(options=[{'label': vallee['nom_vallee'], 'value': vallee['id_vallee']}
+vallee_dropdown = dcc.Dropdown(options=[{'label': vallee['nom_vallee'], 'value': vallee['id']}
                                for vallee in vallee_data.values()], placeholder="Choisir une vallée")
 
-site_dropdown = dcc.Dropdown(options=[{'label': site['nom_site'], 'value': site['id_site']}
+site_dropdown = dcc.Dropdown(options=[{'label': site['nom_site'], 'value': site['id']}
                              for site in site_data.values()], placeholder="Choisir un site")
 
 component = dbc.Card([
@@ -60,10 +60,10 @@ def update(state):
         return {
             'vallee': None,
             'site': None,
-            'site_options': [{'label': site['nom_site'], 'value': site['id_site']} for site in site_data.values()]
+            'site_options': [{'label': site['nom_site'], 'value': site['id']} for site in site_data.values()]
         }
     return {
         'vallee': state['vallee'],
         'site': state['site'],
-        'site_options': [{'label': site['nom_site'], 'value': site['id_site']} for site in site_data.values() if site['id_vallee'] == state['vallee']]
+        'site_options': [{'label': site['nom_site'], 'value': site['id']} for site in site_data.values() if site['id_vallee'] == state['vallee']]
     }

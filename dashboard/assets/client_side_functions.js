@@ -7,21 +7,21 @@ window.PNM = Object.assign({}, window.PNM, {
     // Situation map
     siteSituationFilter: (feature, context) => {
       let hideout = context.props.hideout;
-      return feature.properties.id_site == hideout.site;
+      return feature.properties.id == hideout.site;
     },
     siteSituationToLayer: (feature, latlng, context) => {
       let color = "white",
         radius = 2,
         opacity = 1,
         pane = "site_pane";
-      if (feature.properties.id_site == context.props.hideout.site) {
+      if (feature.properties.id == context.props.hideout.site) {
         radius = 4;
         pane = "selected_site_pane";
         opacity = 1;
         let etat = feature.properties.etat;
         if (etat == null) color = "black";
-        else if (etat >= 2 / 3) color = "green";
-        else if (etat >= 1 / 3) color = "orange";
+        else if (etat == "bon") color = "green";
+        else if (etat == "moyen") color = "orange";
         else color = "red";
       }
       return L.circleMarker(latlng, {
@@ -36,7 +36,7 @@ window.PNM = Object.assign({}, window.PNM, {
     valleeSituationStyle: (feature, context) => {
       if (
         context.props.hideout.site != null ||
-        context.props.hideout.vallee != feature.properties.id_vallee
+        context.props.hideout.vallee != feature.properties.id
       ) {
         return {
           color: "grey",
@@ -52,9 +52,9 @@ window.PNM = Object.assign({}, window.PNM, {
     },
     // main map
     siteTooltip: (feature, layer) => {
-      let defens = feature.properties.n_defens
+      let defens = feature.properties.ids_defens
         ? `
-<br>${feature.properties.n_defens} defens sur ${feature.properties.s_defens} m<sup>2</sup>
+<br>${feature.properties.ids_defens.length} defens sur ${feature.properties.s_defens} m<sup>2</sup>
 `
         : "";
       let surface = feature.properties.s_zh
@@ -63,15 +63,15 @@ window.PNM = Object.assign({}, window.PNM, {
       let etat = feature.properties.etat;
       let etat_descr;
       if (etat == null) etat_descr = "Etat inconnu";
-      else if (etat >= 2 / 3) etat_descr = "Bon état";
-      else if (etat >= 1 / 3) etat_descr = "Etat moyen";
+      else if (etat == "bon") etat_descr = "Bon état";
+      else if (etat == "moyen") etat_descr = "Etat moyen";
       else etat_descr = "Etat dégradé";
       layer.bindTooltip(`
 Site <strong>${feature.properties.nom_site}</strong>
 <br> Etendue ${surface}
 ${defens}
 <br>${etat_descr}
-<br><small>Id #${feature.properties.id_site}</small>
+<br><small>Id #${feature.properties.id}</small>
 `);
     },
 
@@ -146,7 +146,7 @@ Défens <strong>${feature.properties.nom_defens}</strong>
         };
       }
       if (context.props.hideout.site == null) {
-        if (context.props.hideout.vallee == feature.properties.id_vallee) {
+        if (context.props.hideout.vallee == feature.properties.id) {
           return {
             color: "yellow",
             fillOpacity: 0,
@@ -163,13 +163,13 @@ Défens <strong>${feature.properties.nom_defens}</strong>
     siteStatePointToLayer: (feature, latlng, context) => {
       let fill_color;
       let etat = feature.properties.etat;
-      if (etat == null) fill_color = "grey";
-      else if (etat >= 2 / 3) fill_color = "green";
-      else if (etat >= 1 / 3) fill_color = "orange";
+      if (etat == null) fill_color = "blue";
+      else if (etat == "bon") fill_color = "green";
+      else if (etat == "moyen") fill_color = "orange";
       else fill_color = "red";
 
       let radius = context.props.hideout.vallee ? 10 : 5;
-      let color = feature.properties.n_defens != null ? "black" : fill_color;
+      let color = feature.properties.ids_defens != null ? "black" : fill_color;
 
       return L.circleMarker(latlng, {
         radius: radius,

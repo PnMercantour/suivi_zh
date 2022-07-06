@@ -92,8 +92,6 @@ def update(state):
     etats = {'bon': {}, 'moyen': {}, 'mauvais': {}}
     the_color = {'bon': 'green', 'moyen': 'orange', 'mauvais': 'red'}
 
-    print('update habitat', state)
-
     def update_surfaces(h, zh):
         surfaces = etats[zh['etat']]
         surfaces[h['id_type']] = zh['surface'] * \
@@ -112,10 +110,8 @@ def update(state):
         else:
             all_sites = True
         for h in habitat_data.values():
-            print(h)
             if all_sites or (get_site_id(h['id_zh']) in site_list):
                 zh = zh_data[h['id_zh']]
-                print(zh)
                 update_surfaces(h, zh)
     etats = {etat: {id: etats[etat].get(id, 0) for id in sorted(
         ref_habitat.keys())}for etat in ['bon', 'moyen', 'mauvais']}

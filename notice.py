@@ -76,7 +76,6 @@ def updateNoticeTable(feature):
         data = df[df["id_site"] == id].to_dict('records')
         for item in data:
             item['link'] = f"""[{item['nom']}]({app.get_asset_url('pdf/' + item['nom']).replace(' ', '%20')})"""
-            print(item)
         return data
     else:
         return None

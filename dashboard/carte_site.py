@@ -145,7 +145,7 @@ def process(previous_state, map_click, vallee, site, zh):
     if vallee:
         prev_site = previous_state['site']
         prev_vallee = previous_state['vallee']
-        clicked_vallee = vallee['properties']['id_vallee']
+        clicked_vallee = vallee['properties']['id']
         return{
             'vallee': clicked_vallee if (clicked_vallee != prev_vallee or prev_site is not None) else None,
             'site': prev_site if (clicked_vallee == prev_vallee and previous_state['zh'] is not None) else None,
@@ -154,7 +154,7 @@ def process(previous_state, map_click, vallee, site, zh):
     if site:
         return {
             'vallee': site['properties']['id_vallee'],
-            'site': site['properties']['id_site'],
+            'site': site['properties']['id'],
             'zh': None,
         }
     if zh:
