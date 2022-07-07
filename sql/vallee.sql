@@ -1,7 +1,7 @@
 -- construit un objet geojson qui décrit les vallées
--- properties:
---      id_vallee (entier)
---      nom_vallee (chaîne UTF8)
+-- feature list ordonnée suivant le nom de la vallée
+-- sous listes ids_site ordonnées suivant le nom des sites
+-- properties
 -- geometry: multipolygone
 -- bbox : la boîte englobante.
 -- https://datatracker.ietf.org/doc/html/rfc7946
