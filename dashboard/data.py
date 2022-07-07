@@ -1,8 +1,5 @@
 import json
-import csv
-import pandas as pd
-import numpy as np
-# from pandas import DataFrame
+
 from config import data_path, assets_path
 
 
@@ -85,9 +82,3 @@ def bounds(site=None, vallee=None):
         return vallee_data[int(vallee)]['bounds']
     return PNM_bounds
 
-
-# site_etat = {}
-# with (data_path/'site_etat.csv').open('r') as f:
-#     for row in csv.DictReader(f, delimiter=';'):
-#         site_etat[int(row['id_site'])] = {'id_site': int(
-#             row['id_site']), 'ratio': float(row['ratio'])}

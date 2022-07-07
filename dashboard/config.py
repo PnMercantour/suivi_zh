@@ -27,6 +27,13 @@ data_path = project_root / 'data'
 assets_path = app_dir / 'assets'
 
 IGN_KEY = os.getenv('IGN_KEY')
+if IGN_KEY is None:
+    print("""
+---------------------------------------------
+IGN_KEY non trouvée.
+Valorisez la variable d'environnement IGN_KEY avec une clé valide pour accéder à la cartographie raster de l'IGN.
+---------------------------------------------
+""")
 
 app = Dash(__name__, title='Zones humides', external_stylesheets=[
            dbc.themes.SLATE, dbc.icons.FONT_AWESOME])

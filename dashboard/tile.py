@@ -17,7 +17,7 @@ def ign(name=None):
                             maxZoom=19,
                             tileSize=256,
                             attribution="IGN-F/Geoportail")
-    if name == 'carte':
+    if name == 'carte' and IGN_KEY is not None:
         return dl.TileLayer(url="https://wxs.ign.fr/" + IGN_KEY + "/wmts?" +
                             "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
                             "&STYLE=normal" +
@@ -38,7 +38,7 @@ def ign(name=None):
             "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
             "&STYLE=normal" +
             "&TILEMATRIXSET=PM" +
-            "&FORMAT=image/jpeg" +
+            "&FORMAT=image/png" +
             "&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2" +
             "&TILEMATRIX={z}" +
             "&TILEROW={y}" +
