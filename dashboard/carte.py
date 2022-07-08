@@ -5,6 +5,8 @@ from dash_extensions.javascript import assign, arrow_function, Namespace
 from dash.exceptions import PreventUpdate
 from dash import Output, Input, State, callback, clientside_callback, callback_context
 import dash_bootstrap_components as dbc
+
+from common import info_header
 import data
 import tile
 
@@ -108,6 +110,6 @@ def update(state):
 context = Input(sites, 'hideout')
 
 component = dbc.Card([
-    dbc.CardHeader('Carte de situation'),
+    dbc.CardHeader(info_header('Carte de situation', '#carte-de-situation')),
     dbc.CardBody(map),
 ])

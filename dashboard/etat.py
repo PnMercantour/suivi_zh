@@ -4,8 +4,7 @@ from dash import dcc, html, callback, Output
 import dash_bootstrap_components as dbc
 import config
 from data import zh_data, list_sites
-import carte
-
+from common import info_header
 
 color_pie_chart = {
     'bon': 'green',
@@ -17,7 +16,8 @@ graph = dcc.Graph(
 )
 
 component = dbc.Card([
-    dbc.CardHeader('Etat de conservation'),
+    dbc.CardHeader(info_header(
+        'Etat de conservation', '#etat-de-conservation')),
     dbc.CardBody([
         graph
     ]),

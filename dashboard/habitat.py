@@ -4,6 +4,7 @@ from dash import dcc, Output
 import dash_bootstrap_components as dbc
 from config import data_path
 from data import site_data, list_sites, habitat_data, zh_data, ref_habitat, get_site_id
+from common import info_header
 
 color_pie_chart = {
     'A': 'lightcyan',
@@ -27,7 +28,7 @@ color_pie_chart = {
 graph = dcc.Graph()
 
 component = dbc.Card([
-    dbc.CardHeader('Habitat'),
+    dbc.CardHeader(info_header('Habitat', '#habitat')),
     dbc.CardBody([
         graph
     ]),

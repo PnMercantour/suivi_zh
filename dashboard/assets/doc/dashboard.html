@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>dashboard</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+</head>
+<body>
+<p><img src="logo_pnm.png" width="20%" height="20%"></p>
+<h1 id="les-zones-humides">Les zones humides</h1>
+<p>Application web pour la consultation des données relatives à l’état et à la gestion des zones humides sur le territoire du Parc national du Mercantour.</p>
+<p>Le programme de suivi bénéficie du soutien financier de l’agence de l’eau Rhône - Méditerranée.</p>
+<h2 id="zone-détude">Zone d’étude</h2>
+<p>Deux menus déroulants permettent de sélectionner dans des listes (en ouvrant le menu ou en tapant une partie du nom recherché) la vallée ou le site à étudier.</p>
+<p><img src="zone d'étude.png" width="50%" height="50%"></p>
+<p>Lorsqu’une vallée est sélectionnée, seuls les sites de cette vallée sont proposés au choix.<br />
+Lorsqu’aucune vallée n’est sélectionnée, tous les sites sont proposés au choix. Le choix d’un site entraîne la sélection automatique de la vallée de rattachement.</p>
+<p>Il est également possible de sélectionner directement un site ou une vallée en cliquant sur l’une des cartes, sans utiliser les menus déroulants.</p>
+<h2 id="carte-de-situation">Carte de situation</h2>
+<p>La carte de situation permet de voir d’un coup d’oeil la localisation géographique de la zone d’étude courante (l’ensemble du parc, une vallée ou un site). Un clic sur la carte permet de changer de vallée ou de revenir à l’emprise globale.</p>
+<p><img src="situation vallée.png" width="50%" height="50%"> <img src="situation site.png" width="50%" height="50%"></p>
+<h2 id="carte-des-zones-humides">Carte des zones humides</h2>
+<p>La carte des zones humide permet de sélectionner la zone à étudier (en cliquant) et d’obtenir des informations sur les objets affichés en les survolant (info-bulles).</p>
+<p>Le mode de présentation dépend de la zone d’étude courante :</p>
+<ul>
+<li>ensemble du territoire, lorsqu’aucune vallée n’est sélectionnée. La carte zoome sur l’emprise du parc et donne un aperçu des vallées et des sites (code couleur).<br />
+<img src="carte parc.png" width="50%" height="50%"></li>
+<li>vallée, lorsqu’aucun site n’est sélectionné. La carte zoome sur la vallée sélectionnée (affichée en jaune) et affiche les sites de cette vallée sous la forme de points colorés suivant leur état de conservation.<br />
+<img src="carte vallée.png" width="50%" height="50%"></li>
+<li>site, lorsqu’un site est sélectionné. La carte zoome sur l’emprise du site sélectionné et affiche les zones humides, défens et altérations du site. Dans ce mode, il est possible de sélectionner/désélectionner une zone humide pour afficher en détail les habitats constituant la zone humide et l’état de conservation.<br />
+<img src="carte site.png" width="50%" height="50%"></li>
+</ul>
+<p>L’outil de paramétrage de la carte (en haut à droite de la carte) permet de choisir le fonds de carte et d’afficher de façon sélective des objets sur la carte (des info-bulles s’affichent en survolant les objets situés au premier plan):</p>
+<ul>
+<li>Zones humides</li>
+<li>Défens</li>
+<li>Altérations</li>
+<li>Espaces de bon fonctionnement</li>
+<li>Relevés <a href="https://rhomeo-bao.fr/?q=programme">Rhomeo</a> sur 10 sites Il est aussi possible de zoomer avec la souris ou en utilisant l’outil de zoom en haut à gauche de la carte. Le zoom manuel n’affecte pas le mode de présentation.</li>
+</ul>
+<h2 id="etat-de-conservation">Etat de conservation</h2>
+<p><img src="conservation.png" width="20%" height="20%"></p>
+<p>Ce graphique affiche en parts relatives l’état de conservation de la zone d’étude (parc, vallée, site)</p>
+<h2 id="habitat">Habitat</h2>
+<p><img src="habitat.png" width="20%" height="20%"></p>
+<p>Ce graphique affiche les habitats (surface et état) de la zone d’étude (parc, vallée, site ou zone humide lorsqu’une une zone humide est sélectionnée).</p>
+<h2 id="mesures-de-gestion">Mesures de gestion</h2>
+<p>Les notices de gestion de la zone d’étude peuvent être téléchargées.</p>
+</body>
+</html>

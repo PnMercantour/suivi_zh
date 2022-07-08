@@ -9,6 +9,7 @@ import carte_site
 import gestion
 import habitat
 import etat
+from common import info_header
 
 client_state = dcc.Store(id='zh_client_state', storage_type='local')
 
@@ -19,21 +20,21 @@ app.layout = dbc.Container([
         dbc.Col([
             html.Img(src=app.get_asset_url(
                 'logo-structure.png'), width='80%'),
-            html.H1("Les zones humides"),
+            html.H1(info_header("Les zones humides")),
             selection.component,
             carte.component,
             dbc.Row([
                 dbc.Col(html.Img(src=app.get_asset_url(
-                'logo_rfae-recadre.jpg'), width='100%'), md=6),
+                    'logo_rfae-recadre.jpg'), width='100%'), md=6),
                 dbc.Col(html.Img(src=app.get_asset_url(
-                'picto_engage_pour_leau_valide.png'), width='50%'), md=6),
+                    'picto_engage_pour_leau_valide.png'), width='50%'), md=6),
             ])
         ], md=3),
         dbc.Col([
             carte_site.component,
             dbc.Row([
-            #     # dbc.Col(gestion.component, md=6),
-            #     dbc.Col(habitat.component, md=6),
+                #     # dbc.Col(gestion.component, md=6),
+                #     dbc.Col(habitat.component, md=6),
                 dbc.Col(etat.component, md=4),
                 dbc.Col(habitat.component, md=8),
             ]),
@@ -79,7 +80,8 @@ def update(client_state, carte_input, selection_input, carte_site_input):
         changes = carte.process(client_state, **carte_input)
     if changes is None:
         changes = carte_site.process(client_state, **carte_site_input)
-    just_reloaded = changes is None # no trigger, every component to be updated with last known client state (cookie)
+    # no trigger, every component to be updated with last known client state (cookie)
+    just_reloaded = changes is None
     new_state = client_state if just_reloaded else {
         **client_state, **changes}
     return {

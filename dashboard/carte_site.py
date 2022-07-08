@@ -7,6 +7,7 @@ from dash import Output, Input, State, callback, clientside_callback, callback_c
 import dash_bootstrap_components as dbc
 import data
 import tile
+from common import info_header
 
 title = html.Div('Etat des zones humides')
 
@@ -230,6 +231,6 @@ def update(new_state, old_state, force_update):
 
 
 component = dbc.Card([
-    dbc.CardHeader(title),
+    dbc.CardHeader(info_header(title, "#carte-des-zones-humides")),
     dbc.CardBody(map),
 ])

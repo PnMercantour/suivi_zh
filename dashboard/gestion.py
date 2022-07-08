@@ -3,10 +3,11 @@ from dash import Output, callback, callback_context, html, no_update
 import config
 import notice
 import carte
+from common import info_header
 
 
 component = dbc.Card([
-    dbc.CardHeader('Mesures de gestion'),
+    dbc.CardHeader(info_header('Mesures de gestion', '#mesures-de-gestion')),
     dbc.CardBody([
         notice.component,
     ]),

@@ -1,10 +1,14 @@
-# suivi_zh
+# Tableau de bord de suivi des zones humides du Parc national du Mercantour (suivi_zh)
 
-## Tableau de bord pour le suivi des zones humides du Parc national du Mercantour
+<img src="doc/logo_pnm.png" width="30%" height="30%">
 
-Cet outil publie comme une application web les données relatives à l'état et à la gestion des zones humides sur le territoire du Parc national du Mercantour.
+Application web pour la consultation des données relatives à l'état et à la gestion des zones humides sur le territoire du Parc national du Mercantour.
 
 Le site est accessible à l'url https://data.mercantour-parcnational.fr
+
+## Présentation de l'outil
+
+[Lire le guide utilisateur](doc/dashboard.md)
 
 ## Installation
 
@@ -32,8 +36,8 @@ par exemple
 
     echo IGN_KEY=xxxxx > .env
 
-
 ## Lancer le programme
+
 En mode debug
 
     python dashboard/app.py
@@ -58,3 +62,15 @@ bin/getdata
 les scripts unitaires sql sont dans le répertoire `sql` du projet
 
 D'autres scripts sql, qui permettent la gestion de la base de données sql du Parc, sont dans le répertoire `sql/db management`
+
+## Mise à jour de la documentation en ligne (optionnel)
+
+La documentation au format html est enregistrée sur github.  
+Il convient de la mettre à jour lorsque les fichiers sources au format markdown (dans le répertoire doc) sont modifiés.
+
+Installer [pandoc](https://pandoc.org/MANUAL.html).
+
+    sudo apt install pandoc
+    mkdir -p dashboard/assets/doc
+    pandoc -s -o dashboard/assets/doc/dashboard.html doc/dashboard.md
+    cp doc/*.png dashboard/assets/doc/
