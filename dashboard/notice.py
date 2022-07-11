@@ -38,13 +38,15 @@ component = dbc.Table([
 
 output = Output(notice_table, 'children')
 
+notice_table_style = {'vertical-align': 'middle'}
+
 
 def update(state):
     id_site = state['site']
     id_vallee = state['vallee']
     return [html.Tr([
-        html.Td(get_site_name(notice['id_site'])),
-        html.Td(notice['date']),
+        html.Td(get_site_name(notice['id_site']), style=notice_table_style),
+        html.Td(notice['date'], style=notice_table_style),
         html.Td(dbc.Button(html.I(className="fas fa-solid fa-download"), external_link=True,
-                href=get_url(notice), target='_blank', title=notice['nom'])),
+                href=get_url(notice), target='_blank', title=notice['nom']), style=notice_table_style),
     ]) for notice in get_notices(id_site, id_vallee)]

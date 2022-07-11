@@ -72,5 +72,5 @@ Installer [pandoc](https://pandoc.org/MANUAL.html).
 
     sudo apt install pandoc
     mkdir -p dashboard/assets/doc
-    pandoc -s -o dashboard/assets/doc/dashboard.html doc/dashboard.md
+    pandoc -s -t html -o dashboard/assets/doc/dashboard.html --toc --metadata title="Guide utilisateur ZH" doc/dashboard.md
     cp doc/*.png dashboard/assets/doc/

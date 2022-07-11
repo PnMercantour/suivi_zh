@@ -4,54 +4,256 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>dashboard</title>
-  <style type="text/css">
-      code{white-space: pre-wrap;}
-      span.smallcaps{font-variant: small-caps;}
-      span.underline{text-decoration: underline;}
-      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  <title>Guide utilisateur ZH</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
 </head>
 <body>
+<header id="title-block-header">
+<h1 class="title">Guide utilisateur ZH</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#les-zones-humides" id="toc-les-zones-humides">Les zones
+humides</a>
+<ul>
+<li><a href="#zone-détude" id="toc-zone-détude">Zone d’étude</a></li>
+<li><a href="#carte-de-situation" id="toc-carte-de-situation">Carte de
+situation</a></li>
+<li><a href="#carte-des-zones-humides"
+id="toc-carte-des-zones-humides">Carte des zones humides</a></li>
+<li><a href="#etat-de-conservation" id="toc-etat-de-conservation">Etat
+de conservation</a></li>
+<li><a href="#habitat" id="toc-habitat">Habitat</a></li>
+<li><a href="#mesures-de-gestion" id="toc-mesures-de-gestion">Mesures de
+gestion</a></li>
+</ul></li>
+</ul>
+</nav>
 <p><img src="logo_pnm.png" width="20%" height="20%"></p>
 <h1 id="les-zones-humides">Les zones humides</h1>
-<p>Application web pour la consultation des données relatives à l’état et à la gestion des zones humides sur le territoire du Parc national du Mercantour.</p>
-<p>Le programme de suivi bénéficie du soutien financier de l’agence de l’eau Rhône - Méditerranée.</p>
+<p>Application web pour la consultation des données relatives à l’état
+et à la gestion des zones humides sur le territoire du Parc national du
+Mercantour.</p>
+<p>Le programme de suivi bénéficie du soutien financier de l’agence de
+l’eau Rhône - Méditerranée.</p>
 <h2 id="zone-détude">Zone d’étude</h2>
-<p>Deux menus déroulants permettent de sélectionner dans des listes (en ouvrant le menu ou en tapant une partie du nom recherché) la vallée ou le site à étudier.</p>
+<p>Deux menus déroulants permettent de sélectionner dans des listes (en
+ouvrant le menu ou en tapant une partie du nom recherché) la vallée ou
+le site à étudier.</p>
 <p><img src="zone d'étude.png" width="50%" height="50%"></p>
-<p>Lorsqu’une vallée est sélectionnée, seuls les sites de cette vallée sont proposés au choix.<br />
-Lorsqu’aucune vallée n’est sélectionnée, tous les sites sont proposés au choix. Le choix d’un site entraîne la sélection automatique de la vallée de rattachement.</p>
-<p>Il est également possible de sélectionner directement un site ou une vallée en cliquant sur l’une des cartes, sans utiliser les menus déroulants.</p>
+<p>Lorsqu’une vallée est sélectionnée, seuls les sites de cette vallée
+sont proposés au choix.<br />
+Lorsqu’aucune vallée n’est sélectionnée, tous les sites sont proposés au
+choix. Le choix d’un site entraîne la sélection automatique de la vallée
+de rattachement.</p>
+<p>Il est également possible de sélectionner directement un site ou une
+vallée en cliquant sur l’une des cartes, sans utiliser les menus
+déroulants.</p>
 <h2 id="carte-de-situation">Carte de situation</h2>
-<p>La carte de situation permet de voir d’un coup d’oeil la localisation géographique de la zone d’étude courante (l’ensemble du parc, une vallée ou un site). Un clic sur la carte permet de changer de vallée ou de revenir à l’emprise globale.</p>
-<p><img src="situation vallée.png" width="50%" height="50%"> <img src="situation site.png" width="50%" height="50%"></p>
+<p>La carte de situation permet de voir d’un coup d’oeil la localisation
+géographique de la zone d’étude courante (l’ensemble du parc, une vallée
+ou un site). Un clic sur la carte permet de changer de vallée ou de
+revenir à l’emprise globale.</p>
+<p><img src="situation vallée.png" width="50%" height="50%">
+<img src="situation site.png" width="50%" height="50%"></p>
 <h2 id="carte-des-zones-humides">Carte des zones humides</h2>
-<p>La carte des zones humide permet de sélectionner la zone à étudier (en cliquant) et d’obtenir des informations sur les objets affichés en les survolant (info-bulles).</p>
+<p>La carte des zones humide permet de sélectionner la zone à étudier
+(en cliquant) et d’obtenir des informations sur les objets affichés en
+les survolant (info-bulles).</p>
 <p>Le mode de présentation dépend de la zone d’étude courante :</p>
 <ul>
-<li>ensemble du territoire, lorsqu’aucune vallée n’est sélectionnée. La carte zoome sur l’emprise du parc et donne un aperçu des vallées et des sites (code couleur).<br />
+<li>ensemble du territoire, lorsqu’aucune vallée n’est sélectionnée. La
+carte zoome sur l’emprise du parc et donne un aperçu des vallées et des
+sites (code couleur).<br />
 <img src="carte parc.png" width="50%" height="50%"></li>
-<li>vallée, lorsqu’aucun site n’est sélectionné. La carte zoome sur la vallée sélectionnée (affichée en jaune) et affiche les sites de cette vallée sous la forme de points colorés suivant leur état de conservation.<br />
+<li>vallée, lorsqu’aucun site n’est sélectionné. La carte zoome sur la
+vallée sélectionnée (affichée en jaune) et affiche les sites de cette
+vallée sous la forme de points colorés suivant leur état de
+conservation.<br />
 <img src="carte vallée.png" width="50%" height="50%"></li>
-<li>site, lorsqu’un site est sélectionné. La carte zoome sur l’emprise du site sélectionné et affiche les zones humides, défens et altérations du site. Dans ce mode, il est possible de sélectionner/désélectionner une zone humide pour afficher en détail les habitats constituant la zone humide et l’état de conservation.<br />
+<li>site, lorsqu’un site est sélectionné. La carte zoome sur l’emprise
+du site sélectionné et affiche les zones humides, défens et altérations
+du site. Dans ce mode, il est possible de sélectionner/désélectionner
+une zone humide pour afficher en détail les habitats constituant la zone
+humide et l’état de conservation.<br />
 <img src="carte site.png" width="50%" height="50%"></li>
 </ul>
-<p>L’outil de paramétrage de la carte (en haut à droite de la carte) permet de choisir le fonds de carte et d’afficher de façon sélective des objets sur la carte (des info-bulles s’affichent en survolant les objets situés au premier plan):</p>
+<p>L’outil de paramétrage de la carte (en haut à droite de la carte)
+permet de choisir le fonds de carte et d’afficher de façon sélective des
+objets sur la carte (des info-bulles s’affichent en survolant les objets
+situés au premier plan):</p>
 <ul>
 <li>Zones humides</li>
 <li>Défens</li>
 <li>Altérations</li>
 <li>Espaces de bon fonctionnement</li>
-<li>Relevés <a href="https://rhomeo-bao.fr/?q=programme">Rhomeo</a> sur 10 sites Il est aussi possible de zoomer avec la souris ou en utilisant l’outil de zoom en haut à gauche de la carte. Le zoom manuel n’affecte pas le mode de présentation.</li>
+<li>Relevés <a href="https://rhomeo-bao.fr/?q=programme">Rhomeo</a> sur
+10 sites Il est aussi possible de zoomer avec la souris ou en utilisant
+l’outil de zoom en haut à gauche de la carte. Le zoom manuel n’affecte
+pas le mode de présentation.</li>
 </ul>
 <h2 id="etat-de-conservation">Etat de conservation</h2>
 <p><img src="conservation.png" width="20%" height="20%"></p>
-<p>Ce graphique affiche en parts relatives l’état de conservation de la zone d’étude (parc, vallée, site)</p>
+<p>Ce graphique affiche en parts relatives l’état de conservation de la
+zone d’étude (parc, vallée, site)</p>
 <h2 id="habitat">Habitat</h2>
 <p><img src="habitat.png" width="20%" height="20%"></p>
-<p>Ce graphique affiche les habitats (surface et état) de la zone d’étude (parc, vallée, site ou zone humide lorsqu’une une zone humide est sélectionnée).</p>
+<p>Ce graphique affiche les habitats (surface et état) de la zone
+d’étude (parc, vallée, site ou zone humide lorsqu’une une zone humide
+est sélectionnée).</p>
 <h2 id="mesures-de-gestion">Mesures de gestion</h2>
-<p>Les notices de gestion de la zone d’étude peuvent être téléchargées.</p>
+<p>Les notices de gestion de la zone d’étude peuvent être
+téléchargées.</p>
 </body>
 </html>
