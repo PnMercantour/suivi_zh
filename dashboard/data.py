@@ -50,6 +50,10 @@ with (assets_path/'rhomeo_site.json').open('r') as f:
     rhomeo_site_data = to_dict([row['properties']
                                for row in json.load(f)['features']], key='code')
 
+with (assets_path/'rhomeo_result.json').open('r') as f:
+    rhomeo_result_data = to_dict([row['properties']
+                                  for row in json.load(f)['features']])
+
 PNM_bounds = [[43.8, 6.5], [44.5, 7.7]]
 
 

@@ -45,6 +45,7 @@ L'outil de paramétrage de la carte (en haut à droite de la carte) permet de ch
 - Altérations
 - Espaces de bon fonctionnement
 - Relevés [Rhomeo](https://rhomeo-bao.fr/?q=programme) sur 10 sites
+
   Il est aussi possible de zoomer avec la souris ou en utilisant l'outil de zoom en haut à gauche de la carte. Le zoom manuel n'affecte pas le mode de présentation.
 
 ## Etat de conservation
@@ -62,3 +63,10 @@ Ce graphique affiche les habitats (surface et état) de la zone d'étude (parc, 
 ## Mesures de gestion
 
 Les notices de gestion de la zone d'étude peuvent être téléchargées.
+
+## Rhomeo
+
+Les 10 sites qui font l'objet d'une étude des sols et de végétation [Rhomeo](https://rhomeo-bao.fr/?q=programme) sont représentés avec des marqueurs plus gros que les autres sites.
+L'affichage des relevés Rhomeo permet également de localiser ces sites (points violets sur la carte).
+
+Lorsque la zone d'étude correspond à l'un de ces sites Rhomeo, les indicateurs Rhomeo calculés pour ce site s'affichent dans une boîte spécifique en dessous des mesures de gestion.
