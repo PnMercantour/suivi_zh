@@ -62,15 +62,19 @@ window.PNM = Object.assign({}, window.PNM, {
         : "inconnue";
       let etat = feature.properties.etat;
       let etat_descr;
-      if (etat == null) etat_descr = "Etat inconnu";
-      else if (etat == "bon") etat_descr = "Bon état";
+      if (etat == "bon") etat_descr = "Bon état";
       else if (etat == "moyen") etat_descr = "Etat moyen";
-      else etat_descr = "Etat dégradé";
+      else if (etat == "mauvais") etat_descr = "Etat dégradé";
+      else etat_descr = "Etat inconnu";
+      statut_rhomeo = feature.properties.rhomeo
+        ? `<br>Code Rhomeo: ${feature.properties.rhomeo}`
+        : "";
       layer.bindTooltip(`
 Site <strong>${feature.properties.nom_site}</strong>
 <br> Etendue ${surface}
 ${defens}
 <br>${etat_descr}
+${statut_rhomeo}
 <br><small>Id #${feature.properties.id}</small>
 `);
     },
@@ -87,6 +91,13 @@ ${defens}
 <br> ${feature.properties.surface} m<sup>2</sup>
 <br>${etat_descr} 
 <br> <em>${feature.properties.source} (${feature.properties.annee})</em>
+<br><small>Id #${feature.properties.id}</small>
+`);
+    },
+    alterationTooltip: (feature, layer) => {
+      console.log("alteration tooltip", feature);
+      layer.bindTooltip(`
+Altération <strong>${feature.properties.id_type}</strong>
 <br><small>Id #${feature.properties.id}</small>
 `);
     },
@@ -128,6 +139,10 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       let hideout = context.props.hideout;
       return feature.properties.id_site == hideout.site;
     },
+    alterationFilter: (feature, context) => {
+      let hideout = context.props.hideout;
+      return feature.properties.id_site == hideout.site;
+    },
     defensFilter: (feature, context) => {
       let hideout = context.props.hideout;
       return feature.properties.id_site == hideout.site;
@@ -135,6 +150,10 @@ Défens <strong>${feature.properties.nom_defens}</strong>
     ebfFilter: (feature, context) => {
       let hideout = context.props.hideout;
       return hideout.vallee != null;
+    },
+    rhomeoFilter: (feature, context) => {
+      let hideout = context.props.hideout;
+      return hideout.site == null || hideout.code == feature.properties.code;
     },
 
     valleeStateStyle: (feature, context) => {
@@ -168,7 +187,9 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       else if (etat == "moyen") fill_color = "orange";
       else fill_color = "red";
 
-      let radius = context.props.hideout.vallee ? 10 : 5;
+      let radius =
+        (context.props.hideout.vallee ? 10 : 5) +
+        (feature.properties.rhomeo ? 2 : 0);
       let color = feature.properties.ids_defens != null ? "black" : fill_color;
 
       return L.circleMarker(latlng, {

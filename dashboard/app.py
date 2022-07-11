@@ -9,6 +9,7 @@ import carte_site
 import gestion
 import habitat
 import etat
+import rhomeo
 from common import info_header
 
 client_state = dcc.Store(id='zh_client_state', storage_type='local')
@@ -33,17 +34,14 @@ app.layout = dbc.Container([
         dbc.Col([
             carte_site.component,
             dbc.Row([
-                #     # dbc.Col(gestion.component, md=6),
-                #     dbc.Col(habitat.component, md=6),
                 dbc.Col(etat.component, md=4),
                 dbc.Col(habitat.component, md=8),
             ]),
         ], md=6,
         ),
         dbc.Col([
-            # etat.component,
             gestion.component,
-            # habitat.component,
+            rhomeo.component,
         ], md=3)
     ],
         align='top', justify='evenly',
@@ -60,6 +58,7 @@ app.layout = dbc.Container([
         'gestion': gestion.output,
         'etat': etat.output,
         'habitat': habitat.output,
+        'rhomeo': rhomeo.output,
     },
     inputs={
         'client_state': State(client_state, 'data'),
@@ -92,6 +91,7 @@ def update(client_state, carte_input, selection_input, carte_site_input):
         'gestion': gestion.update(new_state),
         'etat': etat.update(new_state),
         'habitat': habitat.update(new_state),
+        'rhomeo': rhomeo.update(new_state),
     }
 
 

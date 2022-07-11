@@ -57,6 +57,25 @@ zones_humides = dl.GeoJSON(
         pane="markerPane",
     ),
 )
+
+alteration = dl.GeoJSON(
+    url=app.get_asset_url('alteration.json'),
+    hideout={
+        'vallee': None,
+        'site': None,
+        'zh': None,
+    },
+    options=dict(
+        filter=ns('alterationFilter'),
+        onEachFeature=ns('alterationTooltip'),
+        pane='shadowPane',
+        style={
+            'color': 'pink',
+            'fillOpacity': 0.4,
+        }
+    )
+)
+
 defens = dl.GeoJSON(
     url=app.get_asset_url('defens.json'),
     hideout={
@@ -95,9 +114,14 @@ ebf = dl.GeoJSON(
 
 rhomeo = dl.GeoJSON(
     url=app.get_asset_url('rhomeo.json'),
+    hideout={
+        'vallee': None,
+        'site': None,
+        'code': None,
+    },
     options=dict(
         pointToLayer=ns('rhomeoPointToLayer'),
-
+        filter=ns('rhomeoFilter'),
         onEachFeature=ns('rhomeoTooltip'),
         # pane='detail_ebf_pane',
         # style={
@@ -122,6 +146,7 @@ map = dl.Map(
                            pane='detail_ebf_pane', style={'zIndex': 455}),
                    name='Espaces de bon fonctionnement', checked=False),
         dl.Overlay(zones_humides, name='Zones humides', checked=True),
+        dl.Overlay(alteration, name='Altérations', checked=False),
         dl.Overlay(defens, name='Défens', checked=True),
         dl.Overlay(dl.Pane(rhomeo, name='rhomeo_pane',
                            pane='rhomeo_pane', style={'zIndex': 600}),
@@ -139,10 +164,11 @@ input = {
     'vallee': Input(vallees, 'click_feature'),
     'site': Input(sites, 'click_feature'),
     'zh': Input(zones_humides, 'click_feature'),
+    'rhomeo': Input(rhomeo, 'click_feature'),
 }
 
 
-def process(previous_state, map_click, vallee, site, zh):
+def process(previous_state, map_click, vallee, site, zh, rhomeo):
     if vallee:
         prev_site = previous_state['site']
         prev_vallee = previous_state['vallee']
@@ -164,6 +190,14 @@ def process(previous_state, map_click, vallee, site, zh):
         new_zh = clicked_zh if clicked_zh != prev_zh else None
         return {
             'zh': new_zh,
+        }
+    if rhomeo:
+        print(rhomeo)
+        the_site = data.site_data[rhomeo['properties']['id_site']]
+        return{
+            'vallee': the_site['id_vallee'],
+            'site': the_site['id'],
+            'zh': None,
         }
     if map_click:
         if previous_state['zh']:
@@ -200,11 +234,14 @@ output = {
     'vallee_click': Output(vallees, 'click_feature'),
     'site_click': Output(sites, 'click_feature'),
     'zh_click': Output(zones_humides, 'click_feature'),
+    'rhomeo_click': Output(rhomeo, 'click_feature'),
     'bounds': Output(map, 'bounds'),
     'site_hideout': Output(sites, 'hideout'),
     'vallee_hideout': Output(vallees, 'hideout'),
+    'alteration_hideout': Output(alteration, 'hideout'),
     'defens_hideout': Output(defens, 'hideout'),
     'ebf_hideout': Output(ebf, 'hideout'),
+    'rhomeo_hideout': Output(rhomeo, 'hideout'),
     'title': Output(title, 'children'),
 }
 
@@ -217,16 +254,19 @@ def update(new_state, old_state, force_update):
         'site'] and vallee == old_state['vallee']
     return {
         'hideout': {'site': site, 'vallee': vallee, 'zh': zh},
+        'alteration_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'defens_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'site_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'vallee_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'ebf_hideout': {'vallee': vallee},  # don't use site
+        'rhomeo_hideout': {'site': site, 'vallee': vallee, 'code': data.site_data[site]['rhomeo'] if site is not None else None, },
         'title': no_update if same_context else make_title(site=site, vallee=vallee, zh=zh),
         'bounds': no_update if same_context else data.bounds(site=site, vallee=vallee),
         'map_click': None,
         'vallee_click': None,
         'site_click': None,
         'zh_click': None,
+        'rhomeo_click': None,
     }
 
 

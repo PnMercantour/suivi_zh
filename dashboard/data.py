@@ -38,10 +38,17 @@ with (assets_path/'ref_habitat.json').open('r') as f:
     ref_habitat = to_dict(ref['properties']
                           for ref in json.load(f)['features'])
 
+with (assets_path/'ref_alteration.json').open('r') as f:
+    ref_alteration = to_dict(ref['properties']
+                             for ref in json.load(f)['features'])
+
 with (assets_path/'notice.json').open('r') as f:
     notice_data = to_dict([notice['properties']
                            for notice in json.load(f)['features']])
 
+with (assets_path/'rhomeo_site.json').open('r') as f:
+    rhomeo_site_data = to_dict([row['properties']
+                               for row in json.load(f)['features']], key='code')
 
 PNM_bounds = [[43.8, 6.5], [44.5, 7.7]]
 
@@ -81,4 +88,3 @@ def bounds(site=None, vallee=None):
     if vallee is not None:
         return vallee_data[int(vallee)]['bounds']
     return PNM_bounds
-
