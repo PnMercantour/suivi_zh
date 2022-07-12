@@ -41,6 +41,20 @@ sites = dl.GeoJSON(
     ),
 )
 
+sites_rhomeo = dl.GeoJSON(
+    url=app.get_asset_url('site.json'),
+    hideout={
+        'vallee': None,
+        'site': None,
+        'zh': None,
+    },
+    options=dict(
+        filter=ns('siteRhomeoFilter'),
+        pointToLayer=ns('siteRhomeoPointToLayer'),
+        pane='detail_site_pane',
+    ),
+)
+
 zones_humides = dl.GeoJSON(
     url=app.get_asset_url('zh.json'),
     hideout={
@@ -151,9 +165,12 @@ map = dl.Map(
         dl.Overlay(dl.Pane(rhomeo, name='rhomeo_pane',
                            pane='rhomeo_pane', style={'zIndex': 600}),
                    name='Relevés Rhomeo', checked=False),
+        dl.Overlay(dl.Pane(sites_rhomeo, name='site_rhomeo_pane', pane='site_rhomeo_pane', style={'zIndex': 455}),
+                   name='Sites Rhomeo', checked=True),
 
     ]),
-    style={'width': '100%', 'height': '60vh'},
+    style={'width': '100%', 'height': '100%'},
+    zoomControl=False,
     bounds=data.bounds(),
 )
 
@@ -237,6 +254,7 @@ output = {
     'rhomeo_click': Output(rhomeo, 'click_feature'),
     'bounds': Output(map, 'bounds'),
     'site_hideout': Output(sites, 'hideout'),
+    'site_rhomeo_hideout': Output(sites_rhomeo, 'hideout'),
     'vallee_hideout': Output(vallees, 'hideout'),
     'alteration_hideout': Output(alteration, 'hideout'),
     'defens_hideout': Output(defens, 'hideout'),
@@ -257,6 +275,7 @@ def update(new_state, old_state, force_update):
         'alteration_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'defens_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'site_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
+        'site_rhomeo_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'vallee_hideout': {'site': site, 'vallee': vallee, 'zh': zh},
         'ebf_hideout': {'vallee': vallee},  # don't use site
         'rhomeo_hideout': {'site': site, 'vallee': vallee, 'code': data.site_data[site]['rhomeo'] if site is not None else None, },
@@ -273,4 +292,4 @@ def update(new_state, old_state, force_update):
 component = dbc.Card([
     dbc.CardHeader(info_header(title, "#carte-des-zones-humides")),
     dbc.CardBody(map),
-])
+], style={'width': '100%', 'height': '100%'})

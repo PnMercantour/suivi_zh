@@ -12,7 +12,7 @@ color_pie_chart = {
     'mauvais': 'red',
 }
 
-graph = dcc.Graph(
+graph = dcc.Graph(responsive=False
 )
 
 component = dbc.Card([
@@ -21,7 +21,7 @@ component = dbc.Card([
     dbc.CardBody([
         graph
     ]),
-])
+], class_name='h-50')
 
 output = {
     'figure': Output(graph, "figure")
@@ -54,10 +54,11 @@ def update(state):
         labels=['bon', 'moyen', 'mauvais'],
         marker=dict(colors=['green', 'orange', 'red', ]),
         direction='clockwise',
-        hovertemplate="<br>Surface: %{text}</br>",
+        # hovertemplate="<br>Surface: %{text}</br>",
         text=[str(value) + ' m2' for value in values],
     ))
-    fig.update_layout(legend_title_text='Etat')
+    # fig.update_layout(legend_title_text='Etat')
+    fig.update_layout(height=300)
     return {
         'figure': fig,
     }

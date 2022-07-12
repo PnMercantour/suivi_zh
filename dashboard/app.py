@@ -21,9 +21,9 @@ app.layout = dbc.Container([
         dbc.Col([
             html.Img(src=app.get_asset_url(
                 'logo-structure.png'), width='80%'),
-            html.H1(info_header("Les zones humides")),
+            html.H3(info_header("Les zones humides")),
             selection.component,
-            carte.component,
+            html.Div(carte.component, style={'height': '30vh'}),
             dbc.Row([
                 dbc.Col(html.Img(src=app.get_asset_url(
                     'logo_rfae-recadre.jpg'), width='100%'), md=6),
@@ -32,13 +32,12 @@ app.layout = dbc.Container([
             ])
         ], md=3),
         dbc.Col([
-            carte_site.component,
+            html.Div(carte_site.component, style={'height': '50vh'}),
             dbc.Row([
-                dbc.Col(etat.component, md=4),
+                dbc.Col(etat.component, md=4, style={'height': '100%'}),
                 dbc.Col(habitat.component, md=8),
-            ]),
-        ], md=6,
-        ),
+            ], style={'height': '50vh'}),
+        ], md=6),
         dbc.Col([
             gestion.component,
             rhomeo.component,

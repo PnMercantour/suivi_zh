@@ -9,6 +9,7 @@ import dash_bootstrap_components as dbc
 from common import info_header
 import data
 import tile
+import data
 
 
 vallees = dl.GeoJSON(
@@ -52,9 +53,9 @@ map = dl.Map([
     ),
 ],
     id='map',
-    bounds=data.PNM_bounds,
+    bounds=data.bounds(),
     zoomControl=False,
-    style={'width': '100%', 'height': '30vh'},
+    style={'width': '100%', 'height': '100%'},
 )
 
 
@@ -100,7 +101,7 @@ def update(state):
     return {
         'hideout': {'site': state['site'], 'vallee': state['vallee']},
         'vallee_hideout': {'site': state['site'], 'vallee': state['vallee']},
-        'bounds': data.PNM_bounds,  # reset bounds to initial value
+        'bounds': data.bounds(),  # reset bounds to initial value
         'map_click': None,
         'vallee_click': None,
         'site_click': None,
@@ -112,4 +113,4 @@ context = Input(sites, 'hideout')
 component = dbc.Card([
     dbc.CardHeader(info_header('Carte de situation', '#carte-de-situation')),
     dbc.CardBody(map),
-])
+],style={'width': '100%', 'height': '100%'})
