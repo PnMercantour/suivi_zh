@@ -4,7 +4,7 @@ from dash import dcc, html, callback, Output
 import dash_bootstrap_components as dbc
 import config
 from data import zh_data, list_sites
-from common import info_header
+from common import info_header, info_surface
 
 color_pie_chart = {
     'bon': 'green',
@@ -55,15 +55,12 @@ def update(state):
         direction='clockwise',
         showlegend=False,
         textinfo='none',
-        # hoverinfo="skip",
-        # hovertemplate="<br>Surface: %{text}</br>",
-        # text=[str(value) + ' m2' for value in values],
-    ),
-    )
+        hovertext=[
+            f"{info_surface(value)}" for value in values],
+        hoverinfo='text',
+    ))
     fig.update_layout(margin={'l': 0, 'r': 0, 't': 0, 'b': 0})
     fig.update_layout(paper_bgcolor='rgb(50,56,62)')  # TODO : do it properly
-    # fig.update_layout(legend_title_text='Etat')
-    # fig.update_layout(height=200)
     return {
         'figure': fig,
     }

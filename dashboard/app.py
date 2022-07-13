@@ -32,14 +32,15 @@ app.layout = dbc.Container([
             ])
         ], md=3),
         dbc.Col([
-            html.Div(carte_site.component, style={'height': '50vh'}),
+            html.Div(carte_site.component, style={'height': '60vh'}),
             dbc.Row([
                 dbc.Col(etat.component, md=4, style={'height': '100%'}),
                 dbc.Col(habitat.component, md=8, style={'height': '100%'}),
-            ], style={'height': '48vh'}),
+            ], style={'height': '38vh'}),
         ], md=6),
         dbc.Col([
-            gestion.component,
+            html.Div(gestion.component, style={'height': '60vh'}),
+            # gestion.component,
             rhomeo.component,
         ], md=3)
     ],

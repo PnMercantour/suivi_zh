@@ -11,3 +11,4 @@ psql -f sql/rhomeo_site.sql -t -o dashboard/assets/rhomeo_site.json service=proj
 psql -f sql/site.sql -t -o dashboard/assets/site.json service=projets
 psql -f sql/vallee.sql -t -o dashboard/assets/vallee.json service=projets
 psql -f sql/zh.sql -t -o dashboard/assets/zh.json service=projets
+cp dashboard/assets/site.json dashboard/assets/site_rhomeo.json

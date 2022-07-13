@@ -4,21 +4,7 @@ from dash import html, Output
 import dash_bootstrap_components as dbc
 
 from config import data_path, app
-from data import get_site_name, list_sites, get_notices
-
-# with (data_path / 'notice.csv').open('r') as csvfile:
-#     reader = csv.DictReader(csvfile)
-#     notices = [row for row in reader]
-
-
-# def filter(id_site=None, id_vallee=None):
-#     if id_site is not None:
-#         site_list = [str(id_site)]
-#     elif id_vallee is not None:
-#         site_list = [str(id_site) for id_site in list_sites(id_vallee)]
-#     else:
-#         return notices
-#     return [notice for notice in notices if notice['id_site'] in site_list]
+from data import get_site_name, get_notices
 
 
 def get_url(notice):
@@ -30,7 +16,7 @@ notice_table = html.Tbody()
 component = dbc.Table([
     html.Thead(html.Tr([
         html.Th("Site"),
-        html.Th("Date"),
+        html.Th("Edition"),
         html.Th('Notice'),
     ])),
     notice_table,
@@ -38,7 +24,7 @@ component = dbc.Table([
 
 output = Output(notice_table, 'children')
 
-notice_table_style = {'vertical-align': 'middle'}
+notice_table_style = {'verticalAlign': 'middle'}
 
 
 def update(state):

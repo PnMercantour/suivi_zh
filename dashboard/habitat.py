@@ -4,12 +4,13 @@ from dash import dcc, Output
 import dash_bootstrap_components as dbc
 from config import data_path
 from data import site_data, list_sites, habitat_data, zh_data, ref_habitat, get_site_id
-from common import info_header
+from common import info_header, info_surface
 
 graph = dcc.Graph(responsive=True, style={'height': '100%'})
 
 component = dbc.Card([
-    dbc.CardHeader(info_header('Habitat', '#habitat')),
+    dbc.CardHeader(info_header(
+        "Habitats d'intérêt communautaire", '#habitat')),
     dbc.CardBody([
         graph
     ]),
@@ -22,7 +23,6 @@ output = {
 # on élimine les habitats hors liste (pas de label)
 interest = sorted([habitat for habitat in ref_habitat.values()if habitat['label'] is not None],
                   key=lambda habitat: habitat['code'])
-print(interest)
 
 
 def update(state):
@@ -71,10 +71,6 @@ def update(state):
         'plot_bgcolor': 'rgb(50,56,62)',
     })
 
-    def aux(value):
-        print(value)
-        return 'foo'
-
     fig = go.Figure(data=[
         go.Bar(
             name=etat,
@@ -82,13 +78,9 @@ def update(state):
             y=[round(value) for value in l.values()],
             marker_color=the_color[etat],
             showlegend=False,
-            # hovertext=aux([round(value) for value in l.values()]),
             hovertext=[
-                f"{h['label']} <br> {round(l[h['id']])} m<sup>2</sup>" for h in interest],
+                f"{h['label']} <br> {info_surface(l[h['id']])}" for h in interest],
             hoverinfo='text',
-            # hovertemplate="Habitat %{x}: [%{text}] %{y}<br>",
-            # hovertext=[ref_habitat.get(habitat, {'libelle': 'non défini'})[
-            # 'libelle'] for habitat in list(l.keys())]
         ) for (etat, l) in etats.items()
     ],            layout=layout,
     )

@@ -7,8 +7,6 @@ from common import info_header
 from data import site_data, rhomeo_site_data, rhomeo_result_data
 
 
-table_style = {'vertical-align': 'middle'}
-
 rhomeo_summary = html.Div()
 
 rows = html.Tbody()

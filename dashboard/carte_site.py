@@ -42,7 +42,7 @@ sites = dl.GeoJSON(
 )
 
 sites_rhomeo = dl.GeoJSON(
-    url=app.get_asset_url('site.json'),
+    url=app.get_asset_url('site_rhomeo.json'),
     hideout={
         'vallee': None,
         'site': None,
