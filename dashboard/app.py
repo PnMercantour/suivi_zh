@@ -35,8 +35,8 @@ app.layout = dbc.Container([
             html.Div(carte_site.component, style={'height': '50vh'}),
             dbc.Row([
                 dbc.Col(etat.component, md=4, style={'height': '100%'}),
-                dbc.Col(habitat.component, md=8),
-            ], style={'height': '50vh'}),
+                dbc.Col(habitat.component, md=8, style={'height': '100%'}),
+            ], style={'height': '48vh'}),
         ], md=6),
         dbc.Col([
             gestion.component,

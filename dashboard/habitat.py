@@ -6,37 +6,23 @@ from config import data_path
 from data import site_data, list_sites, habitat_data, zh_data, ref_habitat, get_site_id
 from common import info_header
 
-color_pie_chart = {
-    'A': 'lightcyan',
-    'B': 'cyan',
-    'C': 'lightblue',
-    'D': 'blue',
-    'F': 'royalblue',
-    'G': 'darkblue',
-    'H': 'lightrange',
-    'I': 'orange',
-    'J': 'lightred',
-    'K': 'red',
-    'M': 'darkred',
-    'N': 'lightgreen',
-    'P': 'green',
-    'Q': 'darkgreen',
-    'R': 'grey',
-    'S': 'black',
-}
-
-graph = dcc.Graph()
+graph = dcc.Graph(responsive=True, style={'height': '100%'})
 
 component = dbc.Card([
     dbc.CardHeader(info_header('Habitat', '#habitat')),
     dbc.CardBody([
         graph
     ]),
-])
+], class_name='h-100')
 
 output = {
     'figure': Output(graph, "figure")
 }
+
+# on élimine les habitats hors liste (pas de label)
+interest = sorted([habitat for habitat in ref_habitat.values()if habitat['label'] is not None],
+                  key=lambda habitat: habitat['code'])
+print(interest)
 
 
 def update(state):
@@ -67,35 +53,46 @@ def update(state):
             if all_sites or (get_site_id(h['id_zh']) in site_list):
                 zh = zh_data[h['id_zh']]
                 update_surfaces(h, zh)
-    etats = {etat: {id: etats[etat].get(id, 0) for id in sorted(
-        ref_habitat.keys())}for etat in ['bon', 'moyen', 'mauvais']}
+    etats = {etat: {id: etats[etat].get(id, 0) for id in [h['id'] for h in interest]}for etat in [
+        'bon', 'moyen', 'mauvais']}
     layout = go.Layout({
         'xaxis': {
             'title': 'Habitats',
-            # 'tickangle':45,
-            # 'ticks': '',
-            'showticklabels': False,
+            # 'showticklabels': False,
+            'color': 'rgb(170,170,170)',
         },
-        'yaxis': {'title': 'Surface (m2)'},
+        'yaxis': {
+            # https://plotly.com/python-api-reference/generated/plotly.graph_objects.layout.html#plotly.graph_objects.layout.YAxis
+            'title': 'Surface (<em>m<sup>2</sup></em>)',
+            'color': 'rgb(170,170,170)',
+        },
+        'margin': {'l': 0, 'r': 0, 't': 0, 'b': 0},
+        'paper_bgcolor': 'rgb(50,56,62)',
+        'plot_bgcolor': 'rgb(50,56,62)',
     })
+
+    def aux(value):
+        print(value)
+        return 'foo'
+
     fig = go.Figure(data=[
         go.Bar(
             name=etat,
-            # x=list(l.keys()),
-            x=[ref_habitat[id]['label'] for id in sorted(
-                ref_habitat.keys())],
+            x=[h['code'] for h in interest],
             y=[round(value) for value in l.values()],
             marker_color=the_color[etat],
-            # hoverinfo=['text'],
+            showlegend=False,
+            # hovertext=aux([round(value) for value in l.values()]),
+            hovertext=[
+                f"{h['label']} <br> {round(l[h['id']])} m<sup>2</sup>" for h in interest],
+            hoverinfo='text',
             # hovertemplate="Habitat %{x}: [%{text}] %{y}<br>",
             # hovertext=[ref_habitat.get(habitat, {'libelle': 'non défini'})[
             # 'libelle'] for habitat in list(l.keys())]
         ) for (etat, l) in etats.items()
     ],            layout=layout,
     )
-    fig.update_layout(barmode='stack', legend_title_text='Etat')
-    # fig.update_xaxes(ticktext=list(ref_habitat.keys()))
-    # TODO use tickvals to align custom text
+    fig.update_layout(barmode='stack')
     return {
         'figure': fig,
     }
