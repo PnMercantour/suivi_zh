@@ -1,5 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import Input, Output, callback, callback_context, html, no_update, dcc
+import dash_bootstrap_components as dbc
+
 from common import info_header
 from data import get_vallee_id, vallee_data, site_data
 import notice
@@ -23,9 +25,9 @@ site_dropdown = dcc.Dropdown(options=[{'label': site['nom_site'], 'value': site[
 component = dbc.Card([
     dbc.CardHeader(info_header("Zone d'étude", '#zone-détude')),
     dbc.CardBody([
-        vallee_dropdown,
+        dbc.Row(['Vallée', vallee_dropdown]),
         html.Hr(),
-        site_dropdown,
+        dbc.Row(['Site', site_dropdown]),
     ]),
 ])
 

@@ -10,8 +10,8 @@ component = dbc.Card([
     dbc.CardHeader(info_header('Mesures de gestion', '#mesures-de-gestion')),
     dbc.CardBody([
         notice.component,
-    ]),
-])
+    ], class_name='h-100 overflow-auto'),
+], class_name='h-100')
 
 output = {
     'notice': notice.output,

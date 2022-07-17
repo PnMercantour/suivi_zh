@@ -14,11 +14,13 @@ features AS (
       'properties',
       json_build_object(
         'id',
-        id,
+        alteration.id,
         'id_site',
         id_site,
         'id_type',
-        id_type
+        id_type,
+        'label',
+        ref_alterations.type
       ),
       'geometry',
       st_asgeojson (geom, 6)::json,
@@ -31,6 +33,7 @@ features AS (
       )
     ) feature
   FROM alteration
+    left join eau_zh.ref_alterations on(alteration.id_type = ref_alterations.id)
 )
 SELECT json_build_object(
     'type',

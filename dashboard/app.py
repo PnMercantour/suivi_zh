@@ -10,6 +10,7 @@ import gestion
 import habitat
 import etat
 import rhomeo
+import legende
 from common import info_header
 
 client_state = dcc.Store(id='zh_client_state', storage_type='local')
@@ -21,9 +22,9 @@ app.layout = dbc.Container([
         dbc.Col([
             html.Img(src=app.get_asset_url(
                 'logo-structure.png'), width='80%'),
-            html.H1(info_header("Les zones humides")),
+            html.H4("Les zones humides"),
             selection.component,
-            carte.component,
+            html.Div(carte.component, style={'height': '30vh'}),
             dbc.Row([
                 dbc.Col(html.Img(src=app.get_asset_url(
                     'logo_rfae-recadre.jpg'), width='100%'), md=6),
@@ -32,16 +33,16 @@ app.layout = dbc.Container([
             ])
         ], md=3),
         dbc.Col([
-            carte_site.component,
+            html.Div(carte_site.component, style={'height': '60vh'}),
             dbc.Row([
-                dbc.Col(etat.component, md=4),
-                dbc.Col(habitat.component, md=8),
-            ]),
-        ], md=6,
-        ),
+                dbc.Col(etat.component, md=4, style={'height': '100%'}),
+                dbc.Col(habitat.component, md=8, style={'height': '100%'}),
+            ], style={'height': '38vh'}, className='g-0'),
+        ], md=6),
         dbc.Col([
-            gestion.component,
-            rhomeo.component,
+            html.Div(legende.component, style={'height': '30vh'}),
+            html.Div(gestion.component, style={'height': '30vh'}),
+            html.Div(rhomeo.component, style={'height': '38vh'}),
         ], md=3)
     ],
         align='top', justify='evenly',
@@ -49,7 +50,7 @@ app.layout = dbc.Container([
 ], fluid=True)
 
 
-@callback(
+@ callback(
     output={
         'client_state': Output(client_state, 'data'),
         'carte': carte.output,

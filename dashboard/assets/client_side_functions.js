@@ -95,9 +95,8 @@ ${statut_rhomeo}
 `);
     },
     alterationTooltip: (feature, layer) => {
-      console.log("alteration tooltip", feature);
       layer.bindTooltip(`
-Altération <strong>${feature.properties.id_type}</strong>
+Altération <strong>${feature.properties.label}</strong>
 <br><small>Id #${feature.properties.id}</small>
 `);
     },
@@ -135,6 +134,15 @@ Défens <strong>${feature.properties.nom_defens}</strong>
           feature.properties.id_vallee == hideout.vallee)
       );
     },
+    siteRhomeoFilter: (feature, context) => {
+      let hideout = context.props.hideout;
+      return (
+        feature.properties.rhomeo != null &&
+        hideout.site == null &&
+        (hideout.vallee == null ||
+          feature.properties.id_vallee == hideout.vallee)
+      );
+    },
     zhFilter: (feature, context) => {
       let hideout = context.props.hideout;
       return feature.properties.id_site == hideout.site;
@@ -153,7 +161,7 @@ Défens <strong>${feature.properties.nom_defens}</strong>
     },
     rhomeoFilter: (feature, context) => {
       let hideout = context.props.hideout;
-      return hideout.site == null || hideout.code == feature.properties.code;
+      return hideout.site != null && hideout.code == feature.properties.code;
     },
 
     valleeStateStyle: (feature, context) => {
@@ -187,9 +195,7 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       else if (etat == "moyen") fill_color = "orange";
       else fill_color = "red";
 
-      let radius =
-        (context.props.hideout.vallee ? 10 : 5) +
-        (feature.properties.rhomeo ? 2 : 0);
+      let radius = context.props.hideout.vallee ? 10 : 5;
       let color = feature.properties.ids_defens != null ? "black" : fill_color;
 
       return L.circleMarker(latlng, {
@@ -200,7 +206,15 @@ Défens <strong>${feature.properties.nom_defens}</strong>
         pane: "detail_site_pane",
       });
     },
-
+    siteRhomeoPointToLayer: (feature, latlng, context) => {
+      return L.circleMarker(latlng, {
+        radius: context.props.hideout.vallee ? 13 : 8,
+        color: "purple",
+        fillColor: "purple",
+        fillOpacity: 1,
+        pane: "site_rhomeo_pane",
+      });
+    },
     rhomeoPointToLayer: (feature, latlng, context) => {
       return L.circleMarker(latlng, {
         radius: 4,
