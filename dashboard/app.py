@@ -20,17 +20,20 @@ app.layout = dbc.Container([
     html.Div(style={'height': '1vh'}),
     dbc.Row([
         dbc.Col([
-            html.Img(src=app.get_asset_url(
-                'logo-structure.png'), width='80%'),
-            html.H4("Les zones humides"),
-            selection.component,
-            html.Div(carte.component, style={'height': '30vh'}),
+            html.Div([html.Img(src=app.get_asset_url(
+                'logo-structure.png'),  style={'height': '60%'}), html.H3('Les Zones humides')],
+                style={'height': '25vh'}),
+            html.Div(legende.component, style={'height': '35vh'}),
+            html.Div(selection.component, style={'height': '28vh'}),
+            html.Div(style={'height': '1vh'}),
             dbc.Row([
                 dbc.Col(html.Img(src=app.get_asset_url(
-                    'logo_rfae-recadre.jpg'), width='100%'), md=6),
+                    'logo_rfae-recadre.jpg'), height='100%'), md=6, style={'height': '100%'}),
                 dbc.Col(html.Img(src=app.get_asset_url(
-                    'picto_engage_pour_leau_valide.png'), width='50%'), md=6),
-            ])
+                    'picto_engage_pour_leau_valide.png'), height='100%'), md=6, style={'height': '100%'}),
+            ], style={'height': '8vh'}),
+            html.Div(style={'height': '1vh'}),
+
         ], md=3),
         dbc.Col([
             html.Div(carte_site.component, style={'height': '60vh'}),
@@ -40,12 +43,12 @@ app.layout = dbc.Container([
             ], style={'height': '38vh'}, className='g-0'),
         ], md=6),
         dbc.Col([
-            html.Div(legende.component, style={'height': '30vh'}),
-            html.Div(gestion.component, style={'height': '30vh'}),
+            html.Div(gestion.component, style={'height': '25vh'}),
+            html.Div(carte.component, style={'height': '35vh'}),
             html.Div(rhomeo.component, style={'height': '38vh'}),
         ], md=3)
     ],
-        align='top', justify='evenly',
+        align='start', justify='evenly', className='g-0'
     ),
 ], fluid=True)
 

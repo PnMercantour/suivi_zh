@@ -95,8 +95,8 @@ def zh_site_label(type):
     return f'{label} ({type})'
 
 
-def display_info(key, value):
-    return dbc.Row([dbc.Col(key, md=5), dbc.Col(value, md=7)])
+def display_info(key, value, key_width=5):
+    return dbc.Row([dbc.Col(key, width=key_width), dbc.Col(value, width=12 - key_width)])
 
 
 def indicator_color(i, value):
@@ -112,6 +112,7 @@ def display_indicateur(i, results):
             html.A(f"{ref['id']} - {ref['label']}", title=ref.get('tooltip'),
                    href=ref['url'], target='_blank',),
             html.H5(value,  title=ref.get('interp')),
+            key_width=10,
         )
 
 
