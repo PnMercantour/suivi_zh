@@ -96,7 +96,7 @@ ${statut_rhomeo}
     },
     alterationTooltip: (feature, layer) => {
       layer.bindTooltip(`
-Altération <strong>${feature.properties.id_type}</strong>
+Altération <strong>${feature.properties.label}</strong>
 <br><small>Id #${feature.properties.id}</small>
 `);
     },

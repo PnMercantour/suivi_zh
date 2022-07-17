@@ -20,8 +20,6 @@ vallees = dl.GeoJSON(
     },
     options=dict(
         style=ns('valleeStateStyle'),
-        # style={'color': 'white', 'fillOpacity': 0,
-        #        'pane': 'detail_vallee_pane'},
         onEachFeature=ns('pourChaqueVallee'),
     ),
 )
@@ -84,8 +82,8 @@ alteration = dl.GeoJSON(
         onEachFeature=ns('alterationTooltip'),
         pane='shadowPane',
         style={
-            'color': 'pink',
-            'fillOpacity': 0.4,
+            'color': 'magenta',
+            'fillOpacity': 1,
         }
     )
 )
@@ -209,7 +207,6 @@ def process(previous_state, map_click, vallee, site, zh, rhomeo):
             'zh': new_zh,
         }
     if rhomeo:
-        print(rhomeo)
         the_site = data.site_data[rhomeo['properties']['id_site']]
         return{
             'vallee': the_site['id_vallee'],

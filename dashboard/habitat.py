@@ -8,15 +8,19 @@ from common import info_header, info_surface
 
 graph = dcc.Graph(responsive=True, style={'height': '100%'})
 
-component = dbc.Card([
+collapsible_card = dbc.Collapse(dbc.Card([
     dbc.CardHeader(info_header(
-        "Habitats d'intérêt communautaire", '#habitat')),
+        "Habitats d'intérêt communautaire", '#habitat', title="""Types d'habitat d'intérêt communautaire
+de la zone d'étude.
+Cliquer pour consulter la documentation""")),
     dbc.CardBody([
         graph
     ]),
-], class_name='h-100')
+], class_name='h-100'), class_name='h-100')
 
+component = collapsible_card
 output = {
+    'visible': Output(collapsible_card, 'is_open'),
     'figure': Output(graph, "figure")
 }
 
@@ -86,5 +90,6 @@ def update(state):
     )
     fig.update_layout(barmode='stack')
     return {
+        'visible': any([round(value) != 0 for (etat, l) in etats.items() for value in l.values()]),
         'figure': fig,
     }

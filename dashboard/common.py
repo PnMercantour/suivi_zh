@@ -20,3 +20,13 @@ def info_surface(surface):
         return f'{round(surface)} m<sup>2</sup>'
     else:
         return ''
+
+
+def to_dict(l, key='id'):
+    "builds a dict from an iterable <l>, indexing on <key>"
+    return {i[key]: i for i in l}
+
+
+def to_bounds(b):
+    "converts a standard bbox into leaflet bounds object"
+    return [[b[1], b[0]], [b[3], b[2]]]

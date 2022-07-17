@@ -9,8 +9,6 @@ import dash_bootstrap_components as dbc
 from common import info_header
 import data
 import tile
-import data
-
 
 vallees = dl.GeoJSON(
     url=app.get_asset_url('vallee.json'),
@@ -113,4 +111,4 @@ context = Input(sites, 'hideout')
 component = dbc.Card([
     dbc.CardHeader(info_header('Carte de situation', '#carte-de-situation')),
     dbc.CardBody(map),
-],style={'width': '100%', 'height': '100%'})
+], style={'width': '100%', 'height': '100%'})

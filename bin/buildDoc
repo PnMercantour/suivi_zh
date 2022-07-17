@@ -1,4 +1,4 @@
 #!/bin/sh
 mkdir -p dashboard/assets/doc
-pandoc -s -t html -o dashboard/assets/doc/dashboard.html --toc --metadata title="Guide utilisateur ZH" doc/dashboard.md
+pandoc -s -t html -o dashboard/assets/doc/dashboard.html --css style.css --toc --metadata title="Guide utilisateur ZH" doc/dashboard.md
 cp doc/*.png dashboard/assets/doc/

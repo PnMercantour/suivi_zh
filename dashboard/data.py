@@ -1,34 +1,21 @@
 import json
 
-from config import data_path, assets_path
-
-
-def to_dict(l, key='id'):
-    "builds a dict from an iterable <l>, indexing on <key>"
-    return {i[key]: i for i in l}
-
-
-def to_bounds(b):
-    "converts a standard bbox into leaflet bounds object"
-    return [[b[1], b[0]], [b[3], b[2]]]
-
+from config import assets_path
+from common import to_dict, to_bounds
 
 with (assets_path/'vallee.json').open('r') as f:
     vallee_data = to_dict([
         dict(s['properties'], bounds=to_bounds(s['bbox'])) for s in json.load(f)['features']
     ])
 
-
 with (assets_path/'site.json').open('r') as f:
     site_data = to_dict([
         dict(s['properties'], bounds=to_bounds(s['bbox'])) for s in json.load(f)['features']
     ])
 
-
 with (assets_path/'zh.json').open('r') as f:
     zh_data = to_dict([zh['properties']
                       for zh in json.load(f)['features']])
-
 
 with (assets_path/'habitat.json').open('r') as f:
     habitat_data = to_dict(habitat['properties']
