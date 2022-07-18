@@ -16,7 +16,7 @@ graph = dcc.Graph(responsive=True, style={'height': '100%'})
 
 component = dbc.Card([
     dbc.CardHeader(info_header(
-        'Etat/surface', '#etat-de-conservation', title="""Etat de conservation des zones humides
+        'Etat', '#etat-de-conservation', title="""Etat de conservation des zones humides
 de la zone d'étude en % de surface.
 Cliquer pour consulter la documentation""")),
     dbc.CardBody([

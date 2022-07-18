@@ -12,7 +12,9 @@ rhomeo_summary = html.Div()
 rows = html.Tbody()
 
 collapsible_card = dbc.Collapse(dbc.Card([
-    dbc.CardHeader(info_header('Suivi Rhomeo', '#rhomeo')),
+    dbc.CardHeader(info_header('Rhomeo', '#rhomeo',
+                   title="""Protocole de suivi Rhomeo
+Cliquer pour consulter la documentation""")),
     dbc.CardBody([
         rhomeo_summary,
         dbc.Table([

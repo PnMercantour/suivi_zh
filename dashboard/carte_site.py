@@ -234,11 +234,11 @@ def process(previous_state, map_click, vallee, site, zh, rhomeo):
 
 def make_title(zh=None, site=None, vallee=None):
     if vallee is None:
-        return "Zones humides du Parc national du Mercantour"
+        return "Parc national du Mercantour"
     if site is None:
-        return f"Zones humides de la vallée {data.vallee_data[vallee]['nom_vallee']}"
+        return f"{data.vallee_data[vallee]['nom_vallee']}"
 
-    return f"Zones humides du site {data.site_data[site]['nom_site']} ({data.vallee_data[vallee]['nom_vallee']})"
+    return f"{data.site_data[site]['nom_site']} ({data.vallee_data[vallee]['nom_vallee']})"
 
 
 # component internal output properties

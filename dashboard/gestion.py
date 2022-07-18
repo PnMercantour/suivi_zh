@@ -7,7 +7,9 @@ from common import info_header
 
 
 component = dbc.Card([
-    dbc.CardHeader(info_header('Mesures de gestion', '#mesures-de-gestion')),
+    dbc.CardHeader(info_header('Gestion', '#mesures-de-gestion', title="""Mesures de gestion
+relatives à la zone d'étude.
+Cliquer pour consulter la documentation""")),
     dbc.CardBody([
         notice.component,
     ], class_name='h-100 overflow-auto'),

@@ -34,5 +34,5 @@ def update(state):
         html.Td(get_site_name(notice['id_site']), style=notice_table_style),
         html.Td(notice['date'], style=notice_table_style),
         html.Td(dbc.Button(html.I(className="fas fa-solid fa-download"), external_link=True,
-                href=get_url(notice), target='_blank', title=notice['nom']), style=notice_table_style),
+                href=get_url(notice), target='_blank', title=notice['nom'], size='sm'), style=notice_table_style),
     ]) for notice in get_notices(id_site, id_vallee)]

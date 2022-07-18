@@ -10,7 +10,7 @@ graph = dcc.Graph(responsive=True, style={'height': '100%'})
 
 collapsible_card = dbc.Collapse(dbc.Card([
     dbc.CardHeader(info_header(
-        "Habitats d'intérêt communautaire", '#habitat', title="""Types d'habitat d'intérêt communautaire
+        "Habitats", '#habitat', title="""Types d'habitat d'intérêt communautaire
 de la zone d'étude.
 Cliquer pour consulter la documentation""")),
     dbc.CardBody([
