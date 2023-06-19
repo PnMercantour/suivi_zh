@@ -147,6 +147,10 @@ map = dl.Map(
     dl.LayersControl([
         dl.BaseLayer(tile.ign('carte'), name='IGN', checked=False),
         dl.BaseLayer(tile.ign('ortho'), name='Vue aérienne', checked=True),
+        dl.BaseLayer(tile.ign('orthohisto', '2011-2015'), name='Vue 2011-2015', checked=False),
+        dl.BaseLayer(tile.ign('orthohisto', '2006-2010'), name='Vue 2006-2010', checked=False),
+        dl.BaseLayer(tile.ign('orthohisto', '2000-2005'), name='Vue 2000-2005', checked=False),
+        dl.BaseLayer(tile.ign('WMSorthohisto', '.1950-1965'), name='Vue 1950 - 1965', checked=False),
         dl.Pane(
             dl.Pane(vallees, name='detail_vallee_pane_s',
                     pane='detail_vallee_pane_s', style={'zIndex': 451}),

@@ -2,7 +2,7 @@ from config import IGN_KEY, app, ns
 import dash_leaflet as dl
 
 
-def ign(name=None):
+def ign(name=None, date="2000-2005"):
     if name == 'ortho':
         return dl.TileLayer(url="https://wxs.ign.fr/ortho/wmts?" +
                             "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
@@ -17,6 +17,26 @@ def ign(name=None):
                             maxZoom=19,
                             tileSize=256,
                             attribution="IGN-F/Geoportail")
+    if name == 'orthohisto':
+        return dl.TileLayer(url="https://wxs.ign.fr/orthohisto/geoportail/wmts?" +
+                            "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
+                            "&STYLE=normal" +
+                            "&TILEMATRIXSET=PM" +
+                            "&FORMAT=image/jpeg" +
+                            "&LAYER=ORTHOIMAGERY.ORTHOPHOTOS"+ date +
+                            "&TILEMATRIX={z}" +
+                            "&TILEROW={y}" +
+                            "&TILECOL={x}",
+                            minZoom=0,
+                            maxZoom=19,
+                            tileSize=256,
+                            attribution="IGN-F/Geoportail")
+    if name == 'WMSorthohisto':
+        return dl.WMSTileLayer(url='https://wxs.ign.fr/orthohisto/geoportail/r/wms?',
+                               tileSize=256,
+                               layers="ORTHOIMAGERY.ORTHOPHOTOS"+ date,
+                               attribution="IGN-F/Geoportail",
+                               )
     if name == 'carte' and IGN_KEY is not None:
         return dl.TileLayer(url="https://wxs.ign.fr/" + IGN_KEY + "/wmts?" +
                             "&REQUEST=GetTile&SERVICE=WMTS&VERSION=1.0.0" +
