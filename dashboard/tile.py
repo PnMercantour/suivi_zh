@@ -44,6 +44,7 @@ def ign(name=None, date="2000-2005"):
         return dl.TileLayer(
             url=IGN_OPEN_URL + "&LAYER=ORTHOIMAGERY.ORTHOPHOTOS" + date,
             minZoom=0,
+            maxNativeZoom=18,
             maxZoom=19,
             tileSize=256,
             attribution="Orthophotos - Carte © IGN/Geoportail",
@@ -52,6 +53,7 @@ def ign(name=None, date="2000-2005"):
         return dl.TileLayer(
             url=IGN_PNG_URL + "&LAYER=ORTHOIMAGERY.ORTHOPHOTOS" + date,
             minZoom=0,
+            maxNativeZoom=18,
             maxZoom=19,
             tileSize=256,
             attribution="Orthophotos - Carte © IGN/Geoportail",
@@ -71,7 +73,8 @@ def ign(name=None, date="2000-2005"):
             + "&TILEROW={y}"
             + "&TILECOL={x}",
             minZoom=0,
-            maxZoom=22,
+            maxNativeZoom=17,
+            maxZoom=19,
             tileSize=256,
             opacity=0.6,
             attribution="© IGN/Geoportail",
