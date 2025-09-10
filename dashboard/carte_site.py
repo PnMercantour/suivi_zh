@@ -198,7 +198,7 @@ map = dl.Map(
                 checked=False,
             ),
             dl.Overlay(zones_humides, name="Zones humides", checked=True),
-            dl.Overlay(alteration, name="Altérations", checked=False),
+            dl.Overlay(alteration, name="Altérations", checked=True),
             dl.Overlay(defens, name="Défens", checked=True),
             dl.Overlay(
                 dl.Pane(
@@ -230,11 +230,11 @@ map = dl.Map(
 
 # component internal input triggers
 input = {
-    "map_click": Input(map, "click_lat_lng"),
-    "vallee": Input(vallees, "click_feature"),
-    "site": Input(sites, "click_feature"),
-    "zh": Input(zones_humides, "click_feature"),
-    "rhomeo": Input(rhomeo, "click_feature"),
+    "map_click": Input(map, "clickData"),
+    "vallee": Input(vallees, "clickData"),
+    "site": Input(sites, "clickData"),
+    "zh": Input(zones_humides, "clickData"),
+    "rhomeo": Input(rhomeo, "clickData"),
 }
 
 
@@ -309,12 +309,12 @@ def make_title(zh=None, site=None, vallee=None):
 # component internal output properties
 output = {
     "hideout": Output(zones_humides, "hideout"),
-    "map_click": Output(map, "click_lat_lng"),
-    "vallee_click": Output(vallees, "click_feature"),
-    "site_click": Output(sites, "click_feature"),
-    "zh_click": Output(zones_humides, "click_feature"),
-    "rhomeo_click": Output(rhomeo, "click_feature"),
-    "bounds": Output(map, "bounds"),
+    "map_click": Output(map, "clickData"),
+    "vallee_click": Output(vallees, "clickData"),
+    "site_click": Output(sites, "clickData"),
+    "zh_click": Output(zones_humides, "clickData"),
+    "rhomeo_click": Output(rhomeo, "clickData"),
+    "viewport": Output(map, "viewport"),
     "site_hideout": Output(sites, "hideout"),
     "site_rhomeo_hideout": Output(sites_rhomeo, "hideout"),
     "vallee_hideout": Output(vallees, "hideout"),
@@ -336,6 +336,7 @@ def update(new_state, old_state, force_update):
         and site == old_state["site"]
         and vallee == old_state["vallee"]
     )
+    bounds = data.bounds(site=site, vallee=vallee)
     return {
         "hideout": {"site": site, "vallee": vallee, "zh": zh},
         "alteration_hideout": {"site": site, "vallee": vallee, "zh": zh},
@@ -352,7 +353,7 @@ def update(new_state, old_state, force_update):
         "title": (
             no_update if same_context else make_title(site=site, vallee=vallee, zh=zh)
         ),
-        "bounds": no_update if same_context else data.bounds(site=site, vallee=vallee),
+        'viewport': dict(bounds=bounds, transition="flyToBounds", options={"animate":True, "duration":0.1}) if not same_context else no_update, #bug if fitBounds with dash-leaflet 1
         "map_click": None,
         "vallee_click": None,
         "site_click": None,

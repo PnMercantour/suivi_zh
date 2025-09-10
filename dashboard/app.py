@@ -102,4 +102,4 @@ def update(client_state, carte_input, selection_input, carte_site_input):
 server = app.server
 
 if __name__ == "__main__":
-    app.run_server(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')

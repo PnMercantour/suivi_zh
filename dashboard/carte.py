@@ -58,9 +58,9 @@ map = dl.Map([
 
 
 input = {
-    'map_click': Input(map, 'click_lat_lng'),
-    'vallee': Input(vallees, 'click_feature'),
-    'site': Input(sites, 'click_feature'),
+    'map_click': Input(map, 'clickData'),
+    'vallee': Input(vallees, 'clickData'),
+    'site': Input(sites, 'clickData'),
 }
 
 
@@ -88,21 +88,24 @@ def process(previous_state, map_click, vallee, site):
 output = {
     'hideout': Output(sites, 'hideout'),
     'vallee_hideout': Output(vallees, 'hideout'),
-    'bounds': Output(map, 'bounds'),
-    'map_click': Output(map, 'click_lat_lng'),
-    'vallee_click': Output(vallees, 'click_feature'),
-    'site_click': Output(sites, 'click_feature'),
+    # 'bounds': Output(map, 'bounds'),
+    'map_click': Output(map, 'clickData'),
+    'vallee_click': Output(vallees, 'clickData'),
+    'site_click': Output(sites, 'clickData'),
+    'viewport': Output(map, 'viewport'),
 }
 
 
 def update(state):
+    bounds = data.bounds()
     return {
         'hideout': {'site': state['site'], 'vallee': state['vallee']},
         'vallee_hideout': {'site': state['site'], 'vallee': state['vallee']},
-        'bounds': data.bounds(),  # reset bounds to initial value
+        # 'bounds': data.bounds(),  # reset bounds to initial value
         'map_click': None,
         'vallee_click': None,
         'site_click': None,
+        'viewport': dict(bounds=bounds, transition="flyToBounds")
     }
 
 

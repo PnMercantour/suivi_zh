@@ -6,7 +6,7 @@ window.PNM = Object.assign({}, window.PNM, {
 
     // Situation map
     siteSituationFilter: (feature, context) => {
-      let hideout = context.props.hideout;
+      let hideout = context.hideout;
       return feature.properties.id == hideout.site;
     },
     siteSituationToLayer: (feature, latlng, context) => {
@@ -14,7 +14,7 @@ window.PNM = Object.assign({}, window.PNM, {
         radius = 2,
         opacity = 1,
         pane = "site_pane";
-      if (feature.properties.id == context.props.hideout.site) {
+      if (feature.properties.id == context.hideout.site) {
         radius = 4;
         pane = "selected_site_pane";
         opacity = 1;
@@ -35,8 +35,8 @@ window.PNM = Object.assign({}, window.PNM, {
     },
     valleeSituationStyle: (feature, context) => {
       if (
-        context.props.hideout.site != null ||
-        context.props.hideout.vallee != feature.properties.id
+        context.hideout.site != null ||
+        context.hideout.vallee != feature.properties.id
       ) {
         return {
           color: "grey",
@@ -127,7 +127,7 @@ Défens <strong>${feature.properties.nom_defens}</strong>
     },
 
     siteFilter: (feature, context) => {
-      let hideout = context.props.hideout;
+      let hideout = context.hideout;
       return (
         hideout.site == null &&
         (hideout.vallee == null ||
@@ -135,7 +135,7 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       );
     },
     siteRhomeoFilter: (feature, context) => {
-      let hideout = context.props.hideout;
+      let hideout = context.hideout;
       return (
         feature.properties.rhomeo != null &&
         hideout.site == null &&
@@ -144,36 +144,36 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       );
     },
     zhFilter: (feature, context) => {
-      let hideout = context.props.hideout;
+      let hideout = context.hideout;
       return feature.properties.id_site == hideout.site;
     },
     alterationFilter: (feature, context) => {
-      let hideout = context.props.hideout;
+      let hideout = context.hideout;
       return feature.properties.id_site == hideout.site;
     },
     defensFilter: (feature, context) => {
-      let hideout = context.props.hideout;
+      let hideout = context.hideout;
       return feature.properties.id_site == hideout.site;
     },
     ebfFilter: (feature, context) => {
-      let hideout = context.props.hideout;
+      let hideout = context.hideout;
       return hideout.vallee != null;
     },
     rhomeoFilter: (feature, context) => {
-      let hideout = context.props.hideout;
+      let hideout = context.hideout;
       return hideout.site != null && hideout.code == feature.properties.code;
     },
 
     valleeStateStyle: (feature, context) => {
-      if (context.props.hideout.vallee == null) {
+      if (context.hideout.vallee == null) {
         return {
           color: "white",
           fillOpacity: 0,
           pane: "detail_vallee_pane",
         };
       }
-      if (context.props.hideout.site == null) {
-        if (context.props.hideout.vallee == feature.properties.id) {
+      if (context.hideout.site == null) {
+        if (context.hideout.vallee == feature.properties.id) {
           return {
             color: "yellow",
             fillOpacity: 0,
@@ -195,7 +195,7 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       else if (etat == "moyen") fill_color = "orange";
       else fill_color = "red";
 
-      let radius = context.props.hideout.vallee ? 10 : 5;
+      let radius = context.hideout.vallee ? 10 : 5;
       let color = feature.properties.ids_defens != null ? "black" : fill_color;
 
       return L.circleMarker(latlng, {
@@ -208,7 +208,7 @@ Défens <strong>${feature.properties.nom_defens}</strong>
     },
     siteRhomeoPointToLayer: (feature, latlng, context) => {
       return L.circleMarker(latlng, {
-        radius: context.props.hideout.vallee ? 13 : 8,
+        radius: context.hideout.vallee ? 13 : 8,
         color: "purple",
         fillColor: "purple",
         fillOpacity: 1,
@@ -226,8 +226,8 @@ Défens <strong>${feature.properties.nom_defens}</strong>
 
     zhStyle: (feature, context) => {
       const colormap = { bon: "green", moyen: "orange", mauvais: "red" };
-      if (context.props.hideout.zh != null) {
-        if (feature.properties.id == context.props.hideout.zh) {
+      if (context.hideout.zh != null) {
+        if (feature.properties.id == context.hideout.zh) {
           return {
             color: "yellow",
             fillColor: colormap[feature.properties.etat],
