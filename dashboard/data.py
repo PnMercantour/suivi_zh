@@ -1,3 +1,4 @@
+import csv
 import json
 
 from config import assets_path
@@ -40,6 +41,18 @@ with (assets_path/'rhomeo_site.json').open('r') as f:
 with (assets_path/'rhomeo_result.json').open('r') as f:
     rhomeo_result_data = to_dict([row['properties']
                                   for row in json.load(f)['features']])
+
+with (assets_path/'analyse_rhomeo.csv').open('r') as f:
+    _reader = csv.DictReader(f)
+    analyse_rhomeo_data = {}
+    for _row in _reader:
+        _key = (_row['Indicateur'], _row['Type zone humide'])
+        analyse_rhomeo_data[_key] = {
+            'min': float(_row['Min']),
+            'mean': float(_row['Moyenne']),
+            'max': float(_row['Max']),
+            'n': int(_row['Effectifs']),
+        }
 
 PNM_bounds = [[43.8, 6.5], [44.5, 7.7]]
 
