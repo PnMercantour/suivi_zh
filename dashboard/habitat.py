@@ -1,12 +1,10 @@
 import plotly.graph_objects as go
-import plotly.express as px
 from dash import dcc, Output
 import dash_bootstrap_components as dbc
-from config import data_path
-from data import site_data, list_sites, habitat_data, zh_data, ref_habitat, get_site_id
+from data import list_sites, habitat_data, zh_data, ref_habitat, get_site_id
 from common import info_header, info_surface
 
-graph = dcc.Graph(responsive=True, style={'height': '100%'})
+graph = dcc.Graph(responsive=True, config={'displayModeBar': False}, style={'height': '100%'})
 
 collapsible_card = dbc.Collapse(dbc.Card([
     dbc.CardHeader(info_header(
@@ -28,13 +26,24 @@ output = {
 interest = sorted([habitat for habitat in ref_habitat.values()if habitat['label'] is not None],
                   key=lambda habitat: habitat['code'])
 
+STATUS_COLORS = {
+    'bon': '#55d187',
+    'moyen': '#f4be5b',
+    'mauvais': '#f26b6c',
+}
+
+STATUS_LABELS = {
+    'bon': 'Bon',
+    'moyen': 'Moyen',
+    'mauvais': 'Mauvais',
+}
+
 
 def update(state):
     id_vallee = state['vallee']
     id_site = state['site']
     id_zh = state['zh']
     etats = {'bon': {}, 'moyen': {}, 'mauvais': {}}
-    the_color = {'bon': 'green', 'moyen': 'orange', 'mauvais': 'red'}
 
     def update_surfaces(h, zh):
         surfaces = etats[zh['etat']]
@@ -59,36 +68,64 @@ def update(state):
                 update_surfaces(h, zh)
     etats = {etat: {id: etats[etat].get(id, 0) for id in [h['id'] for h in interest]}for etat in [
         'bon', 'moyen', 'mauvais']}
-    layout = go.Layout({
-        'xaxis': {
-            'title': 'Habitats',
-            # 'showticklabels': False,
-            'color': 'rgb(170,170,170)',
-        },
-        'yaxis': {
-            # https://plotly.com/python-api-reference/generated/plotly.graph_objects.layout.html#plotly.graph_objects.layout.YAxis
-            'title': 'Surface (<em>m<sup>2</sup></em>)',
-            'color': 'rgb(170,170,170)',
-        },
-        'margin': {'l': 0, 'r': 0, 't': 0, 'b': 0},
-        'paper_bgcolor': 'rgb(50,56,62)',
-        'plot_bgcolor': 'rgb(50,56,62)',
-    })
+    fig = go.Figure()
+    habitat_codes = [h['code'] for h in interest]
 
-    fig = go.Figure(data=[
-        go.Bar(
-            name=etat,
-            x=[h['code'] for h in interest],
-            y=[round(value) for value in l.values()],
-            marker_color=the_color[etat],
-            showlegend=False,
-            hovertext=[
-                f"{h['label']} <br> {info_surface(l[h['id']])}" for h in interest],
-            hoverinfo='text',
-        ) for (etat, l) in etats.items()
-    ],            layout=layout,
+    for etat in ['bon', 'moyen', 'mauvais']:
+        surfaces = etats[etat]
+        fig.add_trace(go.Bar(
+            name=STATUS_LABELS[etat],
+            x=habitat_codes,
+            y=[round(surfaces[h['id']]) for h in interest],
+            marker_color=STATUS_COLORS[etat],
+            marker_line=dict(color='rgba(17,25,34,0.75)', width=0.6),
+            customdata=[
+                [h['label'], info_surface(surfaces[h['id']])] for h in interest
+            ],
+            hovertemplate=(
+                '<b>%{customdata[0]}</b>'
+                f'<br>Etat : {STATUS_LABELS[etat]}'
+                '<br>Surface : %{customdata[1]}'
+                '<extra></extra>'
+            ),
+        ))
+
+    fig.update_layout(
+        barmode='stack',
+        bargap=0.18,
+        margin={'l': 8, 'r': 8, 't': 34, 'b': 54},
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(255,255,255,0.02)',
+        font=dict(color='#dfe8f6', size=12),
+        legend=dict(
+            orientation='h',
+            yanchor='bottom', y=1.02,
+            xanchor='left', x=0,
+            bgcolor='rgba(0,0,0,0)',
+            font=dict(size=11),
+        ),
+        hoverlabel=dict(
+            bgcolor='#111922',
+            bordercolor='#2c3b52',
+            font=dict(color='#dfe8f6'),
+        ),
     )
-    fig.update_layout(barmode='stack')
+    fig.update_xaxes(
+        title_text='Habitats',
+        title_font=dict(color='#9eb0c8'),
+        tickfont=dict(color='#dfe8f6', size=10),
+        tickangle=-32,
+        showline=True,
+        linecolor='rgba(223,232,246,0.25)',
+    )
+    fig.update_yaxes(
+        title_text='Surface (<em>m<sup>2</sup></em>)',
+        title_font=dict(color='#9eb0c8'),
+        tickfont=dict(color='#9eb0c8'),
+        gridcolor='rgba(223,232,246,0.14)',
+        separatethousands=True,
+        zeroline=False,
+    )
     return {
         'visible': any([round(value) != 0 for (etat, l) in etats.items() for value in l.values()]),
         'figure': fig,

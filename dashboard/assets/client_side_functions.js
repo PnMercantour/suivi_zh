@@ -1,3 +1,9 @@
+const STATUS_COLORS = {
+  bon: "#55d187",
+  moyen: "#f4be5b",
+  mauvais: "#f26b6c",
+};
+
 window.PNM = Object.assign({}, window.PNM, {
   zh: {
     pourChaqueVallee: (feature, layer) => {
@@ -20,9 +26,9 @@ window.PNM = Object.assign({}, window.PNM, {
         opacity = 1;
         let etat = feature.properties.etat;
         if (etat == null) color = "black";
-        else if (etat == "bon") color = "green";
-        else if (etat == "moyen") color = "orange";
-        else color = "red";
+        else if (etat == "bon") color = STATUS_COLORS.bon;
+        else if (etat == "moyen") color = STATUS_COLORS.moyen;
+        else color = STATUS_COLORS.mauvais;
       }
       return L.circleMarker(latlng, {
         pane: "site_pane",
@@ -191,9 +197,9 @@ Défens <strong>${feature.properties.nom_defens}</strong>
       let fill_color;
       let etat = feature.properties.etat;
       if (etat == null) fill_color = "blue";
-      else if (etat == "bon") fill_color = "green";
-      else if (etat == "moyen") fill_color = "orange";
-      else fill_color = "red";
+      else if (etat == "bon") fill_color = STATUS_COLORS.bon;
+      else if (etat == "moyen") fill_color = STATUS_COLORS.moyen;
+      else fill_color = STATUS_COLORS.mauvais;
 
       let radius = context.hideout.vallee ? 10 : 5;
       let color = feature.properties.ids_defens != null ? "black" : fill_color;
@@ -225,23 +231,22 @@ Défens <strong>${feature.properties.nom_defens}</strong>
     },
 
     zhStyle: (feature, context) => {
-      const colormap = { bon: "green", moyen: "orange", mauvais: "red" };
       if (context.hideout.zh != null) {
         if (feature.properties.id == context.hideout.zh) {
           return {
             color: "yellow",
-            fillColor: colormap[feature.properties.etat],
+            fillColor: STATUS_COLORS[feature.properties.etat],
             fillOpacity: 0.8,
           };
         } else {
           return {
-            color: colormap[feature.properties.etat],
+            color: STATUS_COLORS[feature.properties.etat],
             fillOpacity: 0.2,
           };
         }
       } else {
         return {
-          color: colormap[feature.properties.etat],
+          color: STATUS_COLORS[feature.properties.etat],
           fillOpacity: 0.5,
         };
       }

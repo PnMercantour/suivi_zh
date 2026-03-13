@@ -3,6 +3,13 @@ from dash import html
 from common import info_header
 
 
+STATUS_COLORS = {
+    'bon': '#55d187',
+    'moyen': '#f4be5b',
+    'mauvais': '#f26b6c',
+}
+
+
 def surface(color):
     return html.I(className="fa-solid fa-square",
                   style={"color": color})
@@ -26,9 +33,9 @@ component = dbc.Card([
     dbc.CardHeader(info_header('Légende', '#')),
     dbc.CardBody(dbc.Row(dbc.Col([
         "Etat de conservation",
-        legend_item(surface('green'), 'Bon état'),
-        legend_item(surface('orange'), 'Etat moyen'),
-        legend_item(surface('red'), 'Etat dégradé'),
+        legend_item(surface(STATUS_COLORS['bon']), 'Bon état'),
+        legend_item(surface(STATUS_COLORS['moyen']), 'Etat moyen'),
+        legend_item(surface(STATUS_COLORS['mauvais']), 'Etat dégradé'),
         html.Hr(),
         legend_item(contour('purple'), 'Site rhomeo'),
         legend_item(contour('blue'), 'Espace de bon fonctionnement'),

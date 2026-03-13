@@ -21,7 +21,7 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([
             html.Div([html.Img(src=app.get_asset_url(
-                'logo-structure.png'),  style={'height': '60%'}), html.H3('Les Zones humides')],
+                'logo-structure.png'),  style={'height': '60%'}), html.Div(style={'height': '3em'}), html.H3('Les Zones humides')],
                 style={'height': '25vh'}),
             html.Div(legende.component, style={'height': '35vh'}),
             html.Div(selection.component, style={'height': '28vh'}),
